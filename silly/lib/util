@@ -1,0 +1,16 @@
+#include <stdio.h>
+#include "../src/structs.h"
+#include "../src/utils.h"
+
+
+main() 
+{
+ struct char_file_u tmp;
+
+ while(!feof(stdin)) {
+   fread(&tmp, sizeof(tmp), 1, stdin);
+   if (strcmp(tmp.name, "111111")) {
+     fwrite(&tmp, sizeof(tmp), 1, stdout);
+   }
+ }
+}

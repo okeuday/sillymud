@@ -1,0 +1,31 @@
+
+  Guide to sillymud:
+
+  Help Intro, for some introductory stuff.
+
+  key notes to the differences between silly and other muds:
+
+  monsters of the same race help each other (HELP RACE)
+  equipment and inventory can be damaged by spells and combat
+  it is harder to cast spells in combat than not in combat.
+  there are 50 mortal levels here..  you have to be 51st level to become
+  immortal.
+  dragons breath often.  Mages cast spells often.  Warrior mobs will bash and
+  kick you, rescue each other, and disarm you.  They might also change weapons,
+  to use a better one, or use no weapon at all, whichever does the most 
+  damage.
+  Things can be immune, resistant or susceptible to attacks, spells, or
+  nonmagical weapons, up to +5.  So werewolves, and demons and devils and
+  golems are all somewhat harder to kill without magic weapons.
+
+  there are 153 spells, and 25 new skills.  
+
+  Druids must maintain a neutral alignment.   if they do not, they will 
+  be stripped of their druidical powers, and become clerics.
+
+  poison is VERY dangerous here..  it does 32 points of damage per tick,
+  unless slowed, in which case it does 16.
+
+  fighters, thieves, monks and druids can't read scrolls until they learn
+  how to read magic.   
+

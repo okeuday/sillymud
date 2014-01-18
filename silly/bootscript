@@ -1,0 +1,30 @@
+#!/bin/csh
+#
+#  this command establishes the "root" directory of the mud.
+#
+set MUDROOT=~jdb/src/silly
+#
+#  these commands move any new copies of these files to the correct location.
+#
+mv -f $MUDROOT/ready/dmserver $MUDROOT
+mv -f $MUDROOT/ready/tinyworld.mob $MUDROOT/lib
+mv -f $MUDROOT/ready/tinyworld.obj $MUDROOT/lib
+mv -f $MUDROOT/ready/help_table $MUDROOT/lib
+#
+#nohup $MUDROOT/logtrim&  (this doesn't work well)
+#
+mv $MUDROOT/crash/dm.log.old8 $MUDROOT/crash/dm.log.old9
+mv $MUDROOT/crash/dm.log.old7 $MUDROOT/crash/dm.log.old8
+mv $MUDROOT/crash/dm.log.old6 $MUDROOT/crash/dm.log.old7
+mv $MUDROOT/crash/dm.log.old5 $MUDROOT/crash/dm.log.old6
+mv $MUDROOT/crash/dm.log.old4 $MUDROOT/crash/dm.log.old5
+mv $MUDROOT/crash/dm.log.old3 $MUDROOT/crash/dm.log.old4
+mv $MUDROOT/crash/dm.log.old2 $MUDROOT/crash/dm.log.old3
+mv $MUDROOT/crash/dm.log.old1 $MUDROOT/crash/dm.log.old2
+mv $MUDROOT/crash/dm.log $MUDROOT/crash/dm.log.old1
+mv $MUDROOT/dm.log $MUDROOT/crash/dm.log
+#
+#  here is the actual program in operation.
+#
+nohup $MUDROOT/dmserver 4000 > & $MUDROOT/dm.log &
+

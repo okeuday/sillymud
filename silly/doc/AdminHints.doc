@@ -1,0 +1,58 @@
+
+
+To make houses.
+
+
+edit spec_assign.c     
+   find the assign_rooms procedure.
+
+   add the room # of the room to the structure, and the House procedure
+   (just like the existing entries)
+
+   then, edit the world file, and make sure that the room's name
+   corresponds with the characters name.
+
+   for example:
+
+   Loki's bedroom is ok, because the characters name is the first X
+   chars in the room's name, where x is the length of the character's name
+
+   The bedroom of Loki   is NOT ok.  
+
+
+adding monsters and objects.
+
+Do not edit the obj and mob file while the game is up. the game reads info
+from this file constantly, and will screw up if the file is altered.  
+(it uses a byte count to index the file, so a change in 1 byte can screw
+up everything.
+
+
+to add new boards, you need to add a blank file, with the name
+
+XXXX.messages
+
+
+XXXX == the virtual # of the board.   So, the regular temple board
+  (3099) has the corresponding file  3099.messages.
+
+
+You also have to add the board to the assign_objs procedure in spec_assign
+
+
+Traps:
+
+   traps are more or less working, but since I don't have the skill set up
+   I have not made them a regular part of the game.
+
+   
+
+Item heaping: 
+
+	needs to be changed, so that the only thing that is important is
+	the description, item #, or mob # should be unimportant for
+	differentiation. 
+
+
+
+

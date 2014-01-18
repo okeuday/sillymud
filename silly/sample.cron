@@ -1,0 +1,2 @@
+0,9,20,29,40,49 * * * *         csh ~jdb/src/silly/cronscript
+10,30,50 * * * *        	csh ~jdb/src/silly/cronscript.1

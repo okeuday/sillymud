@@ -1,0 +1,22 @@
+Communication:                 | Movement:
+    say ('), shout, tell,      |    north, south, east, west, up, down,
+    emote (:), ask, whisper,   |    enter, exits, follow, mount, ride,
+    deafen                     |    dismount, mount, stand, rest, sit,
+                               |    sleep, wake, unlock, lock, open, close
+                               |
+Objects:                       | Combat:
+    get, put, drop, wear,      |    kill, hit, backstab, kick, bash,
+    wield, hold, grab, give,   |    flee, cast, wimp, assist
+    look, examine, eat, drink, |
+    sip, taste, remove, pour,  |
+       quaff                   |
+Info:                          | Utility:
+    score, attribute, world,   |    save, quit, !, brief, compact,
+    news, info, inv, read,     |    typo, bug, idea, allspells
+    time, wizlist, display     |
+ 
+Also, to get help on any specific topic, just type HELP <keyword>,
+where <keyword> could be one of the following examples:
+ 
+SOCIAL   SHOPS   INNS   MAGIC   CLERIC   WARRIOR   THIEF DRUID MONK
+ 

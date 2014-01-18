@@ -1,0 +1,811 @@
+/* ************************************************************************
+*  Copyright (C) 1990, 1991 - see 'license.doc' for complete information. *
+************************************************************************* */
+
+                   DATABASE SUPPLEMENTAL DOCUMENTATION
+                            "dbsup.doc"
+
+
+World File field description:
+=============================
+
+Main structure notes:
+---------------------
+
+#<virtual number> is:
+  A number for the given room. No two rooms may have the same number.
+  The <virtual number> must always increase when browsing down the 
+  world file (but increments can be larger than one).
+
+<name>~<NL>:
+  This name is the "title" of the room. This title is also used in special
+  procedures like:
+    "exits"
+    "brief mode"
+
+<description>~<NL>:
+  This is the general description of the room.
+
+<zone nr> is:
+  The number of the zone in which this room is located. This number is used
+  for resetting zones and monster zone movement. See the zone file.
+
+<room_flags> are:
+  A bitvector consisting of the room conditions as:
+
+  DARK           1  Light must be used to see anything.
+  DEATH          2  A player 'dies' (no xp lost) when entering.
+                    It is a good idea to:
+                     *Have these rooms light, because then EXITS will show
+                      the room title, for example "In Boiling Water".
+                     *Make exits to all rooms from which one can enter the
+                      death_room, then the "death cry" will be heard by
+                      other members of the group considering following...
+  NO_MOB         4  No monsters may walk around in here
+  INDOORS        8  This is inside (a house,cave or dungeon for example)
+  Peaceful      16  can't attack people, do offensive things here.
+  NO_SUM        64  monsters can't be summoned out of these rooms
+  NO_MAGIC     128  Not implemented.
+  PRIVATE      512  It is impossible to teleport to this room if it
+                    already contains two characters.
+                    Also the 'teleport' spell will never teleport a
+                    player into this room.
+  SILENCE     1024  No saying things, or casting spells.
+
+??? means that the flag isn't used yet (and you Shouldn't use it either!)
+
+
+<sector_type> is:
+  This determines how many movement points are used when moving through
+  a location of the type - use one of the numbers 0..7 (they are NOT the
+  movement-points used - merely indexes to a lookup-table):
+
+  SECT_INSIDE          0  Uses as if walking indoors
+  SECT_CITY            1  Uses as if walking in a city
+  SECT_FIELD           2  Uses as if walking in a field
+  SECT_FOREST          3  Uses as if walking in a forest
+  SECT_HILLS           4  Uses as if walking in hills
+  SECT_MOUNTAIN        5  Uses as if climbing in mountains
+  SECT_WATER_SWIM      6  Uses as if swimming
+  SECT_WATER_NOSWIM    7  Impossible to swim water - requires a boat
+		       8  Air
+		       9  Water Breathing
+                      
+                       -1   Implies a Teleport sector. expects additional
+parameters after <sector type> : 
+<teleport-time> <to_room> <do_look> <Real Sector-type>
+
+<tele. time> = multiple of 10.. 10 is a bit shorter than a combat round.
+<to_room>  room number that the teleport takes you to.
+<do_look>  if this value is not 0, you do a do_look when entering the new
+           room.
+<REAL sector type>  The sector type, for movement purposes.
+
+
+Direction fields:
+-----------------
+
+<Exit number> is one of:
+  0 = North
+  1 = East
+  2 = South
+  3 = West
+  4 = Up
+  5 = Down
+
+<general description><NL>~<NL>:
+  What a player will see if he types 'look <direction>'
+
+<keyword list>~<NL>:
+  used for commands like 'open', 'close', etc. should be 'door' for ordinary
+  doors. Example: An exit from a given room leads through a cupboard. The
+  keyword list for this exit might look like this:
+
+  "cupboard door~"
+
+
+<Door flag> [NL]:
+
+  If <Door Flag> is 1, the exit can be locked/unlocked/opened/closed/picked.
+  If it is 2, the exit can only be locked/unlocked/opened/closed.
+  If it is 0, these commands won't work. (The exit can still be closed at
+  reset, however; maybe to be opened by some special routine, like a concealed
+  handle).
+
+  The state of the doors after reset may be controlled by a command in the
+  reset-command table (see the zone file). The initial state of a door is
+  open.
+
+<Key Number> [NL]:
+  The number of the object which can unlock/lock the door (in the direction
+  given). If a player carries/holds this object, he can lock/unlock.
+  <Key Number> == -1 means no keyhole. If <Door flag> is 0, the value of this
+  field is ignored.
+
+<to_room> <NL>:
+  The virtual number of the room to which the exit leads. If this number is
+  -1 (NOWHERE), the exit doesn't lead anywhere. This might be useful for
+  adding an exit-description in a direction which doesn't actually lead
+  anywhere.
+
+** Note about doors. You must make a door in both rooms that the door
+                     is set between.
+
+Extra descriptions:
+-------------------
+
+<blank separated keyword list>~<NL> is:
+  A list of the keywords that will allow the extra description to be
+  displayed. The keywords must must be seperated by blanks.
+
+
+<description><NL>~<NL>:
+  The description that is show when a player types 'look at <keyword>'
+  and keyword matches one of the above.
+
+
+Example of a room entry is the database:
+----------------------------------------
+
+#100
+The Lego temple~
+   You stand in a tiny, red temple; built entirely from Lego bricks. It is,
+sadly, not a very interesting place, and perhaps you should leave through the
+portal which leads south to a sunny garden.
+~
+1 12 0
+D2
+You see the grand portal of the Lego church. Beyond is an inviting garden.
+~
+portal grand~
+1 2 107
+E
+portal~
+The portal is high and arched, built out of lego bricks of the finest quality.
+~
+E
+brick~
+The bricks are all in bright different colours.
+~
+S
+#101
+.
+.
+.
+
+Facts about this room is:
+  Room number 100
+  Zone number 1
+	Room Flags  (8+4=12) INDOORS and NO_MOB
+  Sector Type Inside (movement loss calc only)
+  One exit (D2) to the south with 'look south' description
+  Door Flag 1
+  Key no.   2
+  Leads to room 107
+	Extra description for the portal and bricks.
+
+-------------------------------------------------------------------------
+
+Monster fields description:
+===========================
+
+#<virtual number><NL> is:
+  The monsters virtual number. Rules are same as for room virtual numbers.
+
+<namelist><!NL>~<NL>
+  The space-separated name alias list.
+
+<short description><!NL>~<NL>
+  This string will be displayed when the monster take action, for example
+  if it is "The Beastly Fido", and fido leaves south the message will be
+  "The Beastly Fido leaves south."
+
+<long description><NL>~<NL>
+  This description is displayed when the monster is in it's "default"
+  position. When not in the default position, a message like:
+  "<short description> is sleeping here." could be displayed.
+
+<description><NL>~<NL>
+  This will be displayed when a player looks at the monster.
+
+<action flags>[NL]
+
+  This bitvector define how the monster behave.  The bits mean:
+
+  ACT_SPEC         1  This means that there is a special programmed C
+                      procedure connected to the monster. When this bit
+                      is set the monster "function pointer" must be
+                      assigned in the "spec_assign.c" file.
+
+  ACT_SENTINEL     2  When this bit is set the monster will NOT
+                      move around in the world.
+
+  ACT_SCAVENGER    4  When this bit is set, monsters will pick up stuff
+                      lying on the ground. It will pick up the most
+                      expensive items first.
+
+  ACT_ISNPC        8  RESERVED FOR INTERNAL USE
+
+  ACT_NICE_THIEF  16  When this bit is set, a monster will not attack
+                      a thief which has been caught in the act of 
+                      stealing from this monster.
+
+  ACT_AGGRESSIVE  32  When this bit is set, the monster will attack and
+                      attempt to kill any player it can get it's claws on.
+                      It will not attack players it can't see (for example
+                      dark rooms or when player is invisible, unless the
+                      monster can detect invisibility)
+
+  ACT_STAY_ZONE   64  When this bit is set, the monster will never move
+                      into another zone of the world (this is good for
+                      keeping your monsters in your own adventure).
+
+  ACT_WIMPY      128  When this bit is set, the monster will flee when it's
+                      getting percentwise low on hitpoints.
+                      If the monster is both aggressive and wimpy, then it
+                      will only attack players that are NOT awake! (ie. also
+                      suffering players).
+
+
+	here are some more, but they aren't particularly important:
+
+#define ACT_ANNOYING  256  /* MOB is so utterly irritating that other */
+                               /* monsters will attack it...              */
+#define ACT_IMMORTAL  2048  /* MOB is a natural event, can't be kiled  */
+#define ACT_DEADLY    8192  /* MOB has deadly poison                   */
+
+
+
+<affection flags>
+
+  This is a bitvector that indicates what the monster is affected by.
+  Puff could for example be able to "detect invisible" or maybe
+  "sanctuary" (1/2 damage). A lot of these bits are meant for players
+  only (in a context with a spell), and should NOT be used when indicated.
+  The bits are:
+
+  AFF_BLIND             1         The monster is blind
+  AFF_INVISIBLE         2         The monster is invisible
+  AFF_DETECT_EVIL       4         The monster can detect evil.
+  AFF_DETECT_INVISIBLE  8         The monster can see invisible players
+                                  (Especially good for aggressive npc's)
+  AFF_DETECT_MAGIC      16        The monster can detect magic! (whee)
+  AFF_SENSE_LIFE        32        The monster can sence life! (whee)
+  AFF_LIFE_PROTECTION   64        If placed on a mobile????
+                                  If placed on an object, to affect a char
+                                  it will block a killing blow once, and
+                                  the item is destroyed.
+  AFF_SANCTUARY         128       The monster has sanctuary (1/2 damage)
+  AFF_CURSE             1024      The monster is cursed.
+  AFF_FLYING            2048      Monster can fly.
+  AFF_POISON            4096      Monster is poisoned :(
+  AFF_PROTECT_EVIL      8192      Monster is protected from evil!
+  AFF_PARALYSIS         16384     Poor monster is paralized.
+  AFF_INFRAVISION       32768     Sir monster can see in the dark.
+  AFF_WATER_BREATH      65536     monster can breath underwater
+  AFF_SLEEP             131072    Monster has been put to sleep.
+  AFF_DRUG_FREE         262114    Monster can't get stoned!  or drunk!
+  AFF_SNEAK             524288    The message "The xxx leaves direction" will
+                                  not be displayed when the monster moves
+                                  out/in to a room.
+  AFF_HIDE              1048576   The monster will be hidden, and can only
+                                  be detected by a "sense life" spell
+  AFF_CHARM             4194304   The monster will act as charmed when a
+                                  "follow <player>" is entered. Note that
+                                  players can't force monsters to follow
+                                  them.
+  AFF_TRUE_SIGHT        33554432  Sir monster can see everything.
+                                  (See invis, infra, and see hiding things)
+  AFF_SCRYING           67108864  A person with this ability can see into
+                                  adjoining rooms as if they were a god.
+  AFF_FIRESHIELD       134217728  Sir monster is affected by fireshield.
+
+
+
+<Alignment Flag>
+
+  This is the monsters alignment, read as:
+  +1000 .. +350  Good Alignment
+   +349 .. -349  Neutral Alignment
+   -350 ..-1000 Evil Alignment
+
+<Detailed/Simple flag/New/multi Attack/not Bashable>
+   'D' | 'S' | 'N' | 'A' | 'B'
+
+  'D'  - detailed.. ignore.
+  'S'  - what is directly below
+  'N'  - slightly different.
+  'A'  - like N, but a tiny bit different.
+  'L'  - like A, but a tiny bit different.
+  'B'  -  exactly like A, but not bashable
+
+(A first)
+
+If you want your monster to have multiple attacks, give the A flag,
+and add the number of attacks after the A
+for example
+0 0 0 S   <- old style
+
+0 0 0 A 3  <- new style monster with 3 attacks per round.
+
+0 0 0 N  <- new style monster.
+
+<Level>
+   This is the level of the monster. See "defs.doc" for guidelines when
+   setting the level.
+
+<THAC0>
+   The monsters THAC0.
+   See the file "defs.doc" for an explanation of armour vs. THAC0, and
+   guidelines for THAC0.
+   THAC0 is an abbrevation for "To Hit Armour Class Zero".
+
+<AC>
+   The monsters armour class. See "defs.doc" for guidelines regarding
+   armour.
+
+/***********************************************************************/
+//  The following is one area of difference between S and N
+
+-=>S style <=-
+
+<Hit Points (format is xdy+z)>
+   This defines the number of hitpoints a given monster has. If this is
+   entered into the file:
+
+   ... ... 3d8+10 ...
+
+   the monster will have 10 hitpoints plus the result of rolling 3 dice
+   with 8 side, and adding their sum. All the numbers (even zero), the
+   plus sign, and the letter 'd' MUST be entered!!! Example:
+
+   ..... 1d6+0 ....
+
+---> N Style <----
+
+   The hit points are determined automatically as Level D 8
+   all you have to do is give the bonus #.  Example:
+
+   troll with 6 hd + 6 hit points..
+
+
+   OLD Style :  6d8+6
+
+   New style :  6   (for the 6 bonus hitpoints) (the level d8 is determined
+                    automatically)
+
+<Damage (as HP (old style))><NL>
+   This is the damage a monster will cause when it is using NO weapons
+   (the Bare hand damage). The format is exacly like the one described
+   for hit points. A thing to note about damage:
+   The number after the plus sign, is the "strength bonus". This bonus
+   will apply to any weapons used, and bare hands too. Example:
+
+   ..... 1d4+10
+
+   This monster will damage between 11 and 14 hitpoints each round. If the
+   monster picks up and wields a tiny stick which give 1d2 damage, then the
+   monster will now damage by : 1d2 + 10 points. 
+
+/****************************************************************************/
+  if you want your monster to have a RACE!
+
+before gold, enter a -1  this tells it to expect a RACE at the end of 
+the line.
+
+<Gold>
+   The amout of gold carried by the monster.
+
+/*****************************  OLD STYLE *********************************/
+<Exp> 
+   The experience this monster has. Follow guidelines in "defs.doc".
+
+/************************** NEW STYLE *********************************/
+
+<Exp-special bonuses>
+   Acquire a 1st edition Dungeon Masters Guide.  Open it to the table
+   on assigning exp for monsters.   The base and hit point totals are
+   determined internally.  the Special ability bonuses, and Exceptional
+   ability bonuses are yours to determine.  Add up the total of specials and
+   exceptionals, where 1 exceptional = 2 special bonuses.  take that 
+   number (a small number, between 0 and 10 in almost ALL cases.
+  (i.e. if yours isn't between 0 and 10, you don't understand how this 
+   works) and put it here.  For example:  A creature with 3 special bonuses
+   and 1 exceptional bonus would have a '5' here.
+
+<Race> <NL>
+   races can be found in Race.h   If you think you need a new race, let
+me know, and we can work something out. try to find something that is 
+fairly close to your race before we add many more.   
+
+<position>
+   This defines the monster's position when loaded into the game.
+   A position is one of:
+
+   POSITION_DEAD       0  DO NOT USE
+   POSITION_MORTALLYW  1  DO NOT USE
+   POSITION_INCAP      2  DO NOT USE
+   POSITION_STUNNED    3  DO NOT USE
+   POSITION_SLEEPING   4  The monster is sleeping.
+   POSITION_RESTING    5  The monster is resting.
+   POSITION_SITTING    6  The monster is sitting.
+   POSITION_FIGHTING   7  DO NOT USE.
+   POSITION_STANDING   8  The monster is standing.
+
+
+<default position>
+   This is the position into which the monster will return after
+   a fight. This position also defines when the <long description>
+   is displayed - see above.
+
+<sex><NL>
+   This is the monsters sex, on of:
+
+   SEX_NEUTRAL   0
+   SEX_MALE      1
+   SEX_FEMALE    2
+
+   /******************************  NEW STYLE!!!!  *******************/
+
+
+   if your monsters have any immunities, susceptibilies, or resistances.
+
+
+   ADD 3 to the sex.  (neutral = 3, male = 4, female = 5)
+
+   add the following 3 numbers
+
+   Resistance Bitmask , Immunity BitMask, Susceptibility Bitmask
+
+   the numbers can be found in Immune.h
+
+   add them together for multiple immunities :  i.e.
+
+   a monster that is immune to cold and heat will have a total of 3 for
+   the immunity entry.
+
+/*  L   */
+
+Type L monsters have two string fields at the end, which are the sound
+for the room the monster is in, and the sound for the rooms which the
+monster is adjacent to.  for example.. a lamia:
+
+#5201
+lamia beast~
+The lamia~
+A strange lamia stands here waiting for her next meal. 
+~
+This is a creature with the upper torso of a beautiful woman, but the lower
+body of a four-legged beast. She licks her lips as she looks at you greedily.
+~
+100 0 -300 L 2
+10 6 3 50 2d4+3
+-1 750 5 18
+8 8 2
+The lamia howls and shrieks at you
+~
+You hear a shrieking sound from nearby
+~
+
+
+(those last two are the important ones...  You have to have both 
+(obviously)).
+
+
+Object fields description:
+==========================
+
+#<virtual number><NL>
+   See rules for rooms above.
+
+<namelist>~<NL>:
+   Same as for monsters above.
+
+<short description>~<NL>
+   This string will be displayed when the object is used. For example
+   if it is "a rubber raft", and a player drops it, then a message like:
+   "Monthy drops a rubber raft."
+   could be displayed.
+
+<long description>~<NL>
+   This description is displayed when the object is lying on the ground.
+   For example, if it is "A furled umbrella lies here.~" then this message
+   is displayed when the umbrella is lying on the ground.
+
+<action description>~<NL>
+   Do not use.
+
+<type flag>[NL]
+   This defines what kind of item you are defining, it can be one of:
+
+   ITEM_LIGHT      1  Item is a light.
+   ITEM_SCROLL     2  Item is a scroll.
+   ITEM_WAND       3  Item is a wand.
+   ITEM_STAFF      4  Item is a staff.
+   ITEM_WEAPON     5  Item is a weapon
+   ITEM_FIREWEAPON 6  Not yet implemented
+   ITEM_MISSILE    7  Not yet implemented
+   ITEM_TREASURE   8  Item is a treasure (not money)
+   ITEM_ARMOR      9  Item is armour.
+   ITEM_POTION    10  Item is a potion.
+   ITEM_WORN      11  ???
+   ITEM_OTHER     12  Item is other
+   ITEM_TRASH     13  Item is trash
+   ITEM_TRAP      14  Item is a trap.
+   ITEM_CONTAINER 15  Item is a container
+   ITEM_NOTE      16  Item is a note that can be written upon (with a pen)
+   ITEM_DRINKCON  17  Item is a drink container, for example a bottle or
+                      a barrel or a wine-skin.
+                      A drinkcontainer whit contents must *always* have
+                      two names: 1. The name of the drink, 2. the name
+                      of the container, example:
+                       tea cup~
+
+   ITEM_KEY       18  Item is a key
+   ITEM_FOOD      19  Item is food.
+   ITEM_MONEY     20  Item is money.
+   ITEM_PEN       21  Item is a pen.
+   ITEM_BOAT      22  Item is a boat, which must be carried by a player if
+                      the player wishes to enter NOSWIM room sector types.
+   ITEM_AUDIO     23  Item makes noises.
+
+
+
+<extra flag>[NL]
+   This bitvector defines mostly special effects:
+
+   ITEM_GLOW            1  The item is glowing.
+   ITEM_HUM             2  The item is "humming"/"buzzing".
+   ITEM_METAL           4  Nothing yet...
+   ITEM_MINERAL         8  ditto...
+   ITEM_ORGANIC        16  Nthing yet either...
+   ITEM_INVISIBLE      32  Item is invisible.
+   ITEM_MAGIC          64  Item will show a magical aura when 'detect magic'
+                           is used.
+   ITEM_NODROP        128  Item can not be dropped (cursed for example)
+   ITEM_BLESS         256  Item is blessed.
+   ITEM_ANTI_GOOD     512 /* not usable by good people    */
+   ITEM_ANTI_EVIL    1024 /* not usable by evil people    */
+   ITEM_ANTI_NEUTRAL 2048 /* not usable by neutral people */
+   ITEM_ANTI_CLERIC  4096
+   ITEM_ANTI_MAGE    8192
+   ITEM_ANTI_THIEF   16384
+   ITEM_ANTI_FIGHTER 32768
+   To make something anti druid, make it anti theif and/or anti cleric.
+   To make something anti monk, make it anti anything.
+
+<wear flag><NL>
+   This bitvector defines if items can be taken, and if they can be worn:
+
+   ITEM_TAKE              1 Item is takeable.
+   ITEM_WEAR_FINGER       2 Can be worn on a finger (rings usually)
+   ITEM_WEAR_NECK         4 Can be worn around neck.
+   ITEM_WEAR_BODY         8 Can be worn on body.
+   ITEM_WEAR_HEAD        16 Can be worn on head.
+   ITEM_WEAR_LEGS        32 Can be worn on legs.
+   ITEM_WEAR_FEET        64 Can be worn on feet
+   ITEM_WEAR_HANDS      128 Can be worn on hands (gauntlets, etc)
+   ITEM_WEAR_ARMS       256 Can be worn on arms.
+   ITEM_WEAR_SHIELD     512 Can be used as a shield.
+   ITEM_WEAR_ABOUT     1024 ???
+   ITEM_WEAR_WAISTE    2048 Can be worn around the waiste (belt)
+   ITEM_WEAR_WRIST     4096 Can be worn on wrist (bracelets)
+   ITEM_WIELD          8192 Can be wielded and used as a weapon
+   ITEM_HOLD          16384 Item can be held in a hand.
+   ITEM_THROW         32768 Not yet implemented.
+                            Item can be thrown.
+
+<value 0> <value 1> <value 2> <value 3> <NL>
+   These values are very central. They define the ability of items based on
+   the items <Item Type>. These values are defined in "values.doc". Note that
+   if you define an item as being anything but a weapon, you shouldn't set
+   the 'wield' flag. Many similar obvious rules apply. Example of 4 values:
+
+   If the <Item Type> == ITEM_CONTAINER then the values are interpeted as:
+
+      Value[0]: Maximum weight the container can contain.
+      Value[1]: Container flags:
+
+        CLOSEABLE     - 1
+        PICKPROOF     - 2
+        CLOSED        - 4
+        LOCKED        - 8
+
+      Value[2]: The item-number of the object which can open the object.
+                -1 means no lockability.
+      Value[3]: Internal use for Corpses that must "rot".
+
+
+<weight>[NL]
+   The weight of the item in pounds.
+
+<value>[NL]
+   The value of the item if sold - see "defs.doc" for ideas on prices.
+
+<cost/day><NL>
+   The cost to store the item in the reception overnight.
+
+
+
+
+Several extra descriptions or none at all may appear. They follow the room
+format exactly.
+
+'E'<NL>
+<keyword-list>~<NL>
+   Exactly as in rooms.
+
+<extra description><NL>~<NL>
+   Exactly as in rooms.
+
+
+
+Between zero and two "affect's" may be set on an item. The affects could
+for example modify a characters strength, height etc. The affect only goes
+into affect when the character wear, wield or hold the item. The affect
+is removed when the character removes the items.
+
+'A'<NL>
+   When items are worn using wear/wield/grab/hold commands, the 'A' will
+   allow the items to affect a characters various abilities. Currently
+   a maximum of 2 'A' are allowed.
+
+<location>[NL]
+   <location> is one of the below numbers, indicating which ability
+   will be changed.
+
+   APPLY_NONE              0  DO NOT USE.
+   APPLY_STR               1
+   APPLY_DEX               2
+   APPLY_INT               3
+   APPLY_WIS               4
+   APPLY_CON               5
+   APPLY_AGE               9
+   APPLY_CHAR_WEIGHT      10
+   APPLY_CHAR_HEIGHT      11
+   APPLY_MANA             12
+   APPLY_HIT              13  The MAXIMUM number of hitpoints. (DON'T USE)
+   APPLY_MOVE             14
+   APPLY_GOLD             15
+   APPLY_EXP              16
+   APPLY_ARMOR            17  negative numbers are helpful.
+   APPLY_HITROLL          18  The bonus/penalty to hit the opponent.
+   APPLY_DAMROLL          19  The bouns/penalty to damage the opponent.
+   APPLY_SAVING_PARA      20  These five are saving throws.
+   APPLY_SAVING_ROD       21
+   APPLY_SAVING_PETRI     22
+   APPLY_SAVING_BREATH    23
+   APPLY_SAVING_SPELL     24  This is the most used saving throw.
+   APPLY_SAVE_ALL         25  adjustment to all 5 saving throws
+   APPLY_Resistance       26  resistance to spell or weapon type
+                              (see end of file for type #s, add the
+			      numbers together to get multiple
+			      restistances (or susceptibilities, or
+			      immunities)
+   APPLY_SUSC             27
+   APPLY_IMMUNE           28
+
+spells_affect -- see the above portion on monster affects
+(detect invis, invis, hide, sneak, etc)
+
+#define APPLY_SPELL_AFFECT     29
+
+
+(weapon and eat spells)
+(the argument is the spell #.. look in spells.h (file) for spell #s.
+(eat spells are same as potions (more or less)
+weapon spells occur on each sucessful hit.
+
+
+#define APPLY_WEAPON_SPELL     30
+#define APPLY_EAT_SPELL        31
+
+
+(these apply to skills.  the argument is the bonus, or detriment to 
+the skill.)
+
+
+#define APPLY_BACKSTAB         32
+#define APPLY_KICK             33
+#define APPLY_SNEAK            34
+#define APPLY_HIDE             35
+#define APPLY_BASH             36
+#define APPLY_PICK             37
+#define APPLY_STEAL            38
+#define APPLY_TRACK            39
+
+(this is a combination of 18 and 19.  so you can have +2/+2 AND other things
+as well :-)
+
+#define APPLY_HITNDAM          40
+
+
+<modifier><NL>
+
+   The modifier is added to the APPLY_XXX ability of the character
+   when he uses an item, and is subtracted when he stops using it.
+   Take great care when using this. This is an example of an item of
+   improve strength and armour class. Example:
+
+     A
+     1 2
+     A
+     17 -2
+
+   This adds +2 to the strength, and adds -2 to the AC (thus improving it).
+   No more 'A'ffects is allowed at this time.
+
+-------------------------------------------------------------------------
+
+Abbrevations:
+=============
+
+<contents> indicates that the contents MUST be entered.
+
+[contents] indicates that the contents can OPTIONALLY be entered.
+
+<NL> is Newline (return)
+
+! This indicates "NOT" - for example <!NL> means NO newline (ei. it is
+  forbidden to use newline here).
+
+
+
+IMMUNITY STUFF:::
+
+(ex, ring of fire resistance will have special affect
+A
+26 1  
+
+(ring of fire and cold resistance)
+
+A
+26 3
+
+(ring of fire immunity)
+
+A
+28 1
+
+#define IMM_FIRE        1
+#define IMM_COLD        2
+#define IMM_ELEC        4
+#define IMM_ENERGY      8
+#define IMM_BLUNT      16
+#define IMM_PIERCE     32
+#define IMM_SLASH      64
+#define IMM_ACID      128
+#define IMM_POISON    256
+#define IMM_DRAIN     512
+#define IMM_SLEEP    1024    
+#define IMM_CHARM    2048
+
+these don't work
+
+   #define IMM_HOLD     4096
+
+
+These three work, but are mostly for monsters
+(no, i haven't updated the monster docs yet)
+
+#define IMM_NONMAG   8192
+#define IMM_PLUS1   16384
+#define IMM_PLUS2   32768
+#define IMM_PLUS3   65536
+#define IMM_PLUS4  131072
+
+
+
+Weapon damage types:
+    case 0  : w_type = TYPE_SMITE; break;
+    case 1  : w_type = TYPE_STAB;  break;
+    case 2  : w_type = TYPE_WHIP; break;
+    case 3  : w_type = TYPE_SLASH; break;
+    case 4  : w_type = TYPE_SMASH; break;
+    case 5  : w_type = TYPE_CLEAVE; break;
+    case 6  : w_type = TYPE_CRUSH; break;
+    case 7  : w_type = TYPE_BLUDGEON; break;
+    case 8  : w_type = TYPE_CLAW; break;
+    case 9  : w_type = TYPE_BITE; break;
+    case 10 : w_type = TYPE_STING; break;
+    case 11 : w_type = TYPE_PIERCE; break;

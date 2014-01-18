@@ -1,0 +1,8 @@
+#
+# jdb - 1/16
+#
+ps -auxww > ~jdb/.ps.out
+if (`fgrep 'dmserver' ~jdb/.ps.out | wc -l` < 1) then     
+	cd ~jdb/src/silly
+     source bootscript
+endif

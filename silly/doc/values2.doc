@@ -1,0 +1,73 @@
+Return-Path: <ripper@cs.bu.edu>
+Date:    Sat, 29 Aug 92 11:18:24 EDT
+To:      jdb@mole.cis.ufl.edu
+From:    ripper@cs.bu.edu (keith mcclelland)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+This is an extension of the current spell list in whatever (values.doc)
+file.  Enjoy.
+
+SPELL_GOLEM                  109     N       Y      N      N        ==15
+
+SPELL_FAMILIAR               110     N       N      N      N        ==2
+SPELL_CHANGESTAFF            111     N       Y      N      Y        ==30
+SPELL_HOLY_WORD              112     N       Y      N      N        ==31
+SPELL_UNHOLY_WORD            113     N       Y      N      N        ==31
+SPELL_PWORD_KILL             114     N       Y      N      N        ==26
+SPELL_PWORD_BLIND            115     N       Y      N      N        ==19
+SPELL_CHAIN_LIGHTNING        116     N       Y      Y      Y        ==25
+SPELL_SCARE                  117     N       Y      Y      Y        ==4
+SPELL_AID                    118     N       Y      Y      Y        ==4
+SPELL_COMMAND                119     N       Y      N      N        ==1
+
+SPELL_CHANGE_FORM            120     N       N      N      N        ==12
+SPELL_FEEBLEMIND             121     Y       Y      Y      N        ==34
+SPELL_SHILLELAGH             122     N       Y      N      N        ==3
+SPELL_GOODBERRY              123     N       Y      N      N        ==5
+SPELL_FLAME_BLADE            124     N       Y      N      N        ==7
+SPELL_ANIMAL_GROWTH          125     N       Y      Y      N        ==15
+SPELL_INSECT_GROWTH          126     N       Y      Y      N        ==13
+SPELL_CREEPING_DEATH         127     N       Y      N      N        ==45
+SPELL_COMMUNE                128     N       Y      N      N        ==20
+SPELL_ANIMAL_SUM_1           129     Y       Y      Y      Y        ==15
+
+SPELL_ANIMAL_SUM_2           130     Y       Y      Y      Y        ==20
+SPELL_ANIMAL_SUM_3           131     Y       Y      Y      Y        ==25
+SPELL_FIRE_SERVANT           132     N       Y      N      Y        ==35
+SPELL_EARTH_SERVANT          133     N       Y      N      Y        ==36
+SPELL_WATER_SERVANT          134     N       Y      N      Y        ==37
+SPELL_WIND_SERVANT           135     N       Y      N      Y        ==38
+SPELL_REINCARNATE            136     N       N      N      Y        ==38
+SPELL_CHARM_VEGGIE           137     N       Y      N      Y        ==17
+SPELL_VEGGIE_GROWTH          138     N       Y      Y      N        ==20
+SPELL_TREE                   139     Y       Y      N      Y        ==15
+
+SPELL_ANIMATE_ROCK           140     N       Y      Y      N        ==31
+SPELL_TREE_TRAVEL            141     N       Y      Y      Y        ==8
+SPELL_TRAVELLING             142     Y       Y      Y      Y        ==10
+SPELL_ANIMAL_FRIENDSHIP      143     N       Y      Y      N        ==5
+SPELL_INVIS_TO_ANIMALS       144     Y       Y      N      N        ==11
+SPELL_SLOW_POISON            145     Y       Y      Y      N        ==6
+SPELL_ENTANGLE               146     N       Y      Y      N        ==16
+SPELL_SNARE                  147     N       Y      Y      Y        ==8
+SPELL_GUST_OF_WIND           148     N       Y      Y      Y        ==10
+SPELL_BARKSKIN               149     N       Y      Y      N        ==4
+
+SPELL_SUNRAY                 150     N       Y      Y      N        ==27
+SPELL_WARP_WEAPON            151     N       Y      Y      N        ==19
+SPELL_HEAT_STUFF             152     N       Y      Y      N        ==23
+SPELL_FIND_TRAPS             153     Y       Y      Y      Y        ==15
+SPELL_FIRESTORM              154     N       Y      N      Y        ==22
+SPELL_HASTE                  155     N       Y      Y      Y        ==23
+SPELL_SLOW                   156     N       Y      Y      Y        ==19
+SPELL_DUST_DEVIL             157     N       Y      N      Y        ==3
+SPELL_KNOW_MONSTER           158     N       Y      Y      N        ==9
+SPELL_TRANSPORT_VIA_PLANT    159     N       Y      N      N        ==10
+
+SPELL_SPEAK_WITH_PLANT       160     N       Y      Y      N        ==7
+SPELL_SILENCE                161     Y       Y      Y      Y        ==21
+SPELL_SENDING                162     N       N      N      N        ==12
+SPELL_TELEPORT_WO_ERROR      163     Y       Y      Y      N        ==40
+SPELL_PORTAL                 164     N       Y      N      Y        ==40
+SPELL_DRAGON_RIDE            165     Y       Y      Y      Y        ==35
+SPELL_MOUNT                  166     N       Y      N      Y        ==30
+

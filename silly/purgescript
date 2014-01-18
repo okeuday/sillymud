@@ -1,0 +1,6 @@
+#!/bin/csh
+cd /cis/homes/jdb/src/silly
+find lib/rent -mtime +30 -exec echo "/bin/rm " {} \; | grep -v '.aux' > rm.list
+source rm.list
+#/bin/rm rm.list
+

@@ -1,0 +1,17 @@
+This directory contains the security listings.   each 58+ level god must
+have a file in this directory, with their name. the file should consist of
+an internet address, in whatever format the game prints out the result of
+the 'user' command.    for example:  "doldrums.cis.ufl.edu", or 
+128.227.224.35
+
+most of the time, it will be a string address. on some busted machine types
+it will be a numeric address.   only one site per god currently, but the
+limitation can be as general as '128'
+
+the sample file contains an example listing.  the god 'sample' would only
+be allowed to log in from the machine with the ip address 128.227.224.35
+
+if your machine handled ip->name conversion correctly, you could use
+doldrums.cis.ufl.edu 
+instead of the numeric address.
+

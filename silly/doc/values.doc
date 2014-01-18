@@ -1,0 +1,473 @@
+/* ************************************************************************
+*  Copyright (C) 1990, 1991 - see 'license.doc' for complete information. *
+************************************************************************* */
+
+
+                     ITEM VALUE DOCUMENTATION
+                           "values.doc"
+
+
+These values are used, as illustrated below, with the different
+item types. The various item types are shown in dbsup.doc.
+
+
+
+ITEM_LIGHT (1)
+Value[0]: Not Used
+Value[1]: Not Used
+Value[2]: Number of hours the light can be used for. Zero hours means that
+          the light has gone out. A negative number will create an eternal
+          light source.
+Value[3]: Not Used
+
+
+ITEM_SCROLL (2)
+Value[0]: Level of the spell on the scroll.
+Value[1]: Which spell (see list somewhere around the end of file)
+Value[2]: Which spell
+Value[3]: Which spell
+  The values(1-3) are three (or less) different spells, mixed 'on' the scroll.
+  Unused spells should be set to -1.
+
+
+ITEM_WAND (3)
+Value[0]: Level of spell in wand.
+Value[1]: Max Charges (1..X)
+Value[2]: Charges Left
+Value[3]: Which spell in wand (see list somewhere around the end of file)
+
+
+ITEM_STAFF (4)
+Value[0]: Level of spell in staff.
+Value[1]: Max Charges (1..X)
+Value[2]: Charges Left
+Value[3]: Which spell in staff (see list somewhere around the end of file)
+
+
+ITEM_WEAPON (5)
+Value[0]: Not Used
+Value[1]: Number of dice to roll for damage
+Value[2]: Size of dice to roll for damage
+Value[3]: The weapon type. Type is one of:
+
+         NUMBER  CATEGORY   Message type
+            2  : Slash         "whip/whips"
+            3  : Slash         "slash/slashes"
+
+            6  : Bludgeon      "crush/crushes"
+            7  : Bludgeon      "pound/pounds"
+
+           11  : Pierce        "pierce/pierces"
+
+          New types will be added as needed.
+
+
+ITEM_FIREWEAPON (6)
+Value[0]: -
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_MISSILE    (7)
+Value[0]: -
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_TREASURE   (8)
+Value[0]: -
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_ARMOR      (9)
+Value[0]: The effective AC. >0 enhances the armour class. <0 reduces the
+          the armour class (cursed armour for example).
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_POTION    (10)
+Value[0]: Level of the spell in the potion.
+Value[1]: Which spell (Listed elsewhere in this file)
+Value[2]: Which spell
+Value[3]: Which spell
+  The values(1-3) are three (or less) different spells, mixed in the potion.
+  Unused spells should be set to -1.
+   Eg.
+   Value 0 : 30  (Level)
+   Value 1 : 27  (Harm)
+   Value 2 : 17  (Curse)
+   Value 3 :  4  (Blindness)
+     (* Don't drink this - It's bad for your health! *)
+
+
+ITEM_WORN      (11)
+Value[0]: -
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_OTHER     (12)
+Value[0]: -
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_TRASH     (13)
+Value[0]: -
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_TRAP      (14)
+Value[0]: Trigger type for the trap, can be...
+
+        TRAP_EFF_MOVE    1      Movement triggers the trap.
+        TRAP_EFF_OBJECT  2      Getting, or putting triggers the trap.
+        TRAP_EFF_ROOM    4      Trap will affect all in the room.
+        TRAP_EFF_NORTH   8      Trap will affect if you go in this direction.
+        TRAP_EFF_EAST   16      ""
+        TRAP_EFF_SOUTH  32      ""
+        TRAP_EFF_WEST   64      ""
+        TRAP_EFF_UP    128      ""
+        TRAP_EFF_DOWN  256      ""
+
+Value[1]: Damage type of the trap, can be ONE of...
+
+        TRAP_DAM_SLEEP     -3    Will put people to sleep, if failed save.
+        TRAP_DAM_TELEPORT  -2    Will teleport.
+        TRAP_DAM_FIRE      26    SPELL_FIREBALL
+        TRAP_DAM_COLD     203    SPELL_FROST_BREATH
+        TRAP_DAM_ACID      67    SPELL_ACID_BLAST
+        TRAP_DAM_ENERGY    10    SPELL_COLOUR_SPRAY
+        TRAP_DAM_BLUNT    207    TYPE_BLUDGEON
+        TRAP_DAM_PIERCE   208    TYPE_PIERCE
+        TRAP_DAM_SLASH    209    TYPE_SLASH
+
+Value[2]: This is the level of the trap, the number of dice in damage it does.
+Value[3]: This is the number of charges the trap has. (# of times it goes off)
+
+ITEM_CONTAINER (15)
+Value[0]: Maximum weight the container can contain.
+Value[1]: Container flags:
+
+   CLOSEABLE     1
+   PICKPROOF     2
+   CLOSED        4
+   LOCKED        8
+
+Value[2]: The item-number of the object which can open the object. -1 means
+          no lockability.
+Value[3]: Internal use for Corpses that must "rot".
+
+ITEM_NOTE      (16)
+Value[0]: Tounge (language of writing). Not yet used.
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_DRINKCON  (17)
+Value[0]: Maximum drink-units the drink-container can contain.
+Value[1]: Number of drink-units that are left in the container.
+Value[2]: The type of liquid in the drink-container, one of:
+
+              Type           nr.    Effect
+                                    Drunkness   Fullness   Thirst
+
+              LIQ_WATER      0      0           1           10
+              LIQ_BEER       1      3           2           5
+              LIQ_WINE       2      5           2           5
+              LIQ_ALE        3      2           2           5
+              LIQ_DARKALE    4      1           2           5
+              LIQ_WHISKY     5      6           1           4
+              LIQ_LEMONADE   6      0           1           8
+              LIQ_FIREBRT    7      10          0           0
+              LIQ_LOCALSPC   8      3           3           3
+              LIQ_SLIME      9      0           4           -8
+              LIQ_MILK       10     0           3           6
+              LIQ_TEA        11     0           1           6
+              LIQ_COFFE      12     0           1           6
+              LIQ_BLOOD      13     0           2           -1
+              LIQ_SALTWATER  14     0           1           -2
+              LIQ_COKE       15     0           1           5
+
+          The above values for drunkness/fullness/thirst are used per 
+          four "units" drunk. The values are expressed in HOURS!
+          Example:
+            Dragon empties a bottle (say 7 units) of saltwater.
+            His Drunkness is not changed ((7/4)*0)
+            His Fullness increases by ((7/4)*1) hours
+            His Thirst increases by ((7/4)*-2) hours, thus making
+               him More thirsty.
+
+          The hours above are numbers between 0 and 24. 24 hours is
+          maximum for drunkness/fullness/thirst. When hours are zero
+          for any drunkness/fullness/thirst the person will be
+          sober, hungry, or thirsty respectively.
+
+Value[3]: if this value is non-zero, then the drink is poisoned.
+
+ITEM_KEY       (18)
+Value[0]: The key-type. This value must match the lock-type the door
+          that the key can open. 
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_FOOD      (19)
+Value[0]: The number of hours, that this food will fill the stomach
+Value[1]: -
+Value[2]: -
+Value[3]: If this value is non-zero, the food is poisoned.
+
+ITEM_MONEY     (20)
+Value[0]: The number of gold coins "in the pile of coins".
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_PEN       (21)
+Value[0]: -
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+ITEM_BOAT      (22)
+Value[0]: 
+Value[1]: 
+Value[2]: 
+Value[3]: 
+
+ITEM_AUDIO     (23)
+
+                NOTE:  You need an action string for this object,
+                       That string will become the "noise" that is
+                       heard.  ie:
+                        #16
+                        medallion rat~
+                        A rat-shaped medallion~
+                        A rat-shaped medallion is lying here~
+This is the noise-----> You hear squeaking noises nearby
+This is necessary-----> ~
+                        23 0 9
+The 15 is timing----->  15 0 0 0
+                        1 0 5
+Value[0]: This is the value for how often the item makes noise.
+          It must be a multiple of 15, and 0 means it never makes
+          noise.  Timing  is similar to river speed.
+Value[1]: -
+Value[2]: -
+Value[3]: -
+
+
+-------------------------------------------------------------------------
+                              IMPORTANT NOTICE!!
+
+Since the level versus average damage calculations are performed as shown
+in "spell_info.doc" all the offensive spells are individually much stronger
+than higher level spells. For example:
+
+  1 fireball of level 15 gives more damage than one of level 16 which give
+    more damage than level 17 which give more damage than level 18 which
+    give more.... etc.
+
+  Thus please make all offensive potions/scrolls/etc. as the basic level
+  they are designed for. You can see the level below. You can see the spells
+  average damage, by looking at the spell versus the level of the spell,
+  divided by the number of spells learned at that particular level. Example:
+
+  Level 9 Lightning bolt give (102/2) average damage. Divided by 2, because
+          this is the level at which it is first learned (You can almost
+          always cast two spells are first learned level). At level 10 it
+          gives (120/3) average damage.
+
+Looking at the table in "spell_info.doc", you should know that each spell
+is designed so that it will kill a victim three levels below the mana user,
+if the manauser ONLY cast his spell....
+
+
+-------------------------------------------------------------------------
+The Y/N rows below indicate which potions/scrolls/wands/staffs that are
+possible to make. The MIN_LEV is the Minimum Level DEMANDED by the item
+you are making. The game will crash if making level less than demanded.
+
+-------------------------------------------------------------------------
+                                   POTION  SCROLL  WAND  STAFF   MIN_LEV
+TYPE_UNDEFINED               -1      Y       Y      Y      Y        -
+SPELL_RESERVED_DBC            0      N       N      N      N        -
+SPELL_ARMOR                   1      Y       Y      Y      N        >0
+SPELL_TELEPORT                2      Y       Y      Y      Y        >0
+SPELL_BLESS                   3      Y       Y      Y      N        ...
+SPELL_BLINDNESS               4      Y       Y      Y      Y
+SPELL_BURNING_HANDS           5      N       N      N      N        == 5
+SPELL_CALL_LIGHTNING          6      Y       Y      N      Y        >=12
+SPELL_CHARM_PERSON            7      N       Y      N      Y
+SPELL_CHILL_TOUCH             8      N       N      N      N        == 3
+SPELL_CLONE                   9      Y       Y      Y      N
+SPELL_COLOUR_SPRAY           10      N       Y      Y      N        ==11
+
+SPELL_CONTROL_WEATHER        11      N       N      N      N
+SPELL_CREATE_FOOD            12      N       Y      N      N
+SPELL_CREATE_WATER           13      N       N      N      N
+SPELL_CURE_BLIND             14      Y       N      N      Y
+SPELL_CURE_CRITIC            15      Y       N      N      Y
+SPELL_CURE_LIGHT             16      Y       N      N      Y
+SPELL_CURSE                  17      Y       Y      N      Y
+SPELL_DETECT_EVIL            18      Y       N      N      Y
+SPELL_DETECT_INVISIBLE       19      Y       N      N      Y
+SPELL_DETECT_MAGIC           20      Y       N      N      Y
+
+SPELL_DETECT_POISON          21      Y       Y      N      N
+SPELL_DISPEL_EVIL            22      Y       Y      Y      Y       == 10
+SPELL_EARTHQUAKE             23      N       Y      N      Y       == 7
+SPELL_ENCHANT_WEAPON         24      N       Y      N      N
+SPELL_ENERGY_DRAIN           25      Y       Y      Y      Y       == 13
+SPELL_FIREBALL               26      N       Y      Y      N       == 15
+SPELL_HARM                   27      Y       N      N      Y       == 15
+SPELL_HEAL                   28      Y       N      N      Y
+SPELL_INVISIBLE              29      Y       Y      Y      Y
+SPELL_LIGHTNING_BOLT         30      N       Y      Y      N       == 9
+
+SPELL_LOCATE_OBJECT          31      N       N      N      N
+SPELL_MAGIC_MISSILE          32      N       Y      Y      N       == 1
+SPELL_POISON                 33      Y       N      N      Y
+SPELL_PROTECT_FROM_EVIL      34      Y       Y      Y      Y
+SPELL_REMOVE_CURSE           35      Y       Y      N      Y
+SPELL_SANCTUARY              36      Y       Y      N      Y
+SPELL_SHOCKING_GRASP         37      N       N      N      N       == 7
+SPELL_SLEEP                  38      Y       Y      Y      Y
+SPELL_STRENGTH               39      Y       Y      N      Y
+SPELL_SUMMON                 40      N       N      N      N
+
+SPELL_VENTRILOQUATE          41      N       N      N      N
+SPELL_WORD_OF_RECALL         42      Y       Y      Y      Y
+SPELL_REMOVE_POISON          43      Y       N      N      Y
+SPELL_SENCE_LIFE             44      Y       N      N      Y
+
+SPELL_IDENTIFY              *53*     N       Y      N      N
+SPELL_INFRAVISION            54      Y       Y      Y      Y        ==5
+SPELL_CAUSE_LIGHT            55      Y       N      N      Y        ==1
+SPELL_CAUSE_CRITICAL         56      Y       Y      Y      Y        ==9
+SPELL_FLAMESTRIKE            57      N       Y      Y      N        ==11
+SPELL_DISPEL_GOOD            58      Y       Y      Y      Y        ==12
+SPELL_WEAKNESS               59      Y       Y      Y      Y        ==4
+
+SPELL_DISPEL_MAGIC           60      Y       Y      Y      Y        ==6
+SPELL_KNOCK                  61      N       Y      Y      N        ==3
+SPELL_KNOW_ALIGNMENT         62      Y       Y      N      N        ==3
+SPELL_ANIMATE_DEAD           63      N       Y      Y      Y        ==7
+SPELL_PARALYSIS              64      Y       Y      Y      Y        ==15
+SPELL_REMOVE_PARALYSIS       65      Y       N      Y      Y        ==4
+SPELL_FEAR                   66      Y       Y      Y      Y        ==8
+SPELL_ACID_BLAST             67      N       Y      Y      N        ==7
+SPELL_WATER_BREATH           68      Y       N      Y      N        ==4
+SPELL_FLY                    69      Y       N      Y      N        ==3
+
+SPELL_CONE_OF_COLD           70      N       Y      Y      N        ==11
+SPELL_METEOR_SWARM           71      N       Y      Y      N        ==20
+SPELL_ICE_STORM              72      N       Y      Y      N        ==7
+SPELL_SHIELD                 73      Y       N      Y      Y        ==1
+SPELL_MON_SUM1               74      N       Y      Y      Y        ==5
+SPELL_MON_SUM2               75      N       Y      Y      Y        ==7
+SPELL_MON_SUM3               76      N       Y      Y      Y        ==9
+SPELL_MON_SUM4               77      N       Y      Y      Y        ==11
+SPELL_MON_SUM5               78      N       Y      Y      Y        ==13
+SPELL_MON_SUM6               79      N       Y      Y      Y        ==15
+
+SPELL_MON_SUM7               80      N       Y      Y      Y        ==17
+SPELL_FIRESHIELD             81      Y       Y      Y      Y        ==19
+SPELL_CHARM_MONSTER          82      N       Y      N      Y        ==8
+SPELL_CURE_SERIOUS           83      Y       N      Y      Y        ==7
+SPELL_CAUSE_SERIOUS          84      Y       N      Y      Y        ==7
+SPELL_REFRESH                85      Y       N      Y      Y        ==2
+SPELL_SECOND_WIND            86      Y       N      Y      Y        ==6
+SPELL_TURN                   87      N       Y      Y      Y        ==1
+SPELL_SUCCOR                 88      N       N      Y      Y        ==18
+SPELL_LIGHT                  89      N       Y      Y      N        ==1
+
+SPELL_CONT_LIGHT             90      N       Y      Y      N        ==3
+SPELL_CALM                   91      N       Y      Y      Y        ==2
+SPELL_STONE_SKIN             92      Y       Y      Y      Y        ==16
+SPELL_CONJURE_ELEMENTAL      93      N       Y      N      N        ==14
+SPELL_TRUE_SIGHT             94      Y       Y      Y      Y        ==12
+SPELL_MINOR_CREATE           95      N       Y      N      N        ==8
+SPELL_FAERIE_FIRE            96      Y       Y      Y      Y        ==3
+SPELL_FAERIE_FOG             97      N       Y      N      Y        ==10
+SPELL_CACAODEMON             98      N       Y      N      N        ==25
+SPELL_POLY_SELF              99      N       N      N      N        ==8
+
+SPELL_MANA                   100     Y       N      Y      Y        ==61
+SPELL_ASTRAL_WALK            101     Y       Y      Y      N        ==18
+SPELL_RESURRECTION           102     N       N      N      Y        ==21
+SPELL_H_FEAST                103     N       N      Y      Y        ==15
+SPELL_FLY_GROUP              104     Y       N      Y      Y        ==14
+SPELL_DRAGON_BREATH          105     Y?      N      N      N        -
+SPELL_WEB                    106     N       Y      Y      Y        ==5
+SPELL_MINOR_TRACK            107     Y       Y      Y      Y        ==7
+SPELL_MAJOR_TRACK            108     Y       Y      Y      Y        ==16
+SPELL_GOLEM                  109     N       Y      N      N        ==15
+
+SPELL_FAMILIAR               110     N       N      N      N        ==2
+SPELL_CHANGESTAFF            111     N       Y      N      Y        ==30
+SPELL_HOLY_WORD              112     N       Y      N      N        ==31
+SPELL_UNHOLY_WORD            113     N       Y      N      N        ==31
+SPELL_PWORD_KILL             114     N       Y      N      N        ==26
+SPELL_PWORD_BLIND            115     N       Y      N      N        ==19
+SPELL_CHAIN_LIGHTNING        116     N       Y      Y      Y        ==25
+SPELL_SCARE                  117     N       Y      Y      Y        ==4
+SPELL_AID                    118     N       Y      Y      Y        ==4
+SPELL_COMMAND                119     N       Y      N      N        ==1
+
+SPELL_CHANGE_FORM            120     N       N      N      N        ==12
+SPELL_FEEBLEMIND             121     Y       Y      Y      N        ==34
+SPELL_SHILLELAGH             122     N       Y      N      N        ==3
+SPELL_GOODBERRY              123     N       Y      N      N        ==5
+SPELL_FLAME_BLADE            124     N       Y      N      N        ==7
+SPELL_ANIMAL_GROWTH          125     N       Y      Y      N        ==15
+SPELL_INSECT_GROWTH          126     N       Y      Y      N        ==13
+SPELL_CREEPING_DEATH         127     N       Y      N      N        ==45
+SPELL_COMMUNE                128     N       Y      N      N        ==20
+SPELL_ANIMAL_SUM_1           129     Y       Y      Y      Y        ==15
+
+SPELL_ANIMAL_SUM_2           130     Y       Y      Y      Y        ==20
+SPELL_ANIMAL_SUM_3           131     Y       Y      Y      Y        ==25
+SPELL_FIRE_SERVANT           132     N       Y      N      Y        ==35
+SPELL_EARTH_SERVANT          133     N       Y      N      Y        ==36
+SPELL_WATER_SERVANT          134     N       Y      N      Y        ==37
+SPELL_WIND_SERVANT           135     N       Y      N      Y        ==38
+SPELL_REINCARNATE            136     N       N      N      Y        ==38
+SPELL_CHARM_VEGGIE           137     N       Y      N      Y        ==17
+SPELL_VEGGIE_GROWTH          138     N       Y      Y      N        ==20
+SPELL_TREE                   139     Y       Y      N      Y        ==15
+
+SPELL_ANIMATE_ROCK           140     N       Y      Y      N        ==31
+SPELL_TREE_TRAVEL            141     N       Y      Y      Y        ==8
+SPELL_TRAVELLING             142     Y       Y      Y      Y        ==10
+SPELL_ANIMAL_FRIENDSHIP      143     N       Y      Y      N        ==5
+SPELL_INVIS_TO_ANIMALS       144     Y       Y      N      N        ==11
+SPELL_SLOW_POISON            145     Y       Y      Y      N        ==6
+SPELL_ENTANGLE               146     N       Y      Y      N        ==16
+SPELL_SNARE                  147     N       Y      Y      Y        ==8
+SPELL_GUST_OF_WIND           148     N       Y      Y      Y        ==10
+SPELL_BARKSKIN               149     N       Y      Y      N        ==4
+
+SPELL_SUNRAY                 150     N       Y      Y      N        ==27
+SPELL_WARP_WEAPON            151     N       Y      Y      N        ==19
+SPELL_HEAT_STUFF             152     N       Y      Y      N        ==23
+SPELL_FIND_TRAPS             153     Y       Y      Y      Y        ==15
+SPELL_FIRESTORM              154     N       Y      N      Y        ==22
+SPELL_HASTE                  155     N       Y      Y      Y        ==23
+SPELL_SLOW                   156     N       Y      Y      Y        ==19
+SPELL_DUST_DEVIL             157     N       Y      N      Y        ==3
+SPELL_KNOW_MONSTER           158     N       Y      Y      N        ==9
+SPELL_TRANSPORT_VIA_PLANT    159     N       Y      N      N        ==10
+
+SPELL_SPEAK_WITH_PLANT       160     N       Y      Y      N        ==7
+SPELL_SILENCE                161     Y       Y      Y      Y        ==21
+SPELL_SENDING                162     N       N      N      N        ==12
+SPELL_TELEPORT_WO_ERROR      163     Y       Y      Y      N        ==40
+SPELL_PORTAL                 164     N       Y      N      Y        ==40
+SPELL_DRAGON_RIDE            165     Y       Y      Y      Y        ==35
+SPELL_MOUNT                  166     N       Y      N      Y        ==30
+

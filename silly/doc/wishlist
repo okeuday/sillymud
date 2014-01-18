@@ -1,0 +1,87 @@
+1.  large rooms, with the associated modifications to spells, skills, 
+	mobile activities, etc
+2.  mobs with sizes, races, forms, racial hatreds, that act more like
+	pcs, like - movement based on fighting tick, and lagged same
+	way players are.  Some monsters should help each other, without
+	being aggressive.. Some monsters, perhaps many should have a 
+	long term memory, where they start disliking chars who kill them
+	often.
+3.  objects with more info - encumbrance, material make-up (metal, leather,
+	etc).  armor values based more on material than a "number". 
+	consistency of the object would control how much damage it took.
+	
+4.  spells on rooms, that would affect people who enter or leave.
+5.  A slightly scripted "background plot", that would affect what was
+	going on in the world, depending on actions that occured before.
+	This is one of those almost non-feasible things, but I would like
+	to see a mud where things change from time to time.
+6.  A world that isn't based on certain monsters being in certain places..
+	a cave is a cave, whether there is a dragon or a giant in it
+	
+7.  A semi-modular world, that could be reconfigured easily, so it would
+	change from time to time  
+
+8.  Perhaps no regens.. Game comes up, scripts move things in certain
+	directions, until either the script runs out, or game is empty,
+	at which point everything reboots and starts over - maybe even
+	players would start over.   for example:
+	say first script ever is 'small city of X, with a horde of orcs 
+	heading towards it frm the north.' script would move orcs south
+	slowly, and if they eventually got to the city, the guards would
+	go and fight the orcs.  Players could do things like - fight orcs,
+	go try to find help from another city, try to find "magic amulet"
+	which would drive orcs away, etc.  Then, when script was finished,
+	game would reset, player file would be wiped (maybe), and the script
+	would be extended to add new places, and more stuff to do.  
+	I know this is pretty flaky, but it is a wish list, and this is one
+	of the things I really wish could happen. :-)  If you're interested
+	in it, we can talk about it further, but if not, oh well.. I'll just
+	keep thinking about it.
+
+5 and 8 are (obviously) linked.  6 and 7 are a bit more stand-alone, but 
+also associated with 5 and 8
+
+9)  objects- size and weight factoring in to who could use them, 
+	(weapons), etc.  just about anything can be a weapon.. some are
+	just better than others...
+
+10 - flowing rivers... objects which float on rivers, people can be
+	ON these objects, 
+
+11 - objects which can have rooms inside..
+12 - mobs which can have rooms inside, and various other places
+
+	(huge ancient trees you can climb, whales that can swallow you)
+
+13 - spells which react together more "realistically".  Like, if you have
+	infravision, and a fireball goes off, you should be blind for a 
+	while.  
+
+14 - eq should have weight, you should get tired if you are wearing lots
+	of eq.
+15 - weather should change from place to place on the game, and follow some 
+	consistent pattern.  Ambient temperature should play a part in
+	damage, etc.  (if -20 degrees, player should take some damage if
+	not wearing clothing which warms him/her).
+	spells could perhaps be integrated with this - if a fireball is cast,
+	it heats the room, for just a few instants, and everyone is checked
+	for damaged based on the heat, and the duration, etc...
+	(shrug, again, this is a wish list :-)
+
+16 -  charm should not make mindless followers.  
+
+17 - rooms should be dynamically addable and removeable.. so should mobs,
+	and objects.
+18 - some standard, built in mechanism for building houses, or otherwise
+	modifying the database (as a player) should be provided.
+	(so one can buy a plot of land, and hire a builder to build a
+	house based on an existing plan.  ditto for castles, etc)	
+
+I don't really have any preference over how the characters should be made,
+	and developed.  I use ad&d cause its an easily recognizable standard,
+	not because it has any great reverence from me.
+
+I'll send more as they come to me.
+
+
+
