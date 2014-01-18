@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
@@ -916,7 +917,7 @@ void night_watchman()
       (t_info->tm_wday < 6))
     if (t_info->tm_min > 50)
       {
-	log("Leaving the scene for the serious folks.");
+	logE("Leaving the scene for the serious folks.");
 	send_to_all("Closing down. Thank you for flying DikuMUD.\n\r");
 	mudshutdown = 1;
       }
@@ -944,14 +945,14 @@ void check_reboot()
       {
 	if (t_info->tm_min > 50)
 	  {
-	    log("Reboot exists.");
+	    logE("Reboot exists.");
 	    fread(&dummy, sizeof(dummy), 1, boot);
 	    if (!feof(boot))   /* the file is nonepty */
 	      {
-		log("Reboot is nonempty.");
+		logE("Reboot is nonempty.");
 		if (system("./reboot"))
 		  {
-		    log("Reboot script terminated abnormally");
+		    logE("Reboot script terminated abnormally");
 		    send_to_all("The reboot was cancelled.\n\r");
 		    system("mv ./reboot reboot.FAILED");
 		    fclose(boot);

@@ -129,8 +129,8 @@ int BestFightingClass(struct char_data *ch)
  if (GET_LEVEL(ch, MAGE_LEVEL_IND)) 
    return(MAGE_LEVEL_IND);
  
-  log("Massive error.. character has no recognized class.");
-  log(GET_NAME(ch));
+  logE("Massive error.. character has no recognized class.");
+  logE(GET_NAME(ch));
   assert(0);
 
   return(1);
@@ -152,8 +152,8 @@ int BestThiefClass(struct char_data *ch)
  if (GET_LEVEL(ch, CLERIC_LEVEL_IND)) 
    return(CLERIC_LEVEL_IND);
  
-  log("Massive error.. character has no recognized class.");
-  log(GET_NAME(ch));
+  logE("Massive error.. character has no recognized class.");
+  logE(GET_NAME(ch));
   assert(0);
 
   return(1);
@@ -175,8 +175,8 @@ int BestMagicClass(struct char_data *ch)
  if (GET_LEVEL(ch, MONK_LEVEL_IND)) 
    return(MONK_LEVEL_IND);
  
-  log("Massive error.. character has no recognized class.");
-  log(GET_NAME(ch));
+  logE("Massive error.. character has no recognized class.");
+  logE(GET_NAME(ch));
   ch->player.class = 4;
 
   return(1);

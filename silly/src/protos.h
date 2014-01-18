@@ -18,7 +18,8 @@
 #include "wizlist.h"
 #include "parser.h"
 
-char *strdup(char *source);
+typedef void (*funcp)(byte, struct char_data *, char *, int,
+                      struct char_data *, struct obj_data *);
 
 /* From Heap.c */
  
@@ -332,6 +333,9 @@ int board(struct char_data *ch, int cmd, char *arg, struct obj_data *obj, int ty
 char *fix_returns(char *text_string);
 int board_check_locks (int bnum, struct char_data *ch);
  
+/* From bsd.c */
+
+char * strdup(char const * s);
  
 /* From comm.c */
  
@@ -350,6 +354,8 @@ int new_connection(int s);
 int new_descriptor(int s);
 int process_output(struct descriptor_data *t);
 int write_to_descriptor(int desc, char *txt);
+int write_to_descriptor_echo_on(struct descriptor_data *d);
+int write_to_descriptor_echo_off(struct descriptor_data *d);
 int process_input(struct descriptor_data *t);
 void close_sockets(int s);
 void close_socket(struct descriptor_data *d);
@@ -371,7 +377,10 @@ void send_to_room_except_two
 void act(char *str, int hide_invisible, struct char_data *ch,
 	 struct obj_data *obj, void *vict_obj, int type);
 int raw_force_all( char *to_force);
+
+/* From comm_cloudi.c */
  
+void run_the_game_with_cloudi();
  
 /* From constants.c */
  
@@ -1120,11 +1129,10 @@ int DoIHateYou(struct char_data *v);
 /* From signals.c */
  
 void signal_setup();
-int checkpointing();
-int shutdown_request();
-int hupsig();
-int logsig();
- 
+void checkpointing(int);
+void shutdown_request(int);
+void logsig(int);
+void hupsig(int);
  
 /* From skills.c */
  
@@ -1307,9 +1315,13 @@ struct breath_victim *choose_victims(struct char_data *ch,
 				     struct char_data *first_victim);
 void free_victims(struct breath_victim *head);
 int breath_weapon(struct char_data *ch, struct char_data *target,
-		  int mana_cost, void (*func)());
+                  int mana_cost,
+                  void (*func)(byte, struct char_data *, char *, int,
+                               struct char_data *, struct obj_data *));
 int use_breath_weapon(struct char_data *ch, struct char_data *target,
-		      int cost, void (*func)());
+		              int cost,
+                      void (*func)(byte, struct char_data *, char *, int,
+                                   struct char_data *, struct obj_data *));
 int BreathWeapon(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type);
 int sailor(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type);
 int loremaster(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type);
@@ -1780,6 +1792,7 @@ int dice(int number, int size);
 int scan_number(char *text, int *rval);
 int str_cmp(char *arg1, char *arg2);
 int strn_cmp(char *arg1, char *arg2, int n);
+void logE(char *str);
 void log_sev(char *str,int sev);
 void slog(char *str);
 void sprintbit(unsigned long vektor, char *names[], char *result);

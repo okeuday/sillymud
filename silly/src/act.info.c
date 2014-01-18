@@ -4,8 +4,10 @@
  *  Copyright (C) 1990, 1991 - see 'license.doc' for complete information. *
  ************************************************************************* */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <time.h>
 
@@ -2777,9 +2779,9 @@ void do_world(struct char_data *ch, char *argument, int cmd)
   sprintf(buf, "Current time is: %s (EST)\n\r", tmstr);
   send_to_char(buf, ch);
 #if HASH  
-  sprintf(buf, "Total number of rooms in world: %d\n\r", room_db.klistlen);
+  sprintf(buf, "Total number of rooms in world: %d\n\r", (int)room_db.klistlen);
 #else
-  sprintf(buf, "Total number of rooms in world: %d\n\r", room_count);
+  sprintf(buf, "Total number of rooms in world: %d\n\r", (int)room_count);
 #endif
   send_to_char(buf, ch);
   sprintf(buf, "Total number of zones in world: %d\n\r\n\r",
@@ -2794,10 +2796,10 @@ void do_world(struct char_data *ch, char *argument, int cmd)
   sprintf(buf,"Total number of registered players: %d\n\r",top_of_p_table + 1);
   send_to_char(buf, ch);
 
-  sprintf(buf, "Total number of monsters in game: %d\n\r", mob_count);
+  sprintf(buf, "Total number of monsters in game: %d\n\r", (int)mob_count);
   send_to_char(buf, ch);
 
-  sprintf(buf, "Total number of objects in game: %d\n\r", obj_count);
+  sprintf(buf, "Total number of objects in game: %d\n\r", (int)obj_count);
   send_to_char(buf, ch);
 
 }

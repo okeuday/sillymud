@@ -5,6 +5,8 @@
 */
 
 #include <string.h>
+#include <strings.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
@@ -200,7 +202,7 @@ void affect_modify(struct char_data *ch,byte loc, long mod, long bitv,bool add)
       break;
       
     case APPLY_DEX: 
-#ifdef 0
+#if 0
       temp = GET_DEX(ch);
             temp2=GET_DEX(ch);
       if(temp2 < ch->abilities.dex)
@@ -413,8 +415,8 @@ void affect_modify(struct char_data *ch,byte loc, long mod, long bitv,bool add)
       break;
 
     default:
-      log("Unknown apply adjust attempt (handler.c, affect_modify).");
-      log(ch->player.name);
+      logE("Unknown apply adjust attempt (handler.c, affect_modify).");
+      logE(ch->player.name);
       
       break;
       
@@ -515,8 +517,8 @@ void affect_remove( struct char_data *ch, struct affected_type *af )
   struct affected_type *hjp;
   
   if (!ch->affected) {
-    log("affect removed from char without affect");
-    log(GET_NAME(ch));
+    logE("affect removed from char without affect");
+    logE(GET_NAME(ch));
     return;
   }
   
@@ -534,7 +536,7 @@ void affect_remove( struct char_data *ch, struct affected_type *af )
     for(hjp = ch->affected; (hjp->next) && (hjp->next != af); hjp = hjp->next);
     
     if (hjp->next != af) {
-      log("Could not locate affected_type in ch->affected. (handler.c, affect_remove)");
+      logE("Could not locate affected_type in ch->affected. (handler.c, affect_remove)");
       return;
     }
     hjp->next = af->next; /* skip the af element */
@@ -609,7 +611,7 @@ void char_from_room(struct char_data *ch)
   struct room_data *rp;
   
   if (ch->in_room == NOWHERE) {
-    log("NOWHERE extracting char from room (handler.c, char_from_room)");
+    logE("NOWHERE extracting char from room (handler.c, char_from_room)");
     return;
   }
   
@@ -623,7 +625,7 @@ void char_from_room(struct char_data *ch)
     sprintf(buf, "ERROR: char_from_room: %s was not in a valid room (%d)",
 	    (!IS_NPC(ch) ? (ch)->player.name : (ch)->player.short_descr),
 	    ch->in_room);
-    log(buf);
+    logE(buf);
     return;
   }
   
@@ -639,7 +641,7 @@ void char_from_room(struct char_data *ch)
       sprintf(buf, "SHIT, %s was not in people list of his room %d!",
 	      (!IS_NPC(ch) ? (ch)->player.name : (ch)->player.short_descr),
 	      ch->in_room);
-      log(buf);
+      logE(buf);
     }
   }
   
@@ -736,28 +738,28 @@ void obj_from_char(struct obj_data *object)
   struct obj_data *tmp;
   
   if (!object) {
-    log("No object to be take from char.");
+    logE("No object to be take from char.");
     assert(0);
   }
   
   
   if (!object->carried_by) {
-    log("this object is not carried by anyone");
+    logE("this object is not carried by anyone");
     assert(0);
   }
   
   if (!object->carried_by->carrying) {
-    log("No one is carrying this object");
+    logE("No one is carrying this object");
     assert(0);
   }
 
   if (object->in_obj) {
-    log("Obj in more than one place.");
+    logE("Obj in more than one place.");
     assert(0);
   }
 
   if (object->equipped_by) {
-    log("Obj in more than one place.");
+    logE("Obj in more than one place.");
     assert(0);
   }
   
@@ -771,7 +773,7 @@ void obj_from_char(struct obj_data *object)
 	   tmp = tmp->next_content); /* locate previous */
       
       if (!tmp) {
-	log("Couldn't find object on character");
+	logE("Couldn't find object on character");
 	assert(0);
       }
       
@@ -826,12 +828,12 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
   assert(!(ch->equipment[pos]));
   
   if (obj->carried_by) {
-    log("EQUIP: Obj is carried_by when equip.");
+    logE("EQUIP: Obj is carried_by when equip.");
     assert(0);
   }
   
   if (obj->in_room!=NOWHERE) {
-    log("EQUIP: Obj is in_room when equip.");
+    logE("EQUIP: Obj is in_room when equip.");
     assert(0);
     return;
   }
@@ -870,7 +872,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
       do_save(ch,"",0);
       return;
     } else {
-      log("ch->in_room = NOWHERE when equipping char.");
+      logE("ch->in_room = NOWHERE when equipping char.");
       assert(0);
     }
   }
@@ -1177,7 +1179,7 @@ void obj_from_room(struct obj_data *object)
 
   if (object->in_room <= NOWHERE) {
     if (object->carried_by || object->equipped_by) {
-       log("Eek.. an object was just taken from a char, instead of a room");
+       logE("Eek.. an object was just taken from a char, instead of a room");
        assert(0);
     }
     return;  /* its not in a room */
@@ -1194,7 +1196,7 @@ void obj_from_room(struct obj_data *object)
       if (i) {
          i->next_content = object->next_content;
       } else {
-	log("Couldn't find object in room");
+	logE("Couldn't find object in room");
 	assert(0);
       }
     }
@@ -1238,17 +1240,17 @@ void obj_from_obj(struct obj_data *obj)
   if (obj->carried_by) {
     sprintf(buf, "%s carried by %s in obj_from_obj\n", obj->name,
 	    obj->carried_by->player.name);
-    log(buf);
+    logE(buf);
   }
   if (obj->equipped_by) {
     sprintf(buf, "%s equipped by %s in obj_from_obj\n", obj->name,
 	    obj->equipped_by->player.name);
-    log(buf);
+    logE(buf);
   }
   if (obj->in_room != NOWHERE) {
     sprintf(buf, "%s in room %d in obj_from_obj\n", obj->name,
 	    obj->in_room);
-    log(buf);
+    logE(buf);
   }
 
   assert(!obj->carried_by && !obj->equipped_by && obj->in_room == NOWHERE);
@@ -1326,9 +1328,9 @@ void extract_obj(struct obj_data *obj)
       obj->equipped_by->equipment[obj->eq_pos] = 0;
       
     } else {
-      log("Extract on equipped item in slot -1 on:");
-      log(obj->equipped_by->player.name);
-      log(obj->name);
+      logE("Extract on equipped item in slot -1 on:");
+      logE(obj->equipped_by->player.name);
+      logE(obj->name);
       return;
     }
   } else if(obj->in_obj)	{
@@ -1360,7 +1362,7 @@ void extract_obj(struct obj_data *obj)
     if(temp1) {
       temp1->next = obj->next;
     } else {
-      log("Couldn't find object in object list.");
+      logE("Couldn't find object in object list.");
       assert(0);
     }
   }
@@ -1431,7 +1433,7 @@ void extract_char_smarter(struct char_data *ch, int save_room)
   }
   
   if (ch->in_room == NOWHERE) {
-    log("NOWHERE extracting char. (handler.c, extract_char)");
+    logE("NOWHERE extracting char. (handler.c, extract_char)");
     /*
      **  problem from linkdeath
      */
@@ -1559,7 +1561,7 @@ void extract_char_smarter(struct char_data *ch, int save_room)
     if(k)
       k->next = ch->next;
     else {
-      log("Trying to remove ?? from character_list.(handler.c,extract_char)");
+      logE("Trying to remove ?? from character_list.(handler.c,extract_char)");
       exit(0);
     }
   }
@@ -1784,10 +1786,8 @@ struct obj_data *create_money( int amount )
   struct extra_descr_data *new_descr;
   char buf[80];
   
-  char *strdup(char *str);
-  
   if(amount<=0) {
-      log("ERROR: Try to create negative money.");
+      logE("ERROR: Try to create negative money.");
       assert(0);
     }
   

@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "protos.h"
@@ -270,8 +271,8 @@ void mobile_activity(struct char_data *ch)
 #else
   if ((ch->in_room < 0) || !room_find(&room_db,ch->in_room)) {
 #endif
-      log("Char not in correct room.  moving to 50 ");
-      log(GET_NAME(ch));
+      logE("Char not in correct room.  moving to 50 ");
+      logE(GET_NAME(ch));
       assert(ch->in_room >= 0);  /* if they are in a - room, assume an error */
       char_from_room(ch);
       char_to_room(ch, 50);
@@ -287,7 +288,7 @@ void mobile_activity(struct char_data *ch)
     if (!mob_index[ch->nr].func) {
       char buf[180];
       sprintf(buf, "Attempting to call a non-existing mob func on %s", GET_NAME(ch));
-      log(buf);
+      logE(buf);
       REMOVE_BIT(ch->specials.act, ACT_SPEC);
     } else {
 
@@ -455,7 +456,7 @@ int AssistFriend( struct char_data *ch)
 #else
   if (ch->in_room < 0) {
     sprintf(buf, "Mob %s in negative room", ch->player.name);
-    log(buf);
+    logE(buf);
     ch->in_room = 0;
     extract_char(ch);
     return(0);
@@ -817,7 +818,7 @@ void sgoto(char *arg, struct char_data *ch)
      char buf3[150];
      sprintf(buf, "Error in script %s, no destination for goto", 
 	     script_data[ch->script].filename);
-     log(buf);
+     logE(buf);
      ch->commandp++;
      return;
    }
@@ -872,7 +873,7 @@ void do_jmp(char *arg, struct char_data *ch)
   }
 
  sprintf(buf, "Label %s undefined in script assigned to %s.  Ignoring.", arg, GET_NAME(ch));
- log(buf);
+ logE(buf);
 
  ch->commandp++;
 }
@@ -895,7 +896,7 @@ void do_jsr(char *arg, struct char_data *ch)
   }
 
  sprintf(buf, "Label %s undefined in script assigned to %s.  Ignoring.", arg, GET_NAME(ch));
- log(buf);
+ logE(buf);
 
  ch->commandp++;
 }

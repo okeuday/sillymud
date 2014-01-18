@@ -5,6 +5,8 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "protos.h"
@@ -2268,7 +2270,7 @@ void spell_identify(byte level, struct char_data *ch,
 	   strcat(buf2,"\n\r");
 	   break;
 	case APPLY_ATTACKS:
-	   sprintf(buf2,"%f\n\r", obj->affected[i].modifier/10);
+	   sprintf(buf2,"%ld\n\r", obj->affected[i].modifier/10);
 	   break;
         case APPLY_WEAPON_SPELL:
 	case APPLY_EAT_SPELL:
@@ -2280,7 +2282,7 @@ void spell_identify(byte level, struct char_data *ch,
 	   break;
 
 	 default:
-	   sprintf(buf2,"%d\n\r", obj->affected[i].modifier);
+	   sprintf(buf2,"%ld\n\r", obj->affected[i].modifier);
 	   break;
 	}
 	send_to_char(buf2,ch);

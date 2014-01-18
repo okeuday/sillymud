@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
@@ -161,7 +162,7 @@ void load_messages()
     fscanf(f1," %d\n", &type);
     
     if(i>=MAX_MESSAGES){
-      log("Too many combat messages.");
+      logE("Too many combat messages.");
       exit(0);
     }
     
@@ -239,14 +240,14 @@ void set_fighting(struct char_data *ch, struct char_data *vict)
 {
   
   if (ch->specials.fighting) {
-    log("Fighting character set to fighting another.");
+    logE("Fighting character set to fighting another.");
     return;
   }
   
   if (vict->attackers <= 5) {
     vict->attackers+=1;
   } else {
-    log("more than 6 people attacking one target");
+    logE("more than 6 people attacking one target");
   }
   ch->next_fighting = combat_list;
   combat_list = ch;
@@ -300,7 +301,7 @@ void stop_fighting(struct char_data *ch)
 
   ch->specials.fighting->attackers-=1;
   if (ch->specials.fighting->attackers < 0) {
-    log("too few people attacking");
+    logE("too few people attacking");
     ch->specials.fighting->attackers = 0;
   }
   
@@ -313,7 +314,7 @@ void stop_fighting(struct char_data *ch)
     for (tmp = combat_list; tmp && (tmp->next_fighting != ch); 
 	 tmp = tmp->next_fighting);
     if (!tmp) {
-      log("Char fighting not found Error (fight.c, stop_fighting)");
+      logE("Char fighting not found Error (fight.c, stop_fighting)");
       abort();
     }
     tmp->next_fighting = ch->next_fighting;
@@ -340,7 +341,6 @@ void make_corpse(struct char_data *ch)
   char buf[MAX_INPUT_LENGTH];
   int i, ADeadBody=FALSE;
   
-  char *strdup(char *source);
   struct obj_data *create_money( int amount );
   
   CREATE(corpse, struct obj_data, 1);
@@ -893,7 +893,7 @@ int DamCheckDeny(struct char_data *ch, struct char_data *victim, int type)
   if (rp && (rp->room_flags&PEACEFUL) && type!=SPELL_POISON && 
       type!=SPELL_HEAT_STUFF) {
     sprintf(buf, "damage(,,,%d) called in PEACEFUL room", type);
-    log(buf);
+    logE(buf);
     return(TRUE); /* true, they are denied from fighting */
   }
   return(FALSE);
@@ -1778,14 +1778,14 @@ int HitCheckDeny(struct char_data *ch, struct char_data *victim, int type)
   rp = real_roomp(ch->in_room);
   if (rp && rp->room_flags&PEACEFUL && PeacefulWorks) {
     sprintf(buf, "hit() called in PEACEFUL room");
-    log(buf);
+    logE(buf);
     stop_fighting(ch);
     return(TRUE);
   }
   
   if (ch->in_room != victim->in_room) {
     sprintf(buf, "NOT in same room when fighting : %s, %s", ch->player.name, victim->player.name);
-    log(buf);
+    logE(buf);
     stop_fighting(ch);
     return(TRUE);
   }
@@ -2278,7 +2278,7 @@ int GetBackstabMult(struct char_data *ch, struct char_data *v)
   if(!our_skill) {
     sprintf(buf, "Warning, race %d was unaccounted for in GetBackstabMult()",
 	    GET_RACE(v));
-    log(buf);
+    logE(buf);
     return(mult);
   }
 
@@ -2319,7 +2319,7 @@ int HitVictim(struct char_data *ch, struct char_data *v, int dam,
       tmp = GetBackstabMult(ch, v);
       sprintf(buf, "BS multiplier for %dth level char is %d.", GetMaxLevel(ch),
 	      tmp);
-      log(buf);
+      logE(buf);
       dam *= tmp;
       dead = (*dam_func)(ch, v, dam, type);
 
@@ -2447,7 +2447,7 @@ void perform_violence(int pulse)
       sprintf(buf,"perform_violence() found %s fighting in a PEACEFUL room.",
 	      ch->player.name);
       stop_fighting(ch);
-      log(buf);
+      logE(buf);
     } else if (ch == ch->specials.fighting) {
       stop_fighting(ch);
     } else {
@@ -3128,7 +3128,7 @@ void DamageAllStuff( struct char_data *ch, int dam_type)
 	if ((obj = unequip_char(ch,j))!=NULL) {
 	  MakeScrap(ch, obj);
 	} else {
-	  log("hmm, really wierd!");
+	  logE("hmm, really wierd!");
 	}
       }
     }

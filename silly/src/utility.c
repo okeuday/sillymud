@@ -5,14 +5,13 @@
 */
 
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <time.h>
 
 #include "protos.h"
-
-void log (char *s) { log_sev(s, 1); } /*thought this was a prototype - heheh */
 
 extern char *article_list[];
 extern struct time_data time_info;
@@ -296,19 +295,6 @@ int dice(int number, int size)
   return(sum);
 }
 
-
-/* Causing memory leak, but is a standard c function, so commenting out. -DM
-
-
-char *strdup(char *source)
-{
-	char *new;
-
-	CREATE(new, char, strlen(source)+1);
-	return(strcpy(new, source));
-}
-*/
-
 int scan_number(char *text, int *rval)
 {
   int	length;
@@ -357,13 +343,17 @@ int strn_cmp(char *arg1, char *arg2, int n)
 }
 
 
+void logE(char *s)
+{
+    log_sev(s, 1);
+}
 
 /* writes a string to the log */
 void log_sev(char *str,int sev)
 {
   long ct;
   char *tmstr;
-  static char buf[500];
+  static char buf[MAX_STRING_LENGTH + 256];
   struct descriptor_data *i;
   
   
@@ -393,8 +383,6 @@ void slog(char *str)
 	fprintf(stderr, "%s :: %s\n", tmstr, str);
 
 }
-	
-
 
 void sprintbit(unsigned long vektor, char *names[], char *result)
 {
@@ -709,7 +697,7 @@ char buf[200];
 
    if (exp_flags > 100) { 
      sprintf(buf, "Exp flags on %s are > 100 (%d)", GET_NAME(mob), exp_flags);
-     log(buf);
+     logE(buf);
    }
 
 /* 
@@ -888,7 +876,7 @@ for simplicity, 1 exceptional ability is 2 special abilities
       sab  = 12000;
       break;
     }
-#ifdef 0			/* removed 6/13, this was ridiculous */
+#if 0			/* removed 6/13, this was ridiculous */
     case 35:			/* higher level people can allready clear */
     case 36:			/* the mud. -keith */
     case 37:
@@ -1098,14 +1086,14 @@ void RoomSave(struct char_data *ch, int start, int end)
      fprintf(fp,"#%d\n%s~\n%s~\n",rp->number,rp->name,
  	                            temp);
      if (!rp->tele_targ) {
-        fprintf(fp,"%d %d %d",rp->zone, rp->room_flags, rp->sector_type);
+        fprintf(fp,"%d %ld %d",rp->zone, rp->room_flags, rp->sector_type);
       } else {
 	if (!IS_SET(TELE_COUNT, rp->tele_mask)) {
-	   fprintf(fp, "%d %d -1 %d %d %d %d", rp->zone, rp->room_flags,
+	   fprintf(fp, "%d %ld -1 %d %d %d %d", rp->zone, rp->room_flags,
 		rp->tele_time, rp->tele_targ, 
 		rp->tele_mask, rp->sector_type);
 	} else {
-	   fprintf(fp, "%d %d -1 %d %d %d %d %d", rp->zone, rp->room_flags,
+	   fprintf(fp, "%d %ld -1 %d %d %d %d %d", rp->zone, rp->room_flags,
 		rp->tele_time, rp->tele_targ, 
 		rp->tele_mask, rp->tele_cnt, rp->sector_type);
 	} 
@@ -2053,7 +2041,7 @@ void TeleportPulseStuff(int pulse)
 	
 	dest = real_roomp(rp->tele_targ);
 	if (!dest) {
-	  log("invalid tele_targ");
+	  logE("invalid tele_targ");
 	  continue;
 	}
 	
@@ -2306,7 +2294,7 @@ int MobCountInRoom( struct char_data *list)
 void *Mymalloc( long size)
 {
   if (size < 1) {
-    fprintf(stderr, "attempt to malloc negative memory - %d\n", size);
+    fprintf(stderr, "attempt to malloc negative memory - %ld\n", size);
     assert(0);
   }
   return(malloc(size));

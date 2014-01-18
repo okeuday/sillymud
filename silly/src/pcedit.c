@@ -414,8 +414,8 @@ int ReadObjs( FILE *fl, struct obj_file_u *st)
 
   if (feof(fl)) {
     fclose(fl);
-    return(FALSE);
     printf("\nEmpty file.");
+    return(FALSE);
   }
     
   fread(st->owner, sizeof(st->owner), 1, fl);
@@ -457,6 +457,7 @@ int ReadObjs( FILE *fl, struct obj_file_u *st)
   for (i=0;i<st->number;i++) {
     fread(&st->objects[i], sizeof(struct obj_file_elem), 1, fl);
   }
+  return(TRUE);
 }
 
 

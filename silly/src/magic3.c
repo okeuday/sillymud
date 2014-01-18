@@ -6,6 +6,8 @@
 */
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "protos.h"
@@ -18,10 +20,6 @@ extern struct descriptor_data *descriptor_list;
 
 #define STATE(d) ((d)->connected)
 #define IS_IMMUNE(ch, bit) (IS_SET((ch)->M_immune, bit))
-
-/* Extern procedures */
-
-char *strdup(char *source);
 
 /*
   druid spells
@@ -2301,7 +2299,7 @@ void spell_portal(byte level, struct char_data *ch,
   if (!(nrp = real_roomp(tmp_ch->in_room))) {
     char str[180];
     sprintf(str, "%s not in any room.", GET_NAME(tmp_ch));
-    log(str);
+    logE(str);
     send_to_char("Your magic cannot locate the target.\n\r", ch);
     return;
   }

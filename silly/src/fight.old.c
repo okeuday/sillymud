@@ -300,7 +300,6 @@ void make_corpse(struct char_data *ch)
   char buf[MAX_INPUT_LENGTH];
   int i, ADeadBody=FALSE;
   
-  char *strdup(char *source);
   struct obj_data *create_money( int amount );
   
   CREATE(corpse, struct obj_data, 1);

@@ -5,6 +5,8 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "protos.h"
@@ -1202,7 +1204,7 @@ void do_cast(struct char_data *ch, char *argument, int cmd)
 	    else if(spell_class == CLASS_MAGIC_USER)
 	      spell_class = ITEM_ANTI_MAGE;
 	    else 
-	      log("Logic error in sf routine(spell_parser.c), go get Ripper!");
+	      logE("Logic error in sf routine(spell_parser.c), go get Ripper!");
 	    for(i=0;i<MAX_WEAR;i++) {
 	      if (ch->equipment[i]) {
 		if(IS_SET(ch->equipment[i]->obj_flags.extra_flags,spell_class))
@@ -1931,7 +1933,7 @@ int check_falling( struct char_data *ch)
 	if (!IS_IMMORTAL(ch)) {
 	  GET_HIT(ch) = 0;
 	  sprintf(buf, "%s has fallen to death", GET_NAME(ch));
-	  log(buf);
+	  logE(buf);
 	if (!ch->desc)
 	  GET_GOLD(ch) = 0;
 	  die(ch);
@@ -2000,7 +2002,7 @@ int check_falling( struct char_data *ch)
 	if (!IS_IMMORTAL(ch)) {
 	  GET_HIT(ch) = 0;
 	  sprintf(buf, "%s has fallen to death", GET_NAME(ch));
-	  log(buf);
+	  logE(buf);
 	if (!ch->desc)
 	  GET_GOLD(ch) = 0;
 	  die(ch);
@@ -2030,7 +2032,7 @@ int check_falling( struct char_data *ch)
   }  
 
   if (count >= 100) {
-    log("Someone fucked up an air room.");
+    logE("Someone fucked up an air room.");
     char_from_room(ch);
     char_to_room(ch, 2);
     do_look(ch, "", 0);
@@ -2060,7 +2062,7 @@ void check_drowning( struct char_data *ch)
       update_pos(ch);
       if (GET_HIT(ch) < -10) {
 	sprintf(buf, "%s killed by drowning", GET_NAME(ch));
-	log(buf);
+	logE(buf);
 	if (!ch->desc)
 	  GET_GOLD(ch) = 0;
 	die(ch);
@@ -2075,7 +2077,7 @@ void check_falling_obj( struct obj_data *obj, int room)
   int done, count;
 
   if (obj->in_room != room) {
-    log("unusual object information in check_falling_obj");
+    logE("unusual object information in check_falling_obj");
     return;
   }
 
@@ -2165,7 +2167,7 @@ void check_falling_obj( struct obj_data *obj, int room)
   }  
 
   if (count >= 100) {
-    log("Someone fucked up an air room.");
+    logE("Someone fucked up an air room.");
     obj_from_room(obj);
     obj_to_room(obj, 2);
     return;
@@ -2268,7 +2270,7 @@ int CastIntrinsic(struct char_data *ch, int spl)
 	if(p->location == APPLY_INTRINSIC)
 	  return(FALSE);
   } else {
-    log("Unaccounted racial intrinsic, no duration set in CastIntrinsic()");
+    logE("Unaccounted racial intrinsic, no duration set in CastIntrinsic()");
     return(FALSE);
   }
 

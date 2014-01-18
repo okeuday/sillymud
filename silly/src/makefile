@@ -1,17 +1,11 @@
-##
+#-*-Mode:make;coding:utf-8;tab-width:4;c-basic-offset:4-*-
+# ex: set ft=make fenc=utf-8 sts=4 ts=4 sw=4 noet:
 CC=gcc
-##
-LD=$(CC)
-##
-##  these are compile time constructs, that affect the running of the game.
-CPPFLAGS = -DIMPL_SECURITY -DNEW_RENT -DLEVEL_LOSS -DNEWEXP \
- -DGROUP_NAMES
-##  these are architecture dependent flags
-TITANFLAGS = -g -43 -vector_c -safe=ptrs -DTITAN
-SUNFLAGS = -g
-##
-CFLAGS = $(SUNFLAGS) $(CPPFLAGS)
-##
+CFLAGS=-g -O0 -I. -D_XOPEN_SOURCE
+MUD_CFLAGS=-DIMPL_SECURITY -DNEW_RENT -DLEVEL_LOSS -DNEWEXP -DGROUP_NAMES \
+           -Wno-deprecated-declarations \
+           -Wno-pointer-to-int-cast \
+           -Wno-int-to-pointer-cast
 ##
 ##  For lower exp loss at lower levels -DNEWEXP
 ##
@@ -46,96 +40,139 @@ CFLAGS = $(SUNFLAGS) $(CPPFLAGS)
 ##  To have each 58+ god restricted to one site, or set of sites
 ##  -DIMPL_SECURITY
 ##
-##  To use BSD memory allocation/deallocation routines instead of the
-##  native memory routines:
-##  -DKLUDGE_MEM
-##
-##  If your system doesn't have built in functions of strdup() and
-##  strstr(), then:
-##  -DKLUDGE_STRING
-##
 
-HEADERFILES = structs.h utils.h comm.h interpreter.h db.h
-##
-OBJS = comm.o act.comm.o act.info.o act.move.o act.obj1.o act.obj2.o \
-	act.off.o act.other.o act.social.o act.wizard.o handler.o \
-	db.o interpreter.o utility.o spec_assign.o shop.o limits.o mobact.o \
-	fight.o modify.o weather.o spells1.o spells2.o spell_parser.o \
-	reception.o constants.o spec_procs.o signals.o board.o magic.o \
-	magic2.o skills.o Opinion.o Trap.o magicutils.o multiclass.o hash.o \
-	Sound.o Heap.o spec_procs2.o magic3.o security.o spec_procs3.o \
-        create.o bsd.o parser.o intrinsics.o
+all: dmserver
 
-SRCS = comm.c act.comm.c act.info.c act.move.c act.obj1.c act.obj2.c \
-	act.off.c act.other.c act.social.c act.wizard.c handler.c \
-	db.c interpreter.c utility.c spec_assign.c shop.c limits.c mobact.c \
-	fight.c modify.c weather.c spells1.c spells2.c spell_parser.c \
-	reception.c constants.c spec_procs.c signals.c board.c magic.c \
-	magic2.c skills.c Opinion.c Trap.c magicutils.c multiclass.c hash.c \
-	Sound.c Heap.c spec_procs2.c magic3.c security.c spec_procs3.c \
-        create.c bsd.c parser.c intrinsics.c
+OBJS = act.comm.o \
+       act.info.o \
+       act.move.o \
+       act.obj1.o \
+       act.obj2.o \
+       act.off.o \
+       act.other.o \
+       act.social.o \
+       act.wizard.o \
+       board.o \
+       bsd.o \
+       comm.o \
+       constants.o \
+       create.o \
+       db.o \
+       fight.o \
+       handler.o \
+       hash.o \
+       Heap.o \
+       interpreter.o \
+       intrinsics.o \
+       limits.o \
+       magic.o \
+       magic2.o \
+       magic3.o \
+       magicutils.o \
+       mobact.o \
+       modify.o \
+       multiclass.o \
+       Opinion.o \
+       parser.o \
+       reception.o \
+       security.o \
+       shop.o \
+       signals.o \
+       skills.o \
+       Sound.o \
+       spec_assign.o \
+       spec_procs.o \
+       spec_procs2.o \
+       spec_procs3.o \
+       spell_parser.o \
+       spells1.o \
+       spells2.o \
+       Trap.o \
+       utility.o \
+       weather.o
 
-all : dmserver
+protos.h: structs.h \
+          area.h \
+          comm.h \
+          db.h \
+          handler.h \
+          hash.h \
+          heap.h \
+          interpreter.h \
+          limits.h \
+          poly.h \
+          race.h \
+          script.h \
+          spells.h \
+          trap.h \
+          utils.h \
+          vt100c.h \
+          wizlist.h \
+          parser.h
 
-dmserver : ${OBJS}
-## if you want to add debugging stuff, uncomment the following, and comment
-##  out the line after that
-##	$(LD) -o $@ -g ${OBJS} /local/lib/gnu/gcc-gnulib /usr/lib/debug/malloc.o
-	$(LD) -o $@ -g ${OBJS} 
-##	$(LD) -o $@  ${OBJS}
-##
-depend :
-	makedepend ${SRCS}
+act.comm.c: protos.h
+act.info.c: protos.h
+act.move.c: protos.h
+act.obj1.c: protos.h
+act.obj2.c: protos.h
+act.off.c: protos.h
+act.other.c: protos.h
+act.social.c: protos.h
+act.wizard.c: protos.h
+bart.c: protos.h
+board.c: protos.h
+comm.c: protos.h
+constants.c: structs.h \
+             limits.h \
+             trap.h \
+             race.h
+convert.c: protos.h
+create.c: protos.h
+db.c: protos.h
+fight.c: protos.h
+fight.old.c: protos.h
+handler.c: protos.h
+hash.c: protos.h
+Heap.c: protos.h
+hoard.c: protos.h
+interpreter.c: protos.h
+intrinsics.c: protos.h
+limits.c: protos.h
+magic.c: protos.h
+magic2.c: protos.h
+magic3.c: protos.h
+magicutils.c: protos.h
+mobact.c: protos.h
+modify.c: protos.h
+multiclass.c: protos.h
+Opinion.c: protos.h
+parser.c: protos.h
+pcedit.c: protos.h
+reception.c: protos.h
+rentedit.c: structs.h
+security.c: protos.h
+shop.c: protos.h
+signals.c: protos.h
+skills.c: protos.h
+Sound.c: protos.h
+spec_assign.c: protos.h
+spec_procs.c: protos.h
+spec_procs2.c: protos.h
+spec_procs3.c: protos.h
+spell_parser.c: protos.h
+spells1.c: protos.h
+spells2.c: protos.h
+temp.c: protos.h
+Trap.c: protos.h
+utility.c: protos.h
+weather.c: protos.h
 
+%.o: %.c
+	$(CC) -c -o $@ $< $(CFLAGS) $(MUD_CFLAGS)
 
+clean:
+	rm -f dmserver $(OBJS)
 
-# DO NOT DELETE THIS LINE -- make depend depends on it.
+dmserver: $(OBJS)
+	$(CC) -o dmserver $(OBJS) -lcrypt
 
-comm.o: protos.h
-act.comm.o: protos.h
-act.move.o: protos.h
-act.off.o: protos.h
-act.obj1.o: protos.h
-act.obj2.o: protos.h
-act.info.o: protos.h
-act.other.o: protos.h
-act.social.o: protos.h
-act.wizard.o: protos.h
-handler.o: protos.h
-db.o: protos.h
-interpreter.o: protos.h
-utility.o: protos.h
-spec_assign.o: protos.h
-shop.o: protos.h
-limits.o: protos.h
-mobact.o: protos.h
-fight.o: protos.h
-modify.o: protos.h
-weather.o: protos.h
-spells1.o: protos.h
-spells2.o: protos.h
-spell_parser.o: protos.h
-reception.o: protos.h
-constants.o: protos.h
-spec_procs.o: protos.h
-signals.o: protos.h
-board.o: protos.h
-magic.o: protos.h
-magic2.o: protos.h
-magic3.o: protos.h
-magicutils.o: protos.h
-multiclass.o: protos.h
-skills.o: protos.h
-Opinion.o: protos.h
-Trap.o: protos.h
-hash.o: protos.h
-Sound.o: protos.h
-Heap.o: protos.h
-spec_procs2.o: protos.h
-spec_procs3.o: protos.h
-security.o:
-create.o: protos.h
-bsd.o:
-parser.o: protos.h
-
-intrinsics.o: protos.h

@@ -51,7 +51,7 @@ void do_changeform(struct char_data *ch, char *argument, int cmd)
 
   level = (level ? level : GetMaxLevel(ch)); /* for vampires */
   sprintf(buf,"Level %d thing doing a changeform.",level);
-  log(buf);
+  logE(buf);
 
   one_argument(argument,buf);
   

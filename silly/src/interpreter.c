@@ -1,4 +1,6 @@
-/*
+/*-*-Mode:C;coding:utf-8;tab-width:8;c-basic-offset:2;indent-tabs-mode:()-*-
+ * ex: set ft=cpp fenc=utf-8 sts=2 ts=8 sw=2 et:
+
   SillyMUD Distribution V1.1b             (c) 1993 SillyMUD Developement
  
   See license.doc for distribution terms.   SillyMUD is based on DIKUMUD
@@ -7,7 +9,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
-#include <arpa/telnet.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "protos.h"
 
@@ -33,10 +36,6 @@ extern struct hash_header room_db;
 extern struct room_data *room_db;
 #endif
 
-
-
-unsigned char echo_on[]  = {IAC, WONT, TELOPT_ECHO, '\r', '\n', '\0'};
-unsigned char echo_off[] = {IAC, WILL, TELOPT_ECHO, '\0'};
 int WizLock;
 int Silence = 0;
 int plr_tick_count=0;
@@ -145,7 +144,7 @@ void command_interpreter(struct char_data *ch, char *argument)
   if (!IS_NPC(ch)) {
     int i, found=FALSE;
     if ((!ch->player.name[0]) || (ch->player.name[0]<' ')) {
-	log("Error in character name.  Changed to 'Error'");
+	logE("Error in character name.  Changed to 'Error'");
 	free(ch->player.name);
 	ch->player.name = (char *)malloc(6);
 	strcpy(ch->player.name, "Error"); 
@@ -158,7 +157,7 @@ void command_interpreter(struct char_data *ch, char *argument)
       }
     }
     if (found) {
-	log("Error in character name.  Changed to 'Error'");
+	logE("Error in character name.  Changed to 'Error'");
 	free(ch->player.name);
 	ch->player.name = (char *)malloc(6);
 	strcpy(ch->player.name, "Error");
@@ -882,7 +881,7 @@ void nanny(struct descriptor_data *d, char *arg)
   void load_char_objs(struct char_data *ch);
   int load_char(char *name, struct char_file_u *char_element);
   
-  write(d->descriptor, echo_on, 6);
+  write_to_descriptor_echo_on(d);
   
   switch (STATE(d))	{
 
@@ -1137,7 +1136,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
    NOT! :-)
 */ 
-        
+     /*
      if(!strncmp(d->host,"128.197.152.10",14)) {
 	if (!strcmp(tmp_name,"Kitten") || !strcmp(tmp_name,"SexKitten")
 	|| !strcmp(tmp_name,"Rugrat")) {
@@ -1147,6 +1146,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	  close_socket(d);
 	}
       } 
+      */
       /* Check if already playing */
       for(k=descriptor_list; k; k = k->next) {
 	if ((k->character != d->character) && k->character) {
@@ -1186,7 +1186,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	strcpy(d->pwd, tmp_store.pwd);
 	d->pos = player_table[player_i].nr;
 	SEND_TO_Q("Password: ", d);
-	write(d->descriptor, echo_off, 4); 
+        write_to_descriptor_echo_off(d);
 	STATE(d) = CON_PWDNRM;
       } else {
 	koshername = TRUE;
@@ -1233,7 +1233,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	      GET_NAME(d->character));
       
       SEND_TO_Q(buf, d);
-      write(d->descriptor, echo_off, 4);
+      write_to_descriptor_echo_off(d);
       STATE(d) = CON_PWDGET;
     } else {
       if (*arg == 'n' || *arg == 'N') {
@@ -1282,7 +1282,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	     !str_cmp(GET_NAME(d->character), 
 		      GET_NAME(tmp_ch->orig)))) {
 	  
-	  write(d->descriptor, echo_on, 6);
+          write_to_descriptor_echo_on(d);
 	  SEND_TO_Q("Reconnecting.\n\r", d);
 	  
 	  free_char(d->character);
@@ -1303,14 +1303,14 @@ void nanny(struct descriptor_data *d, char *arg)
 	  act("$n has reconnected.", TRUE, tmp_ch, 0, 0, TO_ROOM);
 	  sprintf(buf, "%s[%s] has reconnected.",
 		  GET_NAME(d->character), d->host);
-	  log(buf);
+	  logE(buf);
 	  return;
 	}
       
       
       sprintf(buf, "%s[%s] has connected.", GET_NAME(d->character),
 	      d->host);
-      log(buf);
+      logE(buf);
       SEND_TO_Q(motd, d);
       SEND_TO_Q("\n\r\n*** PRESS RETURN: ", d);
       
@@ -1324,19 +1324,19 @@ void nanny(struct descriptor_data *d, char *arg)
     
     if (!*arg || strlen(arg) > 10) 	{
       
-      write(d->descriptor, echo_on, 6);
+      write_to_descriptor_echo_on(d);
       SEND_TO_Q("Illegal password.\n\r", d);
       SEND_TO_Q("Password: ", d);
       
-      write(d->descriptor, echo_off, 4);
+      write_to_descriptor_echo_off(d);
       return;
     }
     
     strncpy(d->pwd, crypt(arg, d->character->player.name), 10);
     *(d->pwd + 10) = '\0';
-    write(d->descriptor, echo_on, 6);
+    write_to_descriptor_echo_on(d);
     SEND_TO_Q("Please retype password: ", d);
-    write(d->descriptor, echo_off, 4);
+    write_to_descriptor_echo_off(d);
     STATE(d) = CON_PWDCNF;
     break;
     
@@ -1345,15 +1345,15 @@ void nanny(struct descriptor_data *d, char *arg)
     for (; isspace(*arg); arg++);
     
     if (strncmp(crypt(arg, d->character->player.name), d->pwd, 10)) {
-      write(d->descriptor, echo_on, 6);
+      write_to_descriptor_echo_on(d);
       
       SEND_TO_Q("Passwords do not match.\n\r", d);
       SEND_TO_Q("Retype password: ", d);
       STATE(d) = CON_PWDGET;
-      write(d->descriptor, echo_off, 4);
+      write_to_descriptor_echo_off(d);
       return;
     } else {
-      write(d->descriptor, echo_on, 6);
+      write_to_descriptor_echo_on(d);
       
       SEND_TO_Q("Choose A Race:\n\r\n\r", d);
       DisplayRaces(d);
@@ -1624,7 +1624,7 @@ void nanny(struct descriptor_data *d, char *arg)
 #else
       if (STATE(d) != CON_QCLASS) {
 	sprintf(buf, "%s [%s] new player.", GET_NAME(d->character), d->host);
-	log(buf);
+	logE(buf);
 	/*
 	 ** now that classes are set, initialize
 	 */
@@ -1658,14 +1658,17 @@ void nanny(struct descriptor_data *d, char *arg)
      } else if (d->character->generic >= NEWBIE_REQUEST) {
        sprintf(buf, "%s [%s] new player.", GET_NAME(d->character), d->host);
        log_sev(buf, 7);
+       /*
        if (!strncmp(d->host,"128.197.152",11))
            d->character->generic=1;
+       */
   /* I decided to give them another chance.  -Steppenwolf  */
   /* They blew it. -DM */
+       /*
        if (!strncmp(d->host,"oak.grove", 9)
 	    || !strncmp(d->host,"143.195.1.20",12)) {
 	 d->character->generic=1;	 
-       } else {
+       } else {*/
 	 if (top_of_p_table > 0) {
 	   sprintf(buf,"type Auth[orize] %s to allow into game.", GET_NAME(d->character));
 	   log_sev(buf, 6);
@@ -1674,7 +1677,8 @@ void nanny(struct descriptor_data *d, char *arg)
 	   log("Initial character.  Authorized Automatically");
 	   d->character->generic = NEWBIE_START+5;
 	 }
-       }
+       /*
+       }*/
        /*
        **  enough for gods.  now player is told to shut up.
        */
@@ -1747,7 +1751,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
         reset_char(d->character);
         sprintf(buf, "Loading %s's equipment", d->character->player.name);
-        log(buf);
+        logE(buf);
         load_char_objs(d->character);
         save_char(d->character, AUTO_RENT);
         send_to_char(WELC_MESSG, d->character);
@@ -1775,7 +1779,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
         reset_char(d->character);
         sprintf(buf, "Loading %s's equipment", d->character->player.name);
-        log(buf);
+        logE(buf);
         load_char_objs(d->character);
         save_char(d->character, AUTO_RENT);
         send_to_char(WELC_MESSG, d->character);
@@ -1803,7 +1807,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
           reset_char(d->character);
           sprintf(buf, "Loading %s's equipment", d->character->player.name);
-          log(buf);
+          logE(buf);
           load_char_objs(d->character);
           save_char(d->character, AUTO_RENT);
           send_to_char(WELC_MESSG, d->character);
@@ -1836,7 +1840,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
           reset_char(d->character);
           sprintf(buf, "Loading %s's equipment", d->character->player.name);
-          log(buf);
+          logE(buf);
           load_char_objs(d->character);
           save_char(d->character, AUTO_RENT);
           send_to_char(WELC_MESSG, d->character);
@@ -1869,7 +1873,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
           reset_char(d->character);
           sprintf(buf, "Loading %s's equipment", d->character->player.name);
-          log(buf);
+          logE(buf);
           load_char_objs(d->character);
           save_char(d->character, AUTO_RENT);
           send_to_char(WELC_MESSG, d->character);
@@ -1916,7 +1920,7 @@ void nanny(struct descriptor_data *d, char *arg)
     case '1':
       reset_char(d->character);
       sprintf(buf, "Loading %s's equipment", d->character->player.name);
-      log(buf);
+      logE(buf);
       load_char_objs(d->character);
       save_char(d->character, AUTO_RENT);
       send_to_char(WELC_MESSG, d->character);
@@ -2000,7 +2004,7 @@ void nanny(struct descriptor_data *d, char *arg)
     case '4':
       SEND_TO_Q("Enter a new password: ", d);
 
-      write(d->descriptor, echo_off, 4);
+      write_to_descriptor_echo_off(d);
       
       STATE(d) = CON_PWDNEW;
       break;
@@ -2064,12 +2068,12 @@ void nanny(struct descriptor_data *d, char *arg)
     for (; isspace(*arg); arg++);
     
     if (!*arg || strlen(arg) > 10)      {
-	write(d->descriptor, echo_on, 6);
+        write_to_descriptor_echo_on(d);
 	
 	SEND_TO_Q("Illegal password.\n\r", d);
 	SEND_TO_Q("Password: ", d);
 
-	write(d->descriptor, echo_off, 4);
+        write_to_descriptor_echo_off(d);
 	
 	
 	return;
@@ -2077,12 +2081,12 @@ void nanny(struct descriptor_data *d, char *arg)
     
     strncpy(d->pwd, crypt(arg, d->character->player.name), 10);
     *(d->pwd + 10) = '\0';
-    write(d->descriptor, echo_on, 6);
+    write_to_descriptor_echo_on(d);
     
     SEND_TO_Q("Please retype password: ", d);
     
     STATE(d) = CON_PWDNCNF;
-    write(d->descriptor, echo_off, 4);
+    write_to_descriptor_echo_off(d);
     
     
     break;
@@ -2091,15 +2095,15 @@ void nanny(struct descriptor_data *d, char *arg)
     for (; isspace(*arg); arg++);
     
     if (strncmp(crypt(arg, d->character->player.name), d->pwd, 10))      {
-	  write(d->descriptor, echo_on, 6);
+          write_to_descriptor_echo_on(d);
 	  SEND_TO_Q("Passwords don't match.\n\r", d);
 	  SEND_TO_Q("Retype password: ", d);
-	  write(d->descriptor, echo_off, 4);
+          write_to_descriptor_echo_off(d);
 	  
 	  STATE(d) = CON_PWDNEW;
 	  return;
 	}
-    write(d->descriptor, echo_on, 6);
+    write_to_descriptor_echo_on(d);
     
     SEND_TO_Q(
 	      "\n\rDone. You must enter the game to make the change final\n\r",
@@ -2108,7 +2112,7 @@ void nanny(struct descriptor_data *d, char *arg)
     STATE(d) = CON_SLCT;
     break;
   default:
-    log("Nanny: illegal state of con'ness");
+    logE("Nanny: illegal state of con'ness");
     abort();
     break;
   }

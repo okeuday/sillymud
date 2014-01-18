@@ -1231,7 +1231,7 @@ void do_wimp(struct char_data *ch, char *argument, int cmd)
 
 extern struct breather breath_monsters[];
 extern struct index_data *mob_index;
-void (*bweapons[])() = {
+funcp bweapons[] = {
   cast_geyser,
   cast_fire_breath, cast_gas_breath, cast_frost_breath, cast_acid_breath,
   cast_lightning_breath};
@@ -1241,7 +1241,7 @@ void do_breath(struct char_data *ch, char *argument, int cmd)
   struct char_data *victim;
   char	buf[MAX_STRING_LENGTH], name[MAX_STRING_LENGTH];
   int	count, manacost;
-  void	(*weapon)();
+  funcp weapon;
   
   if (check_peaceful(ch,"That wouldn't be nice at all.\n\r"))
     return;
@@ -1272,7 +1272,7 @@ void do_breath(struct char_data *ch, char *argument, int cmd)
     if (count<1) {
       sprintf(buf, "monster %s has no breath weapons",
 	      ch->player.short_descr);
-      log(buf);
+      logE(buf);
       send_to_char("Hey, why don't you have any breath weapons!?\n\r",ch);
       return;
     }

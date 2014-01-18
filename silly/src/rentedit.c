@@ -53,8 +53,7 @@ int ReadObjs( FILE *fl, struct obj_file_u *st)
      fread(&st->objects[i], sizeof(struct obj_file_elem), 1, fl);
   }
   
-  
-
+  return(TRUE);
 }
 
 
@@ -123,11 +122,11 @@ void main (int argc,char *argv[])
 	    found++;
 	  }
 	}
+        fclose(rf);
       }
       if(found)
 	printf("%s has %d of them!.\n",grunt.name,found);
     } 
-    fclose(rf);
   }
   printf("%d people, tried to open %d files, opened %d.\n",
 	 j,num_tried,num_succeed);

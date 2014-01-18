@@ -6,14 +6,15 @@
 
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
 
 #include "protos.h"
 
-int checkpointing(void);
-int shutdown_request(void);
-int logsig(void);
-int hupsig(void);
+void checkpointing(int);
+void shutdown_request(int);
+void logsig(int);
+void hupsig(int);
 
 int raw_force_all( char *to_force);
 
@@ -44,13 +45,13 @@ void signal_setup()
 
 
 
-int checkpointing()
+void checkpointing(int signum)
 {
   extern int tics;
 	
   if (!tics)
     {
-      log("CHECKPOINT shutdown: tics not updated");
+      logE("CHECKPOINT shutdown: tics not updated");
       abort();
     }
   else
@@ -60,22 +61,22 @@ int checkpointing()
 
 
 
-int shutdown_request()
+void shutdown_request(int signum)
 {
 	extern int mudshutdown;
 
-	log("Received USR2 - shutdown request");
+	logE("Received USR2 - shutdown request");
 	mudshutdown = 1;
 }
 
 
 /* kick out players etc */
-int hupsig()
+void hupsig(int signum)
 {
   int i;
   extern int mudshutdown, reboot;
 
-  log("Received SIGHUP, SIGINT, or SIGTERM. Shutting down");
+  logE("Received SIGHUP, SIGINT, or SIGTERM. Shutting down");
 
   raw_force_all("return");
   raw_force_all("save");
@@ -85,7 +86,7 @@ int hupsig()
   mudshutdown = reboot = 1;
 }
 
-int logsig()
+void logsig(int signum)
 {
-	log("Signal received. Ignoring.");
+	logE("Signal received. Ignoring.");
 }

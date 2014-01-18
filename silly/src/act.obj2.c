@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
@@ -30,10 +31,10 @@ void weight_change_object(struct obj_data *obj, int weight)
       weight = 0 - (GET_OBJ_WEIGHT(obj) -1);
       if (obj->carried_by) {
 	sprintf(buf,"Bad weight change on %s, carried by %s.",obj->name,obj->carried_by->player.name);
-	log(buf);
+	logE(buf);
       } else {
 	sprintf(buf,"Bad weight change on %s.",obj->name);
-	log(buf);
+	logE(buf);
       }
   }
   
@@ -48,7 +49,7 @@ void weight_change_object(struct obj_data *obj, int weight)
     GET_OBJ_WEIGHT(obj) += weight;
     obj_to_obj(obj, tmp_obj);
   } else {
-    log("Unknown attempt to subtract weight from an object.");
+    logE("Unknown attempt to subtract weight from an object.");
   }
 }
 
@@ -964,7 +965,7 @@ void wear(struct char_data *ch, struct obj_data *obj_object, int keyword)
     send_to_char(buffer, ch);
   } break;
   default: {
-    log("Unknown type called in wear.");
+    logE("Unknown type called in wear.");
   } break;
   }
 }

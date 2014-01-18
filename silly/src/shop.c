@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "protos.h"
@@ -145,7 +146,7 @@ void shopping_buy( char *arg, struct char_data *ch,
     return;
   }
   
-  if ((num = getabunch(argm,newarg))!=NULL) {
+  if ((num = getabunch(argm,newarg)) != 0) {
     strcpy(argm,newarg);
   }
   if (num == 0) num = 1;

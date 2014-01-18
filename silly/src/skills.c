@@ -5,6 +5,8 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "protos.h"
 
@@ -1325,7 +1327,7 @@ void do_palm( struct char_data *ch, char *arg, int cmd)
 		char buf[MAX_INPUT_LENGTH];
 		sprintf(buf,"%s just got %d coins!",
 			GET_NAME(ch),obj_object->obj_flags.value[0]);
-		log(buf);
+		logE(buf);
 	      }
 	      extract_obj(obj_object);
 	    }
@@ -1386,7 +1388,7 @@ void do_palm( struct char_data *ch, char *arg, int cmd)
 		      char buf[MAX_INPUT_LENGTH];
 		      sprintf(buf,"%s just got %d coins!",
 			      GET_NAME(ch),obj_object->obj_flags.value[0]);
-		      log(buf);
+		      logE(buf);
 		    }
 		    extract_obj(obj_object);
 		  }
@@ -1610,7 +1612,7 @@ void do_makepotion(struct char_data *ch, char *argument, int cmd)
   {
     char buf[80];
     sprintf(buf,"Min brew level is: %d", max);
-    log(buf);
+    logE(buf);
   }
 
   extract_obj(potion);

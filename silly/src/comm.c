@@ -1,4 +1,6 @@
-/*
+/*-*-Mode:C;coding:utf-8;tab-width:8;c-basic-offset:2;indent-tabs-mode:()-*-
+ * ex: set ft=cpp fenc=utf-8 sts=2 ts=8 sw=2 et:
+
   SillyMUD Distribution V1.1b             (c) 1993 SillyMUD Developement
  
   See license.doc for distribution terms.   SillyMUD is based on DIKUMUD
@@ -6,13 +8,17 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
+#include <strings.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <arpa/inet.h>
+#include <arpa/telnet.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <string.h>
 #include <sys/time.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -61,7 +67,7 @@ int no_specials = 0;    /* Suppress ass. of special routines */
 long Uptime;            /* time that the game has been up */
 
 
-int pulse;
+int pulse = 0;
 
 #if SITELOCK
 char hostlist[MAX_BAN_HOSTS][30];  /* list of sites to ban           */
@@ -70,6 +76,9 @@ int numberhosts;
 
 int maxdesc, avail_descs;
 int tics = 0;        /* for extern checkpointing */
+
+static unsigned char echo_on[]  = {IAC, WONT, TELOPT_ECHO, '\r', '\n', '\0'};
+static unsigned char echo_off[] = {IAC, WILL, TELOPT_ECHO, '\0'};
 
 
 /* *********************************************************************
@@ -101,36 +110,16 @@ int main (int argc, char **argv)
 {
   int port, pos=1;
   char buf[512], *dir;
-
   extern int WizLock;
-#ifdef sun
-  struct rlimit rl;
-  int res;
-#endif
-
-
   
   port = DFLT_PORT;
   dir = DFLT_DIR;
-#ifdef sun
-/*
-**  this block sets the max # of connections.  
-**  # of files = 128, so #of players approx = 110
-*/
-   res = getrlimit(RLIMIT_NOFILE, &rl);
-   rl.rlim_cur = 128;
-   res = setrlimit(RLIMIT_NOFILE, &rl);
-#endif
-
-#if DEBUG  
-  malloc_debug(0);
-#endif
 
   while ((pos < argc) && (*(argv[pos]) == '-'))	{
     switch (*(argv[pos] + 1))  {
     case 'l':
       lawful = 1;
-      log("Lawful mode selected.");
+      logE("Lawful mode selected.");
       break;
     case 'd':
       if (*(argv[pos] + 2))
@@ -138,18 +127,18 @@ int main (int argc, char **argv)
       else if (++pos < argc)
 	dir = argv[pos];
       else   	{
-	log("Directory arg expected after option -d.");
+	logE("Directory arg expected after option -d.");
 	assert(0);
       }
       break;
     case 's':
       no_specials = 1;
-      log("Suppressing assignment of special routines.");
+      logE("Suppressing assignment of special routines.");
       break;
     default:
       sprintf(buf, "Unknown option -% in argument string.",
 	      *(argv[pos] + 1));
-      log(buf);
+      logE(buf);
       break;
     }
     pos++;
@@ -168,7 +157,7 @@ int main (int argc, char **argv)
   Uptime = time(0);
   
   sprintf(buf, "Running game on port %d.", port);
-  log(buf);
+  logE(buf);
   
   if (chdir(dir) < 0)	{
     perror("chdir");
@@ -176,7 +165,7 @@ int main (int argc, char **argv)
   }
   
   sprintf(buf, "Using %s as data directory.", dir);
-  log(buf);
+  logE(buf);
   
   srandom(time(0));
   WizLock = FALSE;
@@ -223,21 +212,21 @@ int run_the_game(int port)
     
     descriptor_list = NULL;
   
-  log("Signal trapping.");
+  logE("Signal trapping.");
   signal_setup();
   
-  log("Opening mother connection.");
+  logE("Opening mother connection.");
   s = init_socket(port);
   
   if (lawful && load() >= 6)
     {
-      log("System load too high at startup.");
+      logE("System load too high at startup.");
       coma(1);
     }
   
   boot_db();
   
-  log("Entering game loop.");
+  logE("Entering game loop.");
   
   game_loop(s);
   
@@ -246,11 +235,11 @@ int run_the_game(int port)
   PROFILE(monitor(0);)
     
   if (reboot)  {
-    log("Rebooting.");
+    logE("Rebooting.");
     assert(52);           /* what's so great about HHGTTG, anyhow? */
   }
   
-  log("Normal termination of game.");
+  logE("Normal termination of game.");
 }
 
 
@@ -269,10 +258,10 @@ int game_loop(int s)
   static int cap;
   struct timeval last_time, now, timespent, timeout, null_time;
   static struct timeval opt_time;
-  char comm[MAX_INPUT_LENGTH];
+  char comm[MAX_STRING_LENGTH];
   char promptbuf[80];
   struct descriptor_data *point, *next_point;
-  int mask;
+  sigset_t mask;
   struct room_data *rm;
 
   extern struct descriptor_data *descriptor_list;
@@ -284,15 +273,22 @@ int game_loop(int s)
   
   opt_time.tv_usec = OPT_USEC;  /* Init time values */
   opt_time.tv_sec = 0;
-  gettimeofday(&last_time, (struct timeval *) 0);
+  gettimeofday(&last_time, (struct timezone *) 0);
   
   maxdesc = s;
   /* !! Change if more needed !! */
   avail_descs = getdtablesize() -2;
   
-  mask = sigmask(SIGUSR1) | sigmask(SIGUSR2) | sigmask(SIGINT) |
-    sigmask(SIGPIPE) | sigmask(SIGALRM) | sigmask(SIGTERM) |
-      sigmask(SIGURG) | sigmask(SIGXCPU) | sigmask(SIGHUP);
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGUSR1);
+  sigaddset(&mask, SIGUSR2);
+  sigaddset(&mask, SIGINT);
+  sigaddset(&mask, SIGPIPE);
+  sigaddset(&mask, SIGALRM);
+  sigaddset(&mask, SIGTERM);
+  sigaddset(&mask, SIGURG);
+  sigaddset(&mask, SIGXCPU);
+  sigaddset(&mask, SIGHUP);
   
   /* Main loop */
   while (!mudshutdown)  {
@@ -337,7 +333,7 @@ int game_loop(int s)
 #endif
 
     /* check out the time */
-    gettimeofday(&now, (struct timeval *) 0);
+    gettimeofday(&now, (struct timezone *) 0);
     timespent = timediff(&now, &last_time);
     timeout = timediff(&opt_time, &timespent);
     last_time.tv_sec = now.tv_sec + timeout.tv_sec;
@@ -347,7 +343,7 @@ int game_loop(int s)
       last_time.tv_sec++;
     }
     
-    sigsetmask(mask);
+    sigprocmask(SIG_BLOCK, &mask, 0);
 
     if (select(maxdesc + 1, &input_set, &output_set, &exc_set, &null_time) 
 	< 0)   	{
@@ -364,7 +360,7 @@ int game_loop(int s)
       /*assert(0);*/
     }
     
-    sigsetmask(0);
+    sigprocmask(SIG_UNBLOCK, &mask, 0);
     
     /* Respond to whatever might be happening */
     
@@ -608,9 +604,12 @@ int get_from_q(struct txt_q *queue, char *dest)
 
 	tmp = queue->head;
 	if (dest && queue->head->text) {
-	    strcpy(dest, queue->head->text);
+	    strncpy(dest, queue->head->text, MAX_STRING_LENGTH);
+            dest[MAX_STRING_LENGTH - 1] = '\0';
 	}
 	queue->head = queue->head->next;
+        if (!queue->head)
+          queue->tail = 0;
 
 	free(tmp->text);
 	free(tmp);
@@ -627,14 +626,14 @@ void write_to_q(char *txt, struct txt_q *queue)
   int strl;
 
   if (!queue) {
-    log("Output message to non-existant queue");
+    logE("Output message to non-existant queue");
     return;
   }
 
   CREATE(new, struct txt_block, 1);
   strl = strlen(txt);
   if (strl < 0 || strl > 15000) {
-    log("strlen returned bogus length in write_to_q");
+    logE("strlen returned bogus length in write_to_q");
     free(new);
     return;
   }
@@ -744,7 +743,7 @@ int init_socket(int port)
 		assert(0);
 	}
 
-	if (bind(s, &sa, sizeof(sa), 0) < 0)	{
+	if (bind(s, (struct sockaddr *)&sa, sizeof(sa)) < 0)	{
 	    perror("bind");
 	    exit(0);
 	}
@@ -768,7 +767,7 @@ int new_connection(int s)
   char buf[100];
   
   i = sizeof(isa);
-#ifdef 0
+#if 0
   getsockname(s, &isa, &i);
 #endif
   
@@ -806,13 +805,13 @@ static void printhost(addr, buf)
   struct hostent	*h;
   char	*s;
 
-  h = gethostbyaddr(addr, sizeof(*addr),AF_INET);
+  h = gethostbyaddr(addr, sizeof(struct in_addr),AF_INET);
   s = (h==NULL) ? NULL : h->h_name;
 
   if (s) {
     strcpy(buf, s);
   } else {
-    strcpy(buf, (char *)inet_ntoa(addr));
+    strcpy(buf, (const char *)inet_ntoa(*addr));
   }
 }
 
@@ -838,10 +837,6 @@ int new_descriptor(int s)
   int desc;
   struct descriptor_data *newd;
   int size;
-#ifdef sun
-  struct hostent *from;
-  struct sockaddr peer;
-#endif
   struct sockaddr_in sock;
   char buf[200];
   
@@ -868,31 +863,26 @@ int new_descriptor(int s)
   
   CREATE(newd, struct descriptor_data, 1);
 
-  *newd->host = '\0';
   /* find info */
   size = sizeof(sock);
-  if (getpeername(desc, (struct sockaddr *) &sock, &size) < 0)    {
+  if (getpeername(desc, (struct sockaddr *) &sock, &size) < 0) {
     perror("getpeername");
+    newd->port = 0;
     *newd->host = '\0';
   }
-  
-  if(*newd->host == '\0') {
-#ifndef sun
-    if ((long) strncpy(newd->host, inet_ntoa(sock.sin_addr), 49) > 0)  {
-      *(newd->host + 49) = '\0';
-      sprintf(buf, "New connection from addr %s: %d: %d", newd->host, desc, maxdesc);
-      log_sev(buf,3);
-    }
-#else
-    strcpy(newd->host, (char *)inet_ntoa(&sock.sin_addr));
-    sprintf(buf, "New connection from addr %s: %d: %d", newd->host, desc, maxdesc);
+  else {
+    newd->port = sock.sin_port;
+    strncpy(newd->host, inet_ntoa(sock.sin_addr), 49);
+    *(newd->host + 49) = '\0';
+    sprintf(buf, "New connection from addr %s: %d: %d",
+            newd->host, desc, maxdesc);
     log_sev(buf,3);
-#endif
   }
 
   /* init desc data */
   newd->descriptor = desc;
   newd->connected  = CON_NME;
+  newd->close = 0;
   newd->wait = 1;
   newd->prompt_mode = 0;
   *newd->buf = '\0';
@@ -972,9 +962,23 @@ int write_to_descriptor(int desc, char *txt)
   return(0);
 }
 
+int write_to_descriptor_echo_on(struct descriptor_data *d)
+{
+  if (d->descriptor == 0) {
+    SEND_TO_Q(echo_on, d);
+    return 0;
+  }
+  return write(d->descriptor, echo_on, 6);
+}
 
-
-
+int write_to_descriptor_echo_off(struct descriptor_data *d)
+{
+  if (d->descriptor == 0) {
+    SEND_TO_Q(echo_off, d);
+    return 0;
+  }
+  return write(d->descriptor, echo_off, 4);
+}
 
 int process_input(struct descriptor_data *t)
 {
@@ -999,7 +1003,7 @@ int process_input(struct descriptor_data *t)
 	  break;
 	}
       } else {
-	log("EOF encountered on socket read.");
+	logE("EOF encountered on socket read.");
 	return(-1);
       }
     }
@@ -1080,7 +1084,7 @@ int process_input(struct descriptor_data *t)
 
 void close_sockets(int s)
 {
-  log("Closing all sockets.");
+  logE("Closing all sockets.");
   
   while (descriptor_list)
     close_socket(descriptor_list);
@@ -1101,6 +1105,10 @@ void close_socket(struct descriptor_data *d)
   void do_save(struct char_data *ch, char *argument, int cmd);
   
   if (!d) return;
+  if (d->descriptor == 0) {
+    d->close = 1;
+    return;
+  }
   
   close(d->descriptor);
   flush_queues(d);
@@ -1121,7 +1129,7 @@ void close_socket(struct descriptor_data *d)
        do_save(d->character, "", 0);
       act("$n has lost $s link.", TRUE, d->character, 0, 0, TO_ROOM);
       sprintf(buf, "Closing link to: %s.", GET_NAME(d->character));
-      log(buf);
+      logE(buf);
       if (IS_NPC(d->character)) { /* poly, or switched god */
 	if (d->character->desc)
 	  d->character->orig = d->character->desc->original;
@@ -1138,12 +1146,12 @@ void close_socket(struct descriptor_data *d)
     } else {
       if (GET_NAME(d->character)) {
 	sprintf(buf, "Losing player: %s.", GET_NAME(d->character));
-	log(buf);
+	logE(buf);
       }
       free_char(d->character);
     }
   else
-    log("Losing descriptor without char.");
+    logE("Losing descriptor without char.");
   
   
   if (next_to_process == d)    	/* to avoid crashing the process loop */
@@ -1203,7 +1211,7 @@ void close_socket(struct descriptor_data *d)
 
 void nonblock(int s)
 {
-  if (fcntl(s, F_SETFL, FNDELAY) == -1)    {
+  if (fcntl(s, F_SETFL, O_NONBLOCK) == -1)    {
     perror("Noblock");
     assert(0);
   }
@@ -1232,16 +1240,24 @@ void coma(int s)
       0
       };
   int conn;
+  sigset_t mask;
   
   int workhours(void);
   int load(void);
   
-  log("Entering comatose state.");
+  logE("Entering comatose state.");
   
-  sigsetmask(sigmask(SIGUSR1) | sigmask(SIGUSR2) | sigmask(SIGINT) |
-	     sigmask(SIGPIPE) | sigmask(SIGALRM) | sigmask(SIGTERM) |
-	     sigmask(SIGURG) | sigmask(SIGXCPU) | sigmask(SIGHUP));
-  
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGUSR1);
+  sigaddset(&mask, SIGUSR2);
+  sigaddset(&mask, SIGINT);
+  sigaddset(&mask, SIGPIPE);
+  sigaddset(&mask, SIGALRM);
+  sigaddset(&mask, SIGTERM);
+  sigaddset(&mask, SIGURG);
+  sigaddset(&mask, SIGXCPU);
+  sigaddset(&mask, SIGHUP);
+  sigprocmask(SIG_BLOCK, &mask, 0);
   
   while (descriptor_list)
     close_socket(descriptor_list);
@@ -1255,7 +1271,7 @@ void coma(int s)
     }
     if (FD_ISSET(s, &input_set))	{
       if (load() < 6){
-	log("Leaving coma with visitor.");
+	logE("Leaving coma with visitor.");
 	sigsetmask(0);
 	return;
       }
@@ -1268,14 +1284,14 @@ void coma(int s)
     
     tics = 1;
     if (workhours())  {
-      log("Working hours collision during coma. Exit.");
+      logE("Working hours collision during coma. Exit.");
       assert(0);
     }
   }
   while (load() >= 6);
   
-  log("Leaving coma.");
-  sigsetmask(0);
+  logE("Leaving coma.");
+  sigprocmask(SIG_UNBLOCK, &mask, 0);
 }
 
 
@@ -1521,8 +1537,8 @@ void act(char *str, int hide_invisible, struct char_data *ch,
 	  case '$': i = "$"; 
 	    break;
 	  default:
-	    log("Illegal $-code to act():");
-	    log(str);
+	    logE("Illegal $-code to act():");
+	    logE(str);
 	    break;
 	  }
 	  

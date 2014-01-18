@@ -6,13 +6,6 @@
 
 int CAN_SEE(struct char_data *s, struct char_data *o);
 
-#if DEBUG
-
-#define free(obj) fprintf(stderr, "freeing %d\n", sizeof(*obj));\
-		      free(obj)
-
-#endif
-
 #define TRUE  1
 
 #define FALSE 0

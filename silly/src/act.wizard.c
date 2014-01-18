@@ -5,9 +5,11 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
-
+#include <unistd.h>
 
 #include "protos.h"
 
@@ -237,7 +239,7 @@ void dsearch(char *string, char *tmp)
        buf[j] = '\0';
        strcpy(buf3, (string+j+2));
        sprintf(tmp, "%s%s%s" ,buf, buf2, buf3);
-       sprintf(string, tmp);
+       strcpy(string, tmp);
 
      }
   }
@@ -512,12 +514,12 @@ void do_silence(struct char_data *ch, char *argument, int cmd)
     Silence = 1;
     send_to_char("You have now silenced polyed mobles.\n\r",ch);
     sprintf(buf,"%s has stopped Polymophed characters from shouting.",ch->player.name);
-    log(buf);
+    logE(buf);
   } else {
     Silence = 0;
     send_to_char("You have now unsilenced mobles.\n\r",ch);
     sprintf(buf,"%s has allowed Polymophed characters to shout.",ch->player.name);
-    log(buf);
+    logE(buf);
   }
 }
 void do_wizlock(struct char_data *ch, char *argument, int cmd)
@@ -665,11 +667,11 @@ void do_wizlock(struct char_data *ch, char *argument, int cmd)
 #else
   if (WizLock) {
     send_to_char("WizLock is now off\n\r",ch);
-    log("Wizlock is now off.");
+    logE("Wizlock is now off.");
     WizLock = FALSE;
   } else {
     send_to_char("WizLock is now on\n\r",ch);
-    log("WizLock is now on.");
+    logE("WizLock is now on.");
     WizLock = TRUE;
   }
 #endif
@@ -963,7 +965,7 @@ void do_goto(struct char_data *ch, char *argument, int cmd)
   
   
   if (!real_roomp(location)) {
-    log("Massive error in do_goto. Everyone Off NOW.");
+    logE("Massive error in do_goto. Everyone Off NOW.");
     return;
   }
   
@@ -1236,7 +1238,7 @@ void do_stat(struct char_data *ch, char *argument, int cmd)
       strcat(buf, buf2);
       send_to_char(buf, ch);
       
-      sprintf(buf,"Birth : [%ld]secs, Logon[%ld]secs, Played[%ld]secs\n\r", 
+      sprintf(buf,"Birth : [%ld]secs, Logon[%ld]secs, Played[%d]secs\n\r", 
 	      k->player.time.birth,
 	      k->player.time.logon,
 	      k->player.time.played);
@@ -1387,7 +1389,7 @@ void do_stat(struct char_data *ch, char *argument, int cmd)
           if(aff->location == APPLY_IMMUNE && !(aff->modifier) &&
              aff->bitvector) {
             sprintf(buf, "Spell : '%s'\n\r",spells[aff->type-1]);
-            sprintf(buf,"     Modifies %s by %d points\n\r",
+            sprintf(buf,"     Modifies %s by %ld points\n\r",
                     apply_types[aff->location],aff->bitvector);
             send_to_char(buf,ch);
             sprintf(buf,"     Expires in %3d hours, Resistance Bits set ",
@@ -1399,7 +1401,7 @@ void do_stat(struct char_data *ch, char *argument, int cmd)
           } else {
 	    sprintf(buf, "Spell : '%s'\n\r",spells[aff->type-1]);
 	    send_to_char(buf, ch);
-	    sprintf(buf,"     Modifies %s by %d points\n\r",
+	    sprintf(buf,"     Modifies %s by %ld points\n\r",
 		    apply_types[aff->location], aff->modifier);
 	    send_to_char(buf, ch);
 	    sprintf(buf,"     Expires in %3d hours, Bits set ",
@@ -1608,7 +1610,7 @@ void do_stat(struct char_data *ch, char *argument, int cmd)
       send_to_char("Can affect char :\n\r", ch);
       for (i=0;i<MAX_OBJ_AFFECT;i++) {
 	sprinttype(j->affected[i].location,apply_types,buf2);
-	sprintf(buf,"    Affects : %s By %d\n\r", buf2,j->affected[i].modifier);
+	sprintf(buf,"    Affects : %s By %ld\n\r", buf2,j->affected[i].modifier);
 	send_to_char(buf, ch);
       }			
       return;
@@ -1663,7 +1665,7 @@ void do_set(struct char_data *ch, char *argument, int cmd)
       GET_EXP(mob) = parm;
     } else if (!strcmp(field, "lev")) {
       parm2 = 0; /* mage */
-      sscanf(parmstr,"%d %d",&parm);
+      sscanf(parmstr,"%d", &parm);
       argument=one_argument(argument, parmstr);
       sscanf(parmstr,"%d", &parm2);
       if (!IS_NPC(mob)) {
@@ -1814,7 +1816,7 @@ void do_set(struct char_data *ch, char *argument, int cmd)
 	EasySummon = TRUE;
 	sprintf(buf, "Peaceful rooms and Easy Summon enabled by %s", GET_NAME(ch));
       }
-      log(buf);
+      logE(buf);
 
     } else if (!strcmp(field, "mana")) {
       sscanf(parmstr, "%d", &parm);
@@ -1854,12 +1856,12 @@ void do_shutdown(struct char_data *ch, char *argument, int cmd)
   if (!*arg) {
     sprintf(buf, "Shutdown by %s.", GET_NAME(ch) );
     send_to_all(buf);
-    log(buf);
+    logE(buf);
     mudshutdown = 1;
   } else if (!str_cmp(arg, "reboot")) {
     sprintf(buf, "Reboot by %s.", GET_NAME(ch));
     send_to_all(buf);
-    log(buf);
+    logE(buf);
     mudshutdown = reboot = 1;
   } else
     send_to_char("Go shut down someone your own size.\n\r", ch);
@@ -1902,7 +1904,7 @@ void do_snoop(struct char_data *ch, char *argument, int cmd)
 	char buf[MAX_STRING_LENGTH];
 	sprintf(buf, "caught %s snooping %s who didn't have a descriptor!",
 		ch->player.name, ch->desc->snoop.snooping->player.name);
-	log(buf);
+	logE(buf);
 /*
 logically.. this person has returned from being a creature? 
 */
@@ -3233,12 +3235,7 @@ void do_debug(struct char_data *ch, char *argument, int cmd)
   if (i<0 || i>2) {
     send_to_char("valid values are 0, 1 and 2\n\r", ch);
   } else {
-#if DEBUG
-    malloc_debug(i);
-    sprintf(arg, "malloc debug level set to %d\n\r", i);
-#else
     sprintf(arg, "Debug level set to %d. May not be implemented\n\r", i);
-#endif
     send_to_char(arg, ch);
   }
 }

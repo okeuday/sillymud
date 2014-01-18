@@ -1080,7 +1080,7 @@ void assign_mobiles()
     if (rnum<0) {
       sprintf(buf, "mobile_assign: Mobile %d not found in database.",
 	      specials[i].vnum);
-      log(buf);
+      logE(buf);
     } else {
       mob_index[rnum].func = specials[i].proc;
     }
@@ -1163,7 +1163,7 @@ void assign_rooms()
     rp = real_roomp(specials[i].vnum);
     if (rp==NULL) {
       sprintf(buf,"assign_rooms: room %d unknown",specials[i].vnum);
-      log(buf);
+      logE(buf);
     } else
       rp->funct = specials[i].proc;
   }

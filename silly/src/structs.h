@@ -1,4 +1,6 @@
-/*
+/*-*-Mode:C;coding:utf-8;tab-width:8;c-basic-offset:2;indent-tabs-mode:()-*-
+ * ex: set ft=cpp fenc=utf-8 sts=2 ts=8 sw=2 et:
+
   SillyMUD Distribution V1.1b             (c) 1993 SillyMUD Developement
  
   See license.doc for distribution terms.   SillyMUD is based on DIKUMUD
@@ -999,7 +1001,7 @@ struct affected_type
 {
 	short type;           /* The type of spell that caused this      */
 	sh_int duration;      /* For how long its effects will last      */
-	sbyte modifier;       /* This is added to apropriate ability     */
+	long modifier;       /* This is added to apropriate ability     */
 	byte location;        /* Tells which ability to change(APPLY_XXX)*/
 	long bitvector;       /* Tells which bits to set (AFF_XXX)       */
 
@@ -1326,9 +1328,11 @@ struct descriptor_data
 {
 	int descriptor;	            /* file descriptor for socket */
 	char host[50];                /* hostname                   */
+        int port;                     /* port of source connection  */
 	char pwd[12];                 /* password                   */
 	int pos;                      /* position in player-file    */
 	int connected;                /* mode of 'connectedness'    */
+        int close;                    /* need to close connection   */
 	int wait;                     /* wait for how many loops    */
 	char *showstr_head;	      /* for paging through texts   */
 	char *showstr_point;	      /*       -                    */
@@ -1419,12 +1423,12 @@ struct chr_app_type
 
 /************************************************************/
 
-typedef void (*funcp)();
 
 struct breather {
   int	vnum;
   int	cost;
-  funcp	*breaths;
+  void (**breaths)(byte, struct char_data *, char *, int,
+                   struct char_data *, struct obj_data *);
 };
 
 struct figurine_data {

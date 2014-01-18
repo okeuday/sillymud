@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -362,7 +363,7 @@ int Summoner(struct char_data *ch, int cmd, char *arg, struct char_data *mob, in
           if (i->op_ch) {  /* if there is a char_ptr */
 	    targ = i->op_ch;
 	    if (IS_PC(targ)) {
-	      sprintf(buf, "You hate %s\n\r", targ);
+	      sprintf(buf, "You hate %s\n\r", targ->player.name);
 	      send_to_char(buf, ch);
 	      break;
 	    }
@@ -1026,7 +1027,7 @@ int cleric(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int 
     case 18:      
     case 19:      
     default:
-      act("$n utters the words 'Hurts, doesn't it??'.",1,ch,0,0,TO_ROOM);
+      act("$n utters the words 'Hurts, doesn't it?'.",1,ch,0,0,TO_ROOM);
       cast_harm(GetMaxLevel(ch), ch, "", SPELL_TYPE_SPELL, vict, 0);
       break;
     }
@@ -1172,7 +1173,7 @@ int Teacher(struct char_data *ch, int cmd, char *arg, struct char_data *mob,
   default:
     sprintf(buf,"Teacher() attempted to be called with %d(mob#) as teacher.",
 	    teacher);
-    log(buf);
+    logE(buf);
     return(FALSE);
     break;
   }
@@ -2464,7 +2465,9 @@ void free_victims(struct breath_victim *head)
 }
 
 int breath_weapon(struct char_data *ch, struct char_data *target,
-		  int mana_cost, void (*func)())
+                  int mana_cost,
+                  void (*func)(byte, struct char_data *, char *, int,
+                               struct char_data *, struct obj_data *))
 {
   struct breath_victim *hitlist, *scan;
   struct char_data *tmp;
@@ -2507,7 +2510,9 @@ int breath_weapon(struct char_data *ch, struct char_data *target,
 }
 
 int use_breath_weapon(struct char_data *ch, struct char_data *target,
-		      int cost, void (*func)())
+                      int cost,
+                      void (*func)(byte, struct char_data *, char *, int,
+                                   struct char_data *, struct obj_data *))
 {
   if (GET_MANA(ch)>=0) {
     breath_weapon(ch, target, cost, func);
@@ -2523,46 +2528,48 @@ int use_breath_weapon(struct char_data *ch, struct char_data *target,
 }
 
 
-static void (*breaths[])() = {
+typedef void (*breaths_t)(byte, struct char_data *, char *, int,
+                          struct char_data *, struct obj_data *);
+static breaths_t breaths[] = {
   cast_acid_breath, 0, cast_frost_breath, 0, cast_lightning_breath, 0,
   cast_fire_breath, 0,
   cast_acid_breath, cast_fire_breath, cast_lightning_breath, 0
 };
 
 struct breather breath_monsters[] = {
-  { 230,   55, breaths+0 },
-  { 233,   55, breaths+4 },
-  { 243,   55, breaths+2 },
-  { 3670,  30, breaths+2 },
-  { 3674,  45, breaths+6 },
-  { 3675,  45, breaths+8 },
-  { 3676,  30, breaths+6 },
-  { 3952,  20, breaths+8 },
-  { 5005,  55, breaths+4 },
-  { 6112,  55, breaths+4 },
-  { 6635,  55, breaths+0 },
-  { 6609,  30, breaths+0 },
-  { 6642,  45, breaths+2 },
-  { 6801,  55, breaths+2 },
-  { 6802,  55, breaths+2 },
-  { 6824,  55, breaths+0 },
-  { 7040,  55, breaths+6 },
-  { 9217,  45, breaths+4 },
-  { 9418,  45, breaths+2 },
-  { 9419,  45, breaths+2 },
-  { 15858, 45, breaths+0 },
-  { 15879, 30, breaths+0 },
-  { 16620, 45, breaths+0 },
-  { 16700, 45, breaths+4 },
-  { 16738, 75, breaths+6 },
-  { 18003, 20, breaths+8 },
-  { 20002, 55, breaths+6 },
-  { 20017, 55, breaths+6 },
-  { 20016, 55, breaths+6 },
-  { 20016, 55, breaths+6 },
-  { 25009, 30, breaths+6 },
-  { 25504, 30, breaths+4 },
-  { 27016, 30, breaths+6 },
+  { 230,   55, &breaths[0] },
+  { 233,   55, &breaths[4] },
+  { 243,   55, &breaths[2] },
+  { 3670,  30, &breaths[2] },
+  { 3674,  45, &breaths[6] },
+  { 3675,  45, &breaths[8] },
+  { 3676,  30, &breaths[6] },
+  { 3952,  20, &breaths[8] },
+  { 5005,  55, &breaths[4] },
+  { 6112,  55, &breaths[4] },
+  { 6635,  55, &breaths[0] },
+  { 6609,  30, &breaths[0] },
+  { 6642,  45, &breaths[2] },
+  { 6801,  55, &breaths[2] },
+  { 6802,  55, &breaths[2] },
+  { 6824,  55, &breaths[0] },
+  { 7040,  55, &breaths[6] },
+  { 9217,  45, &breaths[4] },
+  { 9418,  45, &breaths[2] },
+  { 9419,  45, &breaths[2] },
+  { 15858, 45, &breaths[0] },
+  { 15879, 30, &breaths[0] },
+  { 16620, 45, &breaths[0] },
+  { 16700, 45, &breaths[4] },
+  { 16738, 75, &breaths[6] },
+  { 18003, 20, &breaths[8] },
+  { 20002, 55, &breaths[6] },
+  { 20017, 55, &breaths[6] },
+  { 20016, 55, &breaths[6] },
+  { 20016, 55, &breaths[6] },
+  { 25009, 30, &breaths[6] },
+  { 25504, 30, &breaths[4] },
+  { 27016, 30, &breaths[6] },
   { -1 },
 };
 
@@ -2587,7 +2594,7 @@ int BreathWeapon(struct char_data *ch, int cmd, char *arg, struct char_data *mob
     if (scan->vnum < 0) {
       sprintf(buf, "monster %s tries to breath, but isn't listed.",
 	      ch->player.short_descr);
-      log(buf);
+      logE(buf);
       return FALSE;
     }
     
@@ -2597,7 +2604,7 @@ int BreathWeapon(struct char_data *ch, int cmd, char *arg, struct char_data *mob
     if (count<1) {
       sprintf(buf, "monster %s has no breath weapons",
 	      ch->player.short_descr);
-      log(buf);
+      logE(buf);
       return FALSE;
     }
     

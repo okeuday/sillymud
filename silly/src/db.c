@@ -5,7 +5,9 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <time.h>
 
@@ -91,12 +93,12 @@ void boot_db()
 	int i;
 	extern int no_specials;
 
-	log("Boot db -- BEGIN.");
+	logE("Boot db -- BEGIN.");
 
-	log("Resetting the game time:");
+	logE("Resetting the game time:");
 	reset_time();
 
-	log("Reading newsfile, credits, help-page, info and motd.");
+	logE("Reading newsfile, credits, help-page, info and motd.");
 	file_to_string(NEWS_FILE, news);
 	file_to_string(CREDITS_FILE, credits);
 	file_to_string(MOTD_FILE, motd);
@@ -106,13 +108,13 @@ void boot_db()
 	file_to_string(WIZLIST_FILE, wizlist);
         file_to_string("login", login);
 
-        log("Initializing Script Files.");
+        logE("Initializing Script Files.");
 
     /* some machines are pre-allocation specific when dealing with realloc */
         script_data = (struct scripts *) malloc(sizeof(struct scripts));
         CommandSetup();
         InitScripts();
-	log("Opening mobile, object and help files.");
+	logE("Opening mobile, object and help files.");
 	if (!(mob_f = fopen(MOB_FILE, "r")))	{
 		perror("boot");
 		assert(0);
@@ -123,62 +125,64 @@ void boot_db()
 		assert(0);
 	}
 	if (!(help_fl = fopen(HELP_KWRD_FILE, "r")))
-	  log("   Could not open help file.");
+	  logE("   Could not open help file.");
 	else 
 	  help_index = build_help_index(help_fl, &top_of_helpt);
 
-        log("Booting Figurine Table.");
+        logE("Booting Figurine Table.");
         BootFigurines();
 
-	log("Loading zone table.");
+	logE("Loading zone table.");
 	boot_zones();
 
-	log("Loading rooms.");
+	logE("Loading rooms.");
 	boot_world();
 
 
-	log("Generating index tables for mobile and object files.");
+	logE("Generating index tables for mobile and object files.");
 	mob_index = generate_indices(mob_f, &top_of_mobt);
 	obj_index = generate_indices(obj_f, &top_of_objt);
 			
-	log("Renumbering zone table.");
+	logE("Renumbering zone table.");
 	renum_zone_table();
 #if 0 
 	log("Cleaning up player file.");
 	clean_playerfile();
 #endif
-	log("Generating player index.");
+	logE("Generating player index.");
 	build_player_index();
 
-	log("Loading fight messages.");
+	logE("Loading fight messages.");
 	load_messages();
 
-	log("Loading social messages.");
+	logE("Loading social messages.");
 	boot_social_messages();
 
-  log("Loading pose messages.");
+  logE("Loading pose messages.");
 	boot_pose_messages();
 
-	log("Assigning function pointers:");
+	logE("Assigning function pointers:");
 	if (!no_specials)	{
-		log("   Mobiles.");
+		logE("   Mobiles.");
 		assign_mobiles();
-		log("   Objects.");
+		logE("   Objects.");
 		assign_objects();
-		log("   Room.");
+		logE("   Room.");
 		assign_rooms();
 	}
 
-	log("   Commands.");	
+	logE("   Commands.");	
 	assign_command_pointers();
-	log("   Spells.");
+	logE("   Spells.");
 	assign_spell_pointers();
-	log("   Skills.");
+	logE("   Skills.");
         assign_skills();
 
-	log("Updating characters with saved items:");
+	logE("Updating characters with saved items:");
+    /* corrupting password entry, at least, probably due to empty rent files
 	update_obj_file();
-        log("Loading saved rooms.");
+    */
+        logE("Loading saved rooms.");
         ReloadRooms();
 
 #if LIMITED_ITEMS
@@ -210,7 +214,7 @@ void boot_db()
 
 	reset_q.head = reset_q.tail = 0;
 
-	log("Boot db -- DONE.");
+	logE("Boot db -- DONE.");
 }
 
 
@@ -284,7 +288,7 @@ void reset_time()
 	sprintf(buf,"   Current Gametime: %dH %dD %dM %dY.",
 	        time_info.hours, time_info.day,
 	        time_info.month, time_info.year);
-	log(buf);
+	logE(buf);
 
 	weather_info.pressure = 960;
 	if ((time_info.month>=7)&&(time_info.month<=12))
@@ -386,7 +390,7 @@ void build_player_index()
 	sprintf(buf,"GOD: %s, Levels [%d][%d][%d][%d][%d][%d]",dummy.name,
 		dummy.level[0],dummy.level[1],dummy.level[2],dummy.level[3],
 		dummy.level[4],dummy.level[5]);
-	log(buf);
+	logE(buf);
 
 	max = 0;
 	 for (j=0 ; j < MAX_CLASS ; j++)
@@ -411,14 +415,14 @@ void build_player_index()
   
   top_of_p_file = top_of_p_table;
 
-  log("Began Wizlist Generation.");
+  logE("Began Wizlist Generation.");
 
   sprintf(wizlist, "\033[2J\033[0;0H\n\r\n\r");
   sprintf(buf, "-* Creator and Supreme Being [%d/1] *-\n\r",list_wiz.number[10]);
 
   
   center = (38 - (int) (str_len(buf)/2));
-  log("center computed.");
+  logE("center computed.");
   for(i = 0; i <= center; i++)
      strcat(wizlist, " ");
 
@@ -436,7 +440,7 @@ void build_player_index()
   }
 
   strcat(wizlist, "\n\r\n\r");
-  log("Creator Generated.");
+  logE("Creator Generated.");
 
   sprintf(buf, "-* Designers/Administrators [%d/2] *-\n\r", list_wiz.number[9]);
   center = 38 - (int) (str_len(buf)/2);
@@ -473,7 +477,7 @@ void build_player_index()
   }
 
   strcat(wizlist, "\n\r\n\r");
-  log("Implementors Generated.");
+  logE("Implementors Generated.");
 
   sprintf(buf, "-* Gods of Final Judgement [%d/6] *-\n\r", list_wiz.number[7]);
   center = 38 - (int) (str_len(buf)/2);
@@ -492,7 +496,7 @@ void build_player_index()
   }
 
   strcat(wizlist, "\n\r\n\r");
-  log("Gods of Final Judgement Generated.");
+  logE("Gods of Final Judgement Generated.");
 
   sprintf(buf, "-* Gods of Judgement [%d/8] *-\n\r", list_wiz.number[6]);
   center = 38 - (int) (str_len(buf)/2);
@@ -758,25 +762,25 @@ void load_one_room(FILE *fl, struct room_data *rp)
     }
     rp->zone = zone;
   }
-  fscanf(fl, " %d ", &tmp);
+  fscanf(fl, " %ld ", &tmp);
   rp->room_flags = tmp;
-  fscanf(fl, " %d ", &tmp);
+  fscanf(fl, " %ld ", &tmp);
   rp->sector_type = tmp;
   
   if (tmp == -1) { 
-    fscanf(fl, " %d", &tmp);
+    fscanf(fl, " %ld", &tmp);
     rp->tele_time = tmp;
-    fscanf(fl, " %d", &tmp);			  
+    fscanf(fl, " %ld", &tmp);			  
     rp->tele_targ = tmp;
-    fscanf(fl, " %d", &tmp);
+    fscanf(fl, " %ld", &tmp);
     rp->tele_mask = tmp;
     if (IS_SET(TELE_COUNT, rp->tele_mask)) {
-      fscanf(fl, "%d ", &tmp);
+      fscanf(fl, "%ld ", &tmp);
       rp->tele_cnt = tmp;
     } else {
       rp->tele_cnt = 0;
     }
-    fscanf(fl, " %d", &tmp);
+    fscanf(fl, " %ld", &tmp);
     rp->sector_type = tmp;
   } else {
     rp->tele_time = 0;
@@ -787,14 +791,14 @@ void load_one_room(FILE *fl, struct room_data *rp)
   
   if (tmp == SECT_WATER_NOSWIM || tmp == SECT_UNDERWATER)  { /* river */
     /* read direction and rate of flow */
-    fscanf(fl, " %d ", &tmp);
+    fscanf(fl, " %ld ", &tmp);
     rp->river_speed = tmp;
-    fscanf(fl, " %d ", &tmp);
+    fscanf(fl, " %ld ", &tmp);
     rp->river_dir = tmp;
   } 
 
   if (rp->room_flags & TUNNEL) {  /* read in mobile limit on tunnel */
-    fscanf(fl, " %d ", &tmp);
+    fscanf(fl, " %ld ", &tmp);
     rp->moblim = tmp;
   }
   
@@ -866,7 +870,7 @@ void load_one_room(FILE *fl, struct room_data *rp)
     default:
       sprintf(buf,"unknown auxiliary code `%s' in room load of #%d",
 	      chk, rp->number);
-      log(buf);
+      logE(buf);
       break;
     }
   }
@@ -892,7 +896,7 @@ void boot_world()
   
   if (!(fl = fopen(WORLD_FILE, "r")))	{
     perror("fopen");
-    log("boot_world: could not open world file.");
+    logE("boot_world: could not open world file.");
     assert(0);
   }
 
@@ -995,7 +999,7 @@ void setup_dir(FILE *fl, int room, int dir)
 #define LOG_ZONE_ERROR(ch, type, zone, cmd) {\
 	sprintf(buf, "error in zone %s cmd %d (%c) resolving %s number", \
 		zone_table[zone].name, cmd, ch, type); \
-		  log(buf); \
+		  logE(buf); \
 		  }
 void renum_zone_table()
 {
@@ -1224,14 +1228,14 @@ struct char_data *read_mobile(int nr, int type)
   mob->mult_att = 1.0;
   mob->specials.spellfail = 101;
   
-  fscanf(mob_f, "%d ", &tmp);
+  fscanf(mob_f, "%ld ", &tmp);
   mob->specials.act = tmp;
   SET_BIT(mob->specials.act, ACT_ISNPC);
   
-  fscanf(mob_f, " %d ", &tmp);
+  fscanf(mob_f, " %ld ", &tmp);
   mob->specials.affected_by = tmp;
   
-  fscanf(mob_f, " %d ", &tmp);
+  fscanf(mob_f, " %ld ", &tmp);
   mob->specials.alignment = tmp;
 
   mob->player.class = CLASS_WARRIOR;
@@ -1242,7 +1246,7 @@ struct char_data *read_mobile(int nr, int type)
     
     fscanf(mob_f, "\n");
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     GET_LEVEL(mob, WARRIOR_LEVEL_IND) = tmp;
 
 
@@ -1254,21 +1258,21 @@ struct char_data *read_mobile(int nr, int type)
     mob->abilities.chr   =  9+number(1,(MAX(1,tmp/5 - 1)));
 
 
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->points.hitroll = 20-tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
 
     if (tmp > 10 || tmp < -10)
       tmp /= 10;
 
     mob->points.armor = 10*tmp;
     
-    fscanf(mob_f, " %Dd%D+%D ", &tmp, &tmp2, &tmp3);
+    fscanf(mob_f, " %ldd%ld+%ld ", &tmp, &tmp2, &tmp3);
     mob->points.max_hit = dice(tmp, tmp2)+tmp3;
     mob->points.hit = mob->points.max_hit;
     
-    fscanf(mob_f, " %Dd%D+%D \n", &tmp, &tmp2, &tmp3);
+    fscanf(mob_f, " %ldd%ld+%ld \n", &tmp, &tmp2, &tmp3);
     mob->points.damroll = tmp3;
     mob->specials.damnodice = tmp;
     mob->specials.damsizedice = tmp2;
@@ -1280,13 +1284,13 @@ struct char_data *read_mobile(int nr, int type)
     mob->points.move = 50;
     mob->points.max_move = 50;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     if (tmp == -1) {
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->points.gold = tmp;
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       GET_EXP(mob) = tmp;
-      fscanf(mob_f, " %D \n", &tmp);
+      fscanf(mob_f, " %ld \n", &tmp);
       GET_RACE(mob) = tmp;
       if(IsGiant(mob))
 	mob->abilities.str += number(1,4);
@@ -1294,16 +1298,16 @@ struct char_data *read_mobile(int nr, int type)
 	mob->abilities.str -= 1;
     } else {
       mob->points.gold = tmp;
-      fscanf(mob_f, " %D \n", &tmp);
+      fscanf(mob_f, " %ld \n", &tmp);
       GET_EXP(mob) = tmp;
     }
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->specials.position = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->specials.default_pos = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     if (tmp < 3) {
       mob->player.sex = tmp;
       mob->immune = 0;
@@ -1311,11 +1315,11 @@ struct char_data *read_mobile(int nr, int type)
       mob->susc = 0;
     } else if (tmp < 6) {
       mob->player.sex = (tmp-3);
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->immune = tmp;
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->M_immune = tmp;
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->susc = tmp;
     } else {
       mob->player.sex = 0;
@@ -1344,7 +1348,7 @@ struct char_data *read_mobile(int nr, int type)
 	     (letter == 'L')) {
     
     if ((letter == 'A') || (letter == 'B') || (letter == 'L')) {
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->mult_att = (float)tmp;
       /*
       **  read in types:
@@ -1353,7 +1357,7 @@ struct char_data *read_mobile(int nr, int type)
     
     fscanf(mob_f, "\n");
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     GET_LEVEL(mob, WARRIOR_LEVEL_IND) = tmp;
 
 
@@ -1366,16 +1370,16 @@ struct char_data *read_mobile(int nr, int type)
 
 
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->points.hitroll = 20-tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->points.armor = 10*tmp;
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->points.max_hit = dice(GET_LEVEL(mob, WARRIOR_LEVEL_IND), 8)+tmp;
     mob->points.hit = mob->points.max_hit;
     
-    fscanf(mob_f, " %Dd%D+%D \n", &tmp, &tmp2, &tmp3);
+    fscanf(mob_f, " %ldd%ld+%ld \n", &tmp, &tmp2, &tmp3);
     mob->points.damroll = tmp3;
     mob->specials.damnodice = tmp;
     mob->specials.damsizedice = tmp2;
@@ -1387,17 +1391,17 @@ struct char_data *read_mobile(int nr, int type)
     mob->points.move = 50;
     mob->points.max_move = 50;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     
     if (tmp == -1) {
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->points.gold = tmp;
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       if (tmp >= 0)
 	GET_EXP(mob) = (DetermineExp(mob, tmp)+mob->points.gold);
       else 
 	GET_EXP(mob) = -tmp;
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       GET_RACE(mob) = tmp;
       if(IsGiant(mob))
 	mob->abilities.str += number(1,4);
@@ -1409,17 +1413,17 @@ struct char_data *read_mobile(int nr, int type)
       /*
 	this is where the new exp will come into play
 	*/
-      fscanf(mob_f, " %D \n", &tmp);
+      fscanf(mob_f, " %ld \n", &tmp);
       GET_EXP(mob) = (DetermineExp(mob, tmp)+mob->points.gold);
     }
 
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->specials.position = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->specials.default_pos = tmp;
     
-    fscanf(mob_f, " %D \n", &tmp);
+    fscanf(mob_f, " %ld \n", &tmp);
     if (tmp < 3) {
       mob->player.sex = tmp;
       mob->immune = 0;
@@ -1427,11 +1431,11 @@ struct char_data *read_mobile(int nr, int type)
       mob->susc = 0;
     } else if (tmp < 6) {
       mob->player.sex = (tmp-3);
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->immune = tmp;
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->M_immune = tmp;
-      fscanf(mob_f, " %D ", &tmp);
+      fscanf(mob_f, " %ld ", &tmp);
       mob->susc = tmp;
     } else {
       mob->player.sex = 0;
@@ -1478,80 +1482,80 @@ struct char_data *read_mobile(int nr, int type)
     
     fscanf(mob_f, "\n");
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->abilities.str = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->abilities.intel = tmp; 
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->abilities.wis = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->abilities.dex = tmp;
     
-    fscanf(mob_f, " %D \n", &tmp);
+    fscanf(mob_f, " %ld \n", &tmp);
     mob->abilities.con = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
-    fscanf(mob_f, " %D ", &tmp2);
+    fscanf(mob_f, " %ld ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp2);
     
     mob->points.max_hit = number(tmp, tmp2);
     mob->points.hit = mob->points.max_hit;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->points.armor = 10*tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->points.mana = tmp;
     mob->points.max_mana = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->points.move = tmp;		
     mob->points.max_move = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->points.gold = tmp;
     
-    fscanf(mob_f, " %D \n", &tmp);
+    fscanf(mob_f, " %ld \n", &tmp);
     GET_EXP(mob) = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->specials.position = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->specials.default_pos = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->player.sex = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->player.class = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     GET_LEVEL(mob, WARRIOR_LEVEL_IND) = tmp;
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->player.time.birth = time(0);
     mob->player.time.played	= 0;
     mob->player.time.logon  = time(0);
     
-    fscanf(mob_f, " %D ", &tmp);
+    fscanf(mob_f, " %ld ", &tmp);
     mob->player.weight = tmp;
     
-    fscanf(mob_f, " %D \n", &tmp);
+    fscanf(mob_f, " %ld \n", &tmp);
     mob->player.height = tmp;
     
     for (i = 0; i < 3; i++)
       {
-	fscanf(mob_f, " %D ", &tmp);
+	fscanf(mob_f, " %ld ", &tmp);
 	GET_COND(mob, i) = tmp;
       }
     fscanf(mob_f, " \n ");
     
     for (i = 0; i < 5; i++)
       {
-	fscanf(mob_f, " %D ", &tmp);
+	fscanf(mob_f, " %ld ", &tmp);
 	mob->specials.apply_saving_throw[i] = tmp;
       }
     
@@ -1619,7 +1623,7 @@ struct char_data *read_mobile(int nr, int type)
     char buf[200];
     sprintf(buf, "%s has gold > level * 1500 (%d)", mob->player.short_descr,
 	    mob->points.gold);
-    log(buf);
+    logE(buf);
   }
 
   /* set up things that all members of the race have */
@@ -1930,7 +1934,7 @@ void reset_zone(int zone)
     e = zone_table[zone].top;
     sprintf(buf, "Run time initialization of zone %s, rooms (%d-%d)",
 	    s, d, e);
-    log(buf);
+    logE(buf);
 
   }
 
@@ -2017,7 +2021,7 @@ void reset_zone(int zone)
 	    }
 	  } else if (obj = read_object(ZCMD.arg1, REAL)) {
 	    sprintf(buf, "Error finding room #%d", ZCMD.arg3);
-	    log(buf);
+	    logE(buf);
 	    last_cmd = 1;
 	  }  else {
 	    last_cmd = 0;
@@ -2109,7 +2113,7 @@ void reset_zone(int zone)
       default:
 	sprintf(buf, "Undefd cmd [%c] in reset table; zone %d cmd %d.",
 		ZCMD.command,zone, cmd_no);
-	log(buf);
+	logE(buf);
 	break;
       }
     else
@@ -2330,7 +2334,7 @@ void char_to_store(struct char_data *ch, struct char_file_u *st)
   }
   
   if ((i >= MAX_AFFECT) && af && af->next)
-    log("WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
+    logE("WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
   
   
   
@@ -2542,7 +2546,7 @@ char *fread_string(FILE *f1)
 
  if(i == MAX_STRING_LENGTH - 3) { /* We filled the buffer */
     buf[i] = '\0';
-    log("File too long (fread_string).");
+    logE("File too long (fread_string).");
     while(tmp = fgetc(f1))
         if(tmp == '~')
            break;
@@ -2656,7 +2660,7 @@ int file_to_string(char *name, char *buf)
 		{
 			if (strlen(buf) + strlen(tmp) + 2 > MAX_STRING_LENGTH)
 			{
-				log("fl->strng: string too big (db.c, file_to_string)");
+				logE("fl->strng: string too big (db.c, file_to_string)");
 				*buf = '\0';
 				fclose(fl);
 				return(-1);
@@ -2786,11 +2790,11 @@ void reset_char(struct char_data *ch)
   
   if (GET_BANK(ch) > GetMaxLevel(ch)*100000) {
     sprintf(buf, "%s has %d coins in bank.", GET_NAME(ch), GET_BANK(ch));
-    log(buf);
+    logE(buf);
   }
   if (GET_GOLD(ch) > GetMaxLevel(ch)*100000) {
     sprintf(buf, "%s has %d coins.", GET_NAME(ch), GET_GOLD(ch));
-    log(buf);
+    logE(buf);
   }
 
   /*
@@ -3103,7 +3107,7 @@ void reboot_text(struct char_data *ch, char *arg, int cmd)
  if(IS_NPC(ch))
     return;
 
- log("Rebooting Essential Text Files.");
+ logE("Rebooting Essential Text Files.");
 
  file_to_string(NEWS_FILE, news);
  file_to_string(CREDITS_FILE, credits);
@@ -3117,7 +3121,7 @@ void reboot_text(struct char_data *ch, char *arg, int cmd)
  free(mob_index);
  free(obj_index);
 
-  log("Opening mobile, object and help files.");
+  logE("Opening mobile, object and help files.");
   if (!(mob_f = fopen(MOB_FILE, "r")))	{
     perror("boot");
     assert(0);
@@ -3129,7 +3133,7 @@ void reboot_text(struct char_data *ch, char *arg, int cmd)
   }
   
   
-  log("Generating index tables for mobile and object files.");
+  logE("Generating index tables for mobile and object files.");
   mob_index = generate_indices(mob_f, &top_of_mobt);
   obj_index = generate_indices(obj_f, &top_of_objt);
   
@@ -3176,7 +3180,7 @@ void InitScripts()
      }
 
  if(!(f1 = fopen("scripts.dat", "r"))) {
-    log("Unable to open file \"scripts.dat\".");
+    logE("Unable to open file \"scripts.dat\".");
     return;
   }
 
@@ -3202,8 +3206,8 @@ void InitScripts()
        buf[strlen(buf) - 1] = '\0';
 
     if(strlen(buf) < 4)	{	/* no way we can get a valid thing in less */
-      sprintf(buf,"%s read in, garbage.");
-      log(buf);
+      sprintf(buf,"\"%s\" read in, garbage.", buf);
+      logE(buf);
     }
 
     sscanf(buf, "%s %d", buf2, &i);
@@ -3211,7 +3215,7 @@ void InitScripts()
     sprintf(buf, "scripts/%s", buf2);
     if(!(f2 = fopen(buf, "r"))) {
        sprintf(buf, "Unable to open script \"%s\" for reading.", buf2);
-       log(buf);
+       logE(buf);
      }
 
      else {
@@ -3226,7 +3230,7 @@ void InitScripts()
 /* you really don't want to do a lot of reallocs all at once
 */   
 	   if (count==0) {
-	     script_data[top_of_scripts].script = (struct foo_data *) malloc(script_data[top_of_scripts].script, sizeof(struct foo_data));
+	     script_data[top_of_scripts].script = (struct foo_data *) realloc(script_data[top_of_scripts].script, sizeof(struct foo_data));
 	   } else  {
 	     script_data[top_of_scripts].script = (struct foo_data *) realloc(script_data[top_of_scripts].script, sizeof(struct foo_data) * (count + 1));
 	   }
@@ -3244,7 +3248,7 @@ void InitScripts()
        script_data[top_of_scripts].filename = (char *) malloc((strlen(buf2) + 1) * sizeof(char));
        strcpy(script_data[top_of_scripts].filename, buf2);
        sprintf(buf, "Script %s assigned to mobile %d.", buf2, i);
-       log(buf);
+       logE(buf);
        top_of_scripts++;
        fclose(f2);
      }
@@ -3254,7 +3258,7 @@ void InitScripts()
      sprintf(buf, "%d scripts assigned.", top_of_scripts);
   else
      sprintf(buf, "No scripts found to assign.");
-  log(buf);
+  logE(buf);
 
   fclose(f1);
 }
@@ -3266,7 +3270,7 @@ int CheckKillFile(int virtual)
  int i;
 
  if(!(f1 = fopen(killfile, "r"))) {
-    log("Unable to find killfile.");
+    logE("Unable to find killfile.");
     exit(0);
   }
 
@@ -3308,7 +3312,7 @@ void SaveTheWorld()
   fp = (FILE *)fopen(buf, "w");  /* append */
   
   if (!fp) {
-    log("Unable to open zone writing file.");
+    logE("Unable to open zone writing file.");
     return;
   }
 
@@ -3486,7 +3490,7 @@ int ReadTextZone( FILE *fl)
 	    }
 	  } else if (obj = read_object(i, VIRTUAL)) {
 	    sprintf(buf, "Error finding room #%d", k);
-	    log(buf);
+	    logE(buf);
 	    last_cmd = 1;
 	  }  else {
 	    last_cmd = 0;
@@ -3594,7 +3598,7 @@ void BootFigurines()
  char buf[255];
 
  if(!(f1 = fopen("figurines", "r"))) {
-    log("Unable to open file \"figurines\".");
+    logE("Unable to open file \"figurines\".");
     return;
   }
 
@@ -3662,7 +3666,7 @@ void clean_playerfile()
        if(!str_cmp(grunt.dummy.name,"111111")) {
 	 sprintf(buf,"%s was deleted (111111 name hopefully).",
 		 grunt.dummy.name);
-	 log(buf);
+	 logE(buf);
 	 ones++;
 	 num_deleted++;
          grunt.AXE = TRUE;
@@ -3684,14 +3688,14 @@ void clean_playerfile()
              grunt.AXE = TRUE;	
 	     sprintf(buf,"%s deleted after %d months of inactivity.",
 		     grunt.dummy.name,j);
-	     log(buf);
+	     logE(buf);
            }
          } else if(max > LOW_IMMORTAL) {
            if(timeH-grunt.dummy.last_logon > (long) SECS_PER_REAL_DAY*30) {
 	     num_demoted++;
              sprintf(buf,"%s demoted from %d to %d due to inactivity.",
                      grunt.dummy.name,max,max-1);
-	     log(buf);
+	     logE(buf);
              grunt.dummy.last_logon = timeH; /* so it doesn't happen twice */
              max--;
              max = MAX(51,max);	/* should not be necessary */
@@ -3707,17 +3711,17 @@ void clean_playerfile()
   }
 
   sprintf(buf,"-- %d characters were processed.", num_processed);
-  log(buf);
+  logE(buf);
   sprintf(buf,"-- %d characters were deleted.  ", num_deleted);
-  log(buf);
+  logE(buf);
   sprintf(buf,"-- %d of these were allread deleted. (11111s)", ones);
-  log(buf);
+  logE(buf);
   sprintf(buf,"-- %d gods were demoted due to inactivity.", num_demoted);
-  log(buf);
+  logE(buf);
   sprintf(buf,"mv %s %s.bak", PLAYER_FILE, PLAYER_FILE);
   system(buf);
   sprintf(buf,"mv temp %s", PLAYER_FILE);
   system(buf);
-  log("Cleaning done.");
+  logE("Cleaning done.");
 
 }

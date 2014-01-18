@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "protos.h"
@@ -59,7 +60,7 @@ char *fread_action(FILE *fl)
   for (;;)	{
     fgets(buf, MAX_STRING_LENGTH, fl);
     if (feof(fl))		{
-      log("Fread_action - unexpected EOF.");
+      logE("Fread_action - unexpected EOF.");
       exit(0);
     }
     
