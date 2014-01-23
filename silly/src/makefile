@@ -1,6 +1,10 @@
 #-*-Mode:make;coding:utf-8;tab-width:4;c-basic-offset:4-*-
 # ex: set ft=make fenc=utf-8 sts=4 ts=4 sw=4 noet:
 CC=gcc
+CLOUDI_VERSION=1.3.0
+CLOUDI_PATH=/usr/local/lib/cloudi-$(CLOUDI_VERSION)
+CLOUDI_CFLAGS=-I$(CLOUDI_PATH)/api/c/
+CLOUDI_LFLAGS=-L$(CLOUDI_PATH)/api/c/ -Wl,-rpath,$(CLOUDI_PATH)/api/c/ -lcloudi
 CFLAGS=-g -O0 -I. -D_XOPEN_SOURCE
 MUD_CFLAGS=-DIMPL_SECURITY -DNEW_RENT -DLEVEL_LOSS -DNEWEXP -DGROUP_NAMES \
            -Wno-deprecated-declarations \
@@ -167,12 +171,18 @@ Trap.c: protos.h
 utility.c: protos.h
 weather.c: protos.h
 
+comm_cloudi.c: structs.h \
+               utils.h \
+               vt100c.h \
+               comm.h
+
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(MUD_CFLAGS)
 
 clean:
-	rm -f dmserver $(OBJS)
+	rm -f dmserver $(OBJS) comm_cloudi.o
 
-dmserver: $(OBJS)
-	$(CC) -o dmserver $(OBJS) -lcrypt
+dmserver: $(OBJS) comm_cloudi.c
+	$(CC) -c -o comm_cloudi.o comm_cloudi.c $(CFLAGS) $(CLOUDI_CFLAGS)
+	$(CC) -o dmserver $(OBJS) comm_cloudi.o -lcrypt $(CLOUDI_LFLAGS)
 

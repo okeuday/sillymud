@@ -108,6 +108,7 @@ int close_socket_fd( int desc)
 
 int main (int argc, char **argv)
 {
+  int cloudi = 0;  /* run within CloudI */
   int port, pos=1;
   char buf[512], *dir;
   extern int WizLock;
@@ -117,6 +118,10 @@ int main (int argc, char **argv)
 
   while ((pos < argc) && (*(argv[pos]) == '-'))	{
     switch (*(argv[pos] + 1))  {
+    case 'c':
+      cloudi = 1;
+      logE("CloudI mode selected.");
+      break;
     case 'l':
       lawful = 1;
       logE("Lawful mode selected.");
@@ -190,7 +195,10 @@ int main (int argc, char **argv)
   /* close stdin */
   close(0);
 
-  run_the_game(port);
+  if (cloudi)
+    run_the_game_with_cloudi();
+  else
+    run_the_game(port);
   return(0);
 }
 
@@ -965,7 +973,9 @@ int write_to_descriptor(int desc, char *txt)
 int write_to_descriptor_echo_on(struct descriptor_data *d)
 {
   if (d->descriptor == 0) {
+    /* disable for websocket connections
     SEND_TO_Q(echo_on, d);
+     */
     return 0;
   }
   return write(d->descriptor, echo_on, 6);
@@ -974,7 +984,9 @@ int write_to_descriptor_echo_on(struct descriptor_data *d)
 int write_to_descriptor_echo_off(struct descriptor_data *d)
 {
   if (d->descriptor == 0) {
+    /* disable for websocket connections
     SEND_TO_Q(echo_off, d);
+     */
     return 0;
   }
   return write(d->descriptor, echo_off, 4);
