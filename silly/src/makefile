@@ -6,7 +6,7 @@ CLOUDI_PATH=/usr/local/lib/cloudi-$(CLOUDI_VERSION)
 CLOUDI_CFLAGS=-I$(CLOUDI_PATH)/api/c/
 CLOUDI_LFLAGS=-L$(CLOUDI_PATH)/api/c/ -Wl,-rpath,$(CLOUDI_PATH)/api/c/ -lcloudi
 CFLAGS=-g -O0 -I. -D_XOPEN_SOURCE
-MUD_CFLAGS=-DIMPL_SECURITY -DNEW_RENT -DLEVEL_LOSS -DNEWEXP -DGROUP_NAMES \
+MUD_CFLAGS=-DIMPL_SECURITY -DNO_RENT -DLEVEL_LOSS -DNEWEXP -DGROUP_NAMES \
            -Wno-deprecated-declarations \
            -Wno-pointer-to-int-cast \
            -Wno-int-to-pointer-cast
@@ -44,6 +44,11 @@ MUD_CFLAGS=-DIMPL_SECURITY -DNEW_RENT -DLEVEL_LOSS -DNEWEXP -DGROUP_NAMES \
 ##  To have each 58+ god restricted to one site, or set of sites
 ##  -DIMPL_SECURITY
 ##
+##  To provide offers for rent of 0 and only charge for time, not items
+##  -DNEW_RENT
+##
+##  Completely disable rent and allow objects to be saved automatically
+##  -DNO_RENT
 
 all: dmserver
 

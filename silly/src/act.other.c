@@ -197,8 +197,18 @@ void do_quit(struct char_data *ch, char *argument, int cmd)
   
   act("Goodbye, friend.. Come back soon!", FALSE, ch, 0, 0, TO_CHAR);
   act("$n has left the game.", TRUE, ch,0,0,TO_ROOM);
+#if defined(NO_RENT)
+  struct obj_cost cost;
+  recep_offer(ch, NULL, &cost);
+  save_obj(ch, &cost, 1);
+  if (ch->specials.start_room != 2) /* hell */
+    ch->specials.start_room = 98; /* always start in Midgaard temple */
+  extract_char(ch);
+  save_char(ch, AUTO_RENT);
+#else
   zero_rent(ch);
   extract_char(ch); /* Char is saved in extract char */
+#endif
 }
 
 

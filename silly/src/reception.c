@@ -91,6 +91,15 @@ bool recep_offer(struct char_data *ch,	struct char_data *receptionist,
   cost->total_cost = 0; /* Minimum cost */
   cost->no_carried = 0;
   cost->ok = TRUE; /* Use if any "-1" objects */
+
+#if defined(NO_RENT)
+  if (receptionist) {
+    act("$n tells you 'Rent is free, don't worry about it.'",
+        FALSE,receptionist,0,ch,TO_VICT);
+    act("$n sighs loudly.", FALSE, receptionist, 0, 0, TO_ROOM);
+  }
+  return(TRUE);
+#endif
   
   hoarder = add_obj_cost(ch, receptionist, ch->carrying, cost, hoarder);
   
@@ -100,7 +109,7 @@ bool recep_offer(struct char_data *ch,	struct char_data *receptionist,
   if (!cost->ok)
     return(FALSE);
 
-#if NEW_RENT
+#if defined(NEW_RENT)
   cost->total_cost = 0;
 #endif
 
@@ -297,10 +306,14 @@ void load_char_objs(struct char_data *ch)
       logE("Character reconnecting.");
       found = TRUE;
     } else {
-      char	buf[MAX_STRING_LENGTH];
+#if defined(NO_RENT)
+      found = TRUE;
+      logE("No rent was charged.");
+#else
+      char buf[MAX_STRING_LENGTH];
       if (ch->in_room == NOWHERE)
 	logE("Char reconnecting after autorent");
-#if NEW_RENT
+#if defined(NEW_RENT)
       timegold = (int) ((100*((float)time(0) - st.last_update)) / 
 			(SECS_PER_REAL_DAY));
 #else
@@ -319,6 +332,7 @@ void load_char_objs(struct char_data *ch)
 	GET_GOLD(ch) = 0;
 	found = FALSE;
       }
+#endif
     }
 
   fclose(fl);
@@ -784,6 +798,9 @@ int receptionist(struct char_data *ch, int cmd, char *arg, struct char_data *mob
       return(TRUE);
     }
   
+#if defined(NO_RENT)
+  recep_offer(ch, recep, &cost);
+#else
   if (cmd == 92) { /* Rent  */
     if (recep_offer(ch, recep, &cost)) {
       
@@ -808,6 +825,7 @@ int receptionist(struct char_data *ch, int cmd, char *arg, struct char_data *mob
     recep_offer(ch, recep, &cost);
     act("$N gives $n an offer.", FALSE, ch, 0, recep, TO_ROOM);
   }
+#endif
   
   return(TRUE);
 }

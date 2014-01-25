@@ -129,7 +129,7 @@ void do_imptest(struct char_data *ch, char *arg, int cmd)
 void do_passwd(struct char_data *ch, char *argument, int cmdnum)
 {
    int player_i, pos;
-   char name[30], npasswd[20], pass[20];
+   char name[30], npasswd[20], pass[PASSWORD_SIZE];
    struct char_file_u tmp_store;
    FILE *fl;
 
@@ -158,14 +158,13 @@ void do_passwd(struct char_data *ch, char *argument, int cmdnum)
 	return;
       }
 
-      strncpy(pass, crypt(npasswd, tmp_store.name), 10);
+      memcpy(pass, crypt(npasswd, tmp_store.name), PASSWORD_SIZE);
       
    /*
     *  put new password in place of old password
     */
 
-      *(pass+10) = '\0';
-      strcpy(tmp_store.pwd, pass);
+      memcpy(tmp_store.pwd, pass, PASSWORD_SIZE);
 
    /*
     *   save char to file

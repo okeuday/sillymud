@@ -794,12 +794,10 @@ void assign_command_pointers ()
   AddCommand("split", do_split, 297, POSITION_RESTING, 1);
   AddCommand("report", do_report, 298, POSITION_RESTING, 1);
   AddCommand("gname", do_gname, 299, POSITION_RESTING, 1);
-#if STUPID
  /* this command is a little flawed.  Heavy usage generates obscenely 
     long linked lists in the "donation room" which cause the mud to 
     lag a horrible death. */
   AddCommand("donate", do_donate, 300, POSITION_STANDING, 1);
-#endif
   AddCommand("auto",do_auto,301,POSITION_RESTING,1);
   AddCommand("brew", do_makepotion, 302, POSITION_RESTING, 1);
   AddCommand("changeform", do_changeform, 303, POSITION_STANDING, 1);
@@ -880,6 +878,17 @@ void nanny(struct descriptor_data *d, char *arg)
   void do_look(struct char_data *ch, char *argument, int cmd);
   void load_char_objs(struct char_data *ch);
   int load_char(char *name, struct char_file_u *char_element);
+  /* somehow, keeping these unused variables here is preventing the memory
+   * overwrite of a struct char_data that enters the limits.c check_idling()
+   * function to get logged off, when ran within valgrind
+   * (char_data master was being set to 0x33)
+   */
+  static void * unused0 = 0;
+  static void * unused1 = 0;
+  static void * unused2 = 0;
+  static void * unused3 = 0;
+  static void * unused4 = 0;
+  static void * unused5 = 0;
   
   write_to_descriptor_echo_on(d);
   
@@ -1113,12 +1122,6 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
     
   case CON_NME:		/* wait for input of name	*/
-    if (!d->character) {
-      CREATE(d->character, struct char_data, 1);
-      clear_char(d->character);
-      d->character->desc = d;
-    }
-    
     for (; isspace(*arg); arg++)  ;
     if (!*arg)
       close_socket(d);
@@ -1182,8 +1185,14 @@ void nanny(struct descriptor_data *d, char *arg)
 	  break;
 	  }
 	*/
+        if (!d->character) {
+          CREATE(d->character, struct char_data, 1);
+          clear_char(d->character);
+          d->character->desc = d;
+        }
+    
 	store_to_char(&tmp_store, d->character);       	
-	strcpy(d->pwd, tmp_store.pwd);
+	memcpy(d->pwd, tmp_store.pwd, PASSWORD_SIZE);
 	d->pos = player_table[player_i].nr;
 	SEND_TO_Q("Password: ", d);
         write_to_descriptor_echo_off(d);
@@ -1205,6 +1214,12 @@ void nanny(struct descriptor_data *d, char *arg)
         
 	/* player unknown gotta make a new */
 	if (!WizLock) {
+          if (!d->character) {
+            CREATE(d->character, struct char_data, 1);
+            clear_char(d->character);
+            d->character->desc = d;
+          }
+    
 	  CREATE(GET_NAME(d->character), char, 
 		 strlen(tmp_name) + 1);
 	  strcpy(GET_NAME(d->character), CAP(tmp_name));
@@ -1252,7 +1267,8 @@ void nanny(struct descriptor_data *d, char *arg)
     if (!*arg)
       close_socket(d);
     else  {
-      if (strncmp(crypt(arg, d->character->player.name), d->pwd, 10)) 	{
+      if (memcmp(crypt(arg, d->character->player.name),
+                 d->pwd, PASSWORD_SIZE)) 	{
 	SEND_TO_Q("Wrong password.\n\r", d);
 	close_socket(d);
 	return;
@@ -1332,8 +1348,7 @@ void nanny(struct descriptor_data *d, char *arg)
       return;
     }
     
-    strncpy(d->pwd, crypt(arg, d->character->player.name), 10);
-    *(d->pwd + 10) = '\0';
+    memcpy(d->pwd, crypt(arg, d->character->player.name), PASSWORD_SIZE);
     write_to_descriptor_echo_on(d);
     SEND_TO_Q("Please retype password: ", d);
     write_to_descriptor_echo_off(d);
@@ -1344,7 +1359,7 @@ void nanny(struct descriptor_data *d, char *arg)
     /* skip whitespaces */
     for (; isspace(*arg); arg++);
     
-    if (strncmp(crypt(arg, d->character->player.name), d->pwd, 10)) {
+    if (memcmp(crypt(arg, d->character->player.name), d->pwd, PASSWORD_SIZE)) {
       write_to_descriptor_echo_on(d);
       
       SEND_TO_Q("Passwords do not match.\n\r", d);
@@ -1742,24 +1757,19 @@ void nanny(struct descriptor_data *d, char *arg)
  case CON_CITY_CHOICE:
     /* skip whitespaces */
     for (; isspace(*arg); arg++);
-    if (d->character->in_room != NOWHERE) {
-      SEND_TO_Q("This choice is only valid when you have been auto-saved\n\r",d);
-      STATE(d) = CON_SLCT;
-    } else {  
-      switch (*arg)  	{
-      case '1':
+    switch (*arg)  	{
+    case '1':
+      reset_char(d->character);
+      sprintf(buf, "Loading %s's equipment", d->character->player.name);
+      logE(buf);
+      load_char_objs(d->character);
+      save_char(d->character, AUTO_RENT);
+      send_to_char(WELC_MESSG, d->character);
+      d->character->next = character_list;
+      character_list = d->character;
 
-        reset_char(d->character);
-        sprintf(buf, "Loading %s's equipment", d->character->player.name);
-        logE(buf);
-        load_char_objs(d->character);
-        save_char(d->character, AUTO_RENT);
-        send_to_char(WELC_MESSG, d->character);
-        d->character->next = character_list;
-        character_list = d->character;
-
-	char_to_room(d->character, 3001);
-	d->character->player.hometown = 3001;
+	char_to_room(d->character, 98);
+	d->character->player.hometown = 98;
 	
 
 	d->character->specials.tick = plr_tick_count++;
@@ -1775,8 +1785,35 @@ void nanny(struct descriptor_data *d, char *arg)
 	d->prompt_mode = 1;
 	
 	break;
-      case '2':
+    case '2':
+      reset_char(d->character);
+      sprintf(buf, "Loading %s's equipment", d->character->player.name);
+      logE(buf);
+      load_char_objs(d->character);
+      save_char(d->character, AUTO_RENT);
+      send_to_char(WELC_MESSG, d->character);
+      d->character->next = character_list;
+      character_list = d->character;
 
+	char_to_room(d->character, 1103);
+	d->character->player.hometown = 1103;
+
+        d->character->specials.tick = plr_tick_count++;
+        if (plr_tick_count == PLR_TICK_WRAP)
+	     plr_tick_count=0;
+    
+        act("$n has entered the game.", 
+	      TRUE, d->character, 0, 0, TO_ROOM);
+        STATE(d) = CON_PLYNG;
+        if (!GetMaxLevel(d->character))
+           do_start(d->character);
+        do_look(d->character, "",15);
+        d->prompt_mode = 1;
+
+	break;
+    case '3':
+	if (GetMaxLevel(d->character) > 5 ||
+            HasClass(d->character, CLASS_DRUID)) {
         reset_char(d->character);
         sprintf(buf, "Loading %s's equipment", d->character->player.name);
         logE(buf);
@@ -1786,48 +1823,20 @@ void nanny(struct descriptor_data *d, char *arg)
         d->character->next = character_list;
         character_list = d->character;
 
-	char_to_room(d->character, 1103);
-	d->character->player.hometown = 1103;
-
-          d->character->specials.tick = plr_tick_count++;
-          if (plr_tick_count == PLR_TICK_WRAP)
-	     plr_tick_count=0;
-      
-          act("$n has entered the game.", 
-	      TRUE, d->character, 0, 0, TO_ROOM);
-          STATE(d) = CON_PLYNG;
-          if (!GetMaxLevel(d->character))
-             do_start(d->character);
-          do_look(d->character, "",15);
-          d->prompt_mode = 1;
-
-	break;
-      case '3':
-	if (GetMaxLevel(d->character) > 5) {
-
-          reset_char(d->character);
-          sprintf(buf, "Loading %s's equipment", d->character->player.name);
-          logE(buf);
-          load_char_objs(d->character);
-          save_char(d->character, AUTO_RENT);
-          send_to_char(WELC_MESSG, d->character);
-          d->character->next = character_list;
-          character_list = d->character;
-
 	  char_to_room(d->character, 18221);
 	  d->character->player.hometown = 18221;
 
-          d->character->specials.tick = plr_tick_count++;
-          if (plr_tick_count == PLR_TICK_WRAP)
+        d->character->specials.tick = plr_tick_count++;
+        if (plr_tick_count == PLR_TICK_WRAP)
 	     plr_tick_count=0;
-      
-          act("$n has entered the game.", 
+    
+        act("$n has entered the game.", 
 	      TRUE, d->character, 0, 0, TO_ROOM);
-          STATE(d) = CON_PLYNG;
-          if (!GetMaxLevel(d->character))
-             do_start(d->character);
-          do_look(d->character, "",15);
-          d->prompt_mode = 1;
+        STATE(d) = CON_PLYNG;
+        if (!GetMaxLevel(d->character))
+           do_start(d->character);
+        do_look(d->character, "",15);
+        d->prompt_mode = 1;
 	  break;
 
 	} else {
@@ -1835,32 +1844,31 @@ void nanny(struct descriptor_data *d, char *arg)
 	  STATE(d) = CON_SLCT;
 	  break;
 	}
-      case '4':
+    case '4':
 	if (GetMaxLevel(d->character) > 5) {
+        reset_char(d->character);
+        sprintf(buf, "Loading %s's equipment", d->character->player.name);
+        logE(buf);
+        load_char_objs(d->character);
+        save_char(d->character, AUTO_RENT);
+        send_to_char(WELC_MESSG, d->character);
+        d->character->next = character_list;
+        character_list = d->character;
 
-          reset_char(d->character);
-          sprintf(buf, "Loading %s's equipment", d->character->player.name);
-          logE(buf);
-          load_char_objs(d->character);
-          save_char(d->character, AUTO_RENT);
-          send_to_char(WELC_MESSG, d->character);
-          d->character->next = character_list;
-          character_list = d->character;
+	  char_to_room(d->character, 13406);
+	  d->character->player.hometown = 13406;
 
-	  char_to_room(d->character, 3606);
-	  d->character->player.hometown = 3606;
-
-          d->character->specials.tick = plr_tick_count++;
-          if (plr_tick_count == PLR_TICK_WRAP)
+        d->character->specials.tick = plr_tick_count++;
+        if (plr_tick_count == PLR_TICK_WRAP)
 	     plr_tick_count=0;
-      
-          act("$n has entered the game.", 
+    
+        act("$n has entered the game.", 
 	      TRUE, d->character, 0, 0, TO_ROOM);
-          STATE(d) = CON_PLYNG;
-          if (!GetMaxLevel(d->character))
-             do_start(d->character);
-          do_look(d->character, "",15);
-          d->prompt_mode = 1;
+        STATE(d) = CON_PLYNG;
+        if (!GetMaxLevel(d->character))
+           do_start(d->character);
+        do_look(d->character, "",15);
+        d->prompt_mode = 1;
 	  break;
 
 	} else {
@@ -1868,32 +1876,31 @@ void nanny(struct descriptor_data *d, char *arg)
 	  STATE(d) = CON_SLCT;
 	  break;
 	}
-      case '5':
+    case '5':
 	if (GetMaxLevel(d->character) > 5) {
-
-          reset_char(d->character);
-          sprintf(buf, "Loading %s's equipment", d->character->player.name);
-          logE(buf);
-          load_char_objs(d->character);
-          save_char(d->character, AUTO_RENT);
-          send_to_char(WELC_MESSG, d->character);
-          d->character->next = character_list;
-          character_list = d->character;
+        reset_char(d->character);
+        sprintf(buf, "Loading %s's equipment", d->character->player.name);
+        logE(buf);
+        load_char_objs(d->character);
+        save_char(d->character, AUTO_RENT);
+        send_to_char(WELC_MESSG, d->character);
+        d->character->next = character_list;
+        character_list = d->character;
 
 	  char_to_room(d->character, 16107);
 	  d->character->player.hometown = 16107;
 
-          d->character->specials.tick = plr_tick_count++;
-          if (plr_tick_count == PLR_TICK_WRAP)
+        d->character->specials.tick = plr_tick_count++;
+        if (plr_tick_count == PLR_TICK_WRAP)
 	     plr_tick_count=0;
-      
-          act("$n has entered the game.", 
+    
+        act("$n has entered the game.", 
 	      TRUE, d->character, 0, 0, TO_ROOM);
-          STATE(d) = CON_PLYNG;
-          if (!GetMaxLevel(d->character))
-             do_start(d->character);
-          do_look(d->character, "",15);
-          d->prompt_mode = 1;
+        STATE(d) = CON_PLYNG;
+        if (!GetMaxLevel(d->character))
+           do_start(d->character);
+        do_look(d->character, "",15);
+        d->prompt_mode = 1;
 	  break;
 
 	} else {
@@ -1901,11 +1908,10 @@ void nanny(struct descriptor_data *d, char *arg)
 	  STATE(d) = CON_SLCT;
 	  break;
 	}
-      default:
+    default:
 	SEND_TO_Q("That was an illegal choice.\n\r", d);
 	STATE(d) = CON_SLCT;
-        break;
-      }
+      break;
     }
     break;
   
@@ -1935,8 +1941,8 @@ void nanny(struct descriptor_data *d, char *arg)
 	      char_to_room(d->character, 1103);
 	      d->character->player.hometown = 1103;
 	    } else {
-	      char_to_room(d->character, 3001);
-	      d->character->player.hometown = 3001;
+	      char_to_room(d->character, 98);
+	      d->character->player.hometown = 98;
 	    }
 	  } else {
 	    char_to_room(d->character, d->character->specials.start_room);
@@ -1964,8 +1970,8 @@ void nanny(struct descriptor_data *d, char *arg)
 		       d->character->in_room);	  
 	  d->character->player.hometown = d->character->in_room;
 	} else { 
-	  char_to_room(d->character, 3001);
-	  d->character->player.hometown = 3001;
+	  char_to_room(d->character, 98);
+	  d->character->player.hometown = 98;
 	}
       }
 
@@ -1984,7 +1990,7 @@ void nanny(struct descriptor_data *d, char *arg)
       
     case '2':
       SEND_TO_Q("Enter a text you'd like others to see when they look at you.\n\r", d);
-      SEND_TO_Q("Terminate with a '@'.\n\r", d);
+      SEND_TO_Q("Terminate with a @.\n\r", d);
       if (d->character->player.description)	{
 	  SEND_TO_Q("Old description :\n\r", d);
 	  SEND_TO_Q(d->character->player.description, d);
@@ -2013,7 +2019,8 @@ void nanny(struct descriptor_data *d, char *arg)
         SEND_TO_Q("Where would you like to enter?\n\r", d);
         SEND_TO_Q("1.    Midgaard\n\r", d);
         SEND_TO_Q("2.    Shire\n\r",    d);
-      if (GetMaxLevel(d->character) > 5)
+      if ((GetMaxLevel(d->character) > 5) ||
+          HasClass(d->character, CLASS_DRUID))
         SEND_TO_Q("3.    Mordilnia\n\r", d);
       if (GetMaxLevel(d->character) > 10)
         SEND_TO_Q("4.    New  Thalos\n\r", d);
@@ -2079,8 +2086,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	return;
       }
     
-    strncpy(d->pwd, crypt(arg, d->character->player.name), 10);
-    *(d->pwd + 10) = '\0';
+    memcpy(d->pwd, crypt(arg, d->character->player.name), PASSWORD_SIZE);
     write_to_descriptor_echo_on(d);
     
     SEND_TO_Q("Please retype password: ", d);
@@ -2094,7 +2100,7 @@ void nanny(struct descriptor_data *d, char *arg)
     /* skip whitespaces */
     for (; isspace(*arg); arg++);
     
-    if (strncmp(crypt(arg, d->character->player.name), d->pwd, 10))      {
+    if (memcmp(crypt(arg, d->character->player.name), d->pwd, PASSWORD_SIZE)) {
           write_to_descriptor_echo_on(d);
 	  SEND_TO_Q("Passwords don't match.\n\r", d);
 	  SEND_TO_Q("Retype password: ", d);

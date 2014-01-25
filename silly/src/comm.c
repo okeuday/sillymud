@@ -269,7 +269,6 @@ int game_loop(int s)
   char comm[MAX_STRING_LENGTH];
   char promptbuf[80];
   struct descriptor_data *point, *next_point;
-  sigset_t mask;
   struct room_data *rm;
 
   extern struct descriptor_data *descriptor_list;
@@ -286,17 +285,6 @@ int game_loop(int s)
   maxdesc = s;
   /* !! Change if more needed !! */
   avail_descs = getdtablesize() -2;
-  
-  sigemptyset(&mask);
-  sigaddset(&mask, SIGUSR1);
-  sigaddset(&mask, SIGUSR2);
-  sigaddset(&mask, SIGINT);
-  sigaddset(&mask, SIGPIPE);
-  sigaddset(&mask, SIGALRM);
-  sigaddset(&mask, SIGTERM);
-  sigaddset(&mask, SIGURG);
-  sigaddset(&mask, SIGXCPU);
-  sigaddset(&mask, SIGHUP);
   
   /* Main loop */
   while (!mudshutdown)  {
@@ -351,7 +339,7 @@ int game_loop(int s)
       last_time.tv_sec++;
     }
     
-    sigprocmask(SIG_BLOCK, &mask, 0);
+    signals_block();
 
     if (select(maxdesc + 1, &input_set, &output_set, &exc_set, &null_time) 
 	< 0)   	{
@@ -368,7 +356,7 @@ int game_loop(int s)
       /*assert(0);*/
     }
     
-    sigprocmask(SIG_UNBLOCK, &mask, 0);
+    signals_unblock();
     
     /* Respond to whatever might be happening */
     
@@ -1252,24 +1240,13 @@ void coma(int s)
       0
       };
   int conn;
-  sigset_t mask;
   
   int workhours(void);
   int load(void);
   
   logE("Entering comatose state.");
   
-  sigemptyset(&mask);
-  sigaddset(&mask, SIGUSR1);
-  sigaddset(&mask, SIGUSR2);
-  sigaddset(&mask, SIGINT);
-  sigaddset(&mask, SIGPIPE);
-  sigaddset(&mask, SIGALRM);
-  sigaddset(&mask, SIGTERM);
-  sigaddset(&mask, SIGURG);
-  sigaddset(&mask, SIGXCPU);
-  sigaddset(&mask, SIGHUP);
-  sigprocmask(SIG_BLOCK, &mask, 0);
+  signals_block();
   
   while (descriptor_list)
     close_socket(descriptor_list);
@@ -1303,7 +1280,7 @@ void coma(int s)
   while (load() >= 6);
   
   logE("Leaving coma.");
-  sigprocmask(SIG_UNBLOCK, &mask, 0);
+  signals_unblock();
 }
 
 

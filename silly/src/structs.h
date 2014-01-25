@@ -1110,6 +1110,7 @@ struct weather_data
 *  file element for player file. BEWARE: Changing it will ruin the file  *
 *********************************************************************** */
 
+#define PASSWORD_SIZE 13 /* crypt() output for DES */
 
 struct char_file_u
 {
@@ -1152,7 +1153,7 @@ struct char_file_u
 
 	/* char data */
 	char name[20];
-	char pwd[11];
+	char pwd[PASSWORD_SIZE];
 	sh_int apply_saving_throw[5];
 	int conditions[3];
 	int startroom;  /* which room the player should start in */
@@ -1329,7 +1330,7 @@ struct descriptor_data
 	int descriptor;	            /* file descriptor for socket */
 	char host[50];                /* hostname                   */
         int port;                     /* port of source connection  */
-	char pwd[12];                 /* password                   */
+	char pwd[PASSWORD_SIZE];      /* password                   */
 	int pos;                      /* position in player-file    */
 	int connected;                /* mode of 'connectedness'    */
         int close;                    /* need to close connection   */

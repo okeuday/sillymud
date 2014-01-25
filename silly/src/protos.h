@@ -1129,6 +1129,8 @@ int DoIHateYou(struct char_data *v);
 /* From signals.c */
  
 void signal_setup();
+void signals_block();
+void signals_unblock();
 void checkpointing(int);
 void shutdown_request(int);
 void logsig(int);

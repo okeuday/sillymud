@@ -1,4 +1,6 @@
-/*
+/*-*-Mode:C;coding:utf-8;tab-width:8;c-basic-offset:2;indent-tabs-mode:()-*-
+ * ex: set ft=cpp fenc=utf-8 sts=2 ts=8 sw=2 et:
+
   SillyMUD Distribution V1.1b             (c) 1993 SillyMUD Developement
  
   See license.doc for distribution terms.   SillyMUD is based on DIKUMUD
@@ -832,12 +834,19 @@ void check_idling(struct char_data *ch)
 
       ch->desc = 0;
 
+#if defined(NO_RENT)
+      recep_offer(ch, NULL, &cost);
+      save_obj(ch, &cost, 1);
+      extract_char(ch);
+      save_char(ch, AUTO_RENT);
+#else
       if (recep_offer(ch, NULL, &cost)) {
 	cost.total_cost = 100;
 	save_obj(ch, &cost, 1);
        }
       
       extract_char(ch);
+#endif
     }
 }
 

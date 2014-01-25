@@ -2,7 +2,6 @@
  * ex: set ft=cpp fenc=utf-8 sts=2 ts=2 sw=2 et:
  */
 #include <ctype.h>
-#include <signal.h>
 #include <stdio.h>
 #include <sys/time.h>
 #include <stdlib.h>
@@ -58,6 +57,8 @@ void string_add(struct descriptor_data *d, char *str);
 void show_string(struct descriptor_data *d, char *input);
 /* signals.c */
 void signal_setup();
+void signals_block();
+void signals_unblock();
 /* spell_parser.c */
 void affect_update(int pulse);
 void stop_follower(struct char_data *ch);
@@ -70,7 +71,6 @@ void TeleportPulseStuff(int pulse);
 void weather_and_time(int mode);
 
 /* internal */
-static sigset_t signal_mask;
 static char * response_with_cloudi = 0;
 static size_t response_size_with_cloudi = 0;
 static void game_loop(cloudi_instance_t * const api);
@@ -245,7 +245,7 @@ static void game_loop_with_cloudi(cloudi_instance_t * api,
                   timeout, trans_id, pid, pid_size);
   }
 
-  sigprocmask(SIG_BLOCK, &signal_mask, 0);
+  signals_block();
   process_input(point, request, request_size);
 
   /* process_commands; */
@@ -364,8 +364,9 @@ static void game_loop_with_cloudi(cloudi_instance_t * api,
   if (point->close) {
     response_info = response_info_close;
     response_info_size = response_info_size_close;
+    close_socket(point);
   }
-  sigprocmask(SIG_UNBLOCK, &signal_mask, 0);
+  signals_unblock();
   cloudi_return(api, command, name, pattern,
                 response_info, response_info_size,
                 response_with_cloudi, response_size + 1,
@@ -388,22 +389,19 @@ void run_the_game_with_cloudi()
   assert(result == cloudi_success);
   result = cloudi_subscribe(&api, "disconnect", &close_socket_with_cloudi);
   assert(result == cloudi_success);
+  /* cloudi_service_tcp
+   * (incoming Telnet MUD commands)
+   */
   result = cloudi_subscribe(&api, "game_loop", &game_loop_with_cloudi);
   assert(result == cloudi_success);
+  /* cloudi_service_http_cowboy uses the HTTP method as a service name
+   * suffix on its service requests, by default
+   * (so incoming WebSocket MUD commands)
+   */
   result = cloudi_subscribe(&api, "game_loop/get", &game_loop_with_cloudi);
   assert(result == cloudi_success);
 
   descriptor_list = 0;
-  sigemptyset(&signal_mask);
-  sigaddset(&signal_mask, SIGUSR1);
-  sigaddset(&signal_mask, SIGUSR2);
-  sigaddset(&signal_mask, SIGINT);
-  sigaddset(&signal_mask, SIGPIPE);
-  sigaddset(&signal_mask, SIGALRM);
-  sigaddset(&signal_mask, SIGTERM);
-  sigaddset(&signal_mask, SIGURG);
-  sigaddset(&signal_mask, SIGXCPU);
-  sigaddset(&signal_mask, SIGHUP);
 
   logE("Signal trapping.");
   signal_setup();
@@ -466,12 +464,15 @@ static void game_loop(cloudi_instance_t * const api)
         --(point->wait);
       }
       process_commands(point);
+      if (point->close) {
+        close_socket(point);
+      }
     }
 
     /* handle heartbeat stuff */
     /* Note: pulse now changes every 1/4 sec (OPT_USEC) */
     pulse++;
-    sigprocmask(SIG_BLOCK, &signal_mask, 0);
+    signals_block();
     if (!(pulse % PULSE_ZONE))  {
       zone_update();
     }
@@ -484,17 +485,19 @@ static void game_loop(cloudi_instance_t * const api)
     if (!(pulse % PULSE_VIOLENCE))
       perform_violence(pulse);
     if (!(pulse % (SECS_PER_MUD_HOUR*4))) {
+      /* every mud hour, execute this */
       weather_and_time(1);
       affect_update(pulse); /* things have been sped up by combining */
       if (time_info.hours == 1) {
         update_time();
       }
     }
-    sigprocmask(SIG_UNBLOCK, &signal_mask, 0);
+    signals_unblock();
     if (pulse >= 2400) {
       pulse = 0;
       /* check_reboot(); not using reboot file */
     }
+    /* currently, nothing is doing checkpointing when tics == 0 */
     tics++; /* tics since last checkpoint signal */
   }
 }
@@ -570,9 +573,12 @@ static void close_socket(struct descriptor_data *d)
       /* a reconnect only occurs with an entry in the character_list
        * but currently, characters are not being found in that list
        * (see interpreter.c:1278, case CON_PWDNRM in nanny())
+       * link-death is not occurring during normal idling due to the
+       * WebSocket client sending "\r\n" on a timer
+       * (see limits.c:803, check_idling() for normal link-death handling)
        */
-      /* at least make sure they are removed from the room
-       * while they are link-dead
+      /* at least make sure the character is removed from the room
+       * when a user disconnects without quitting
        */
       if (d->character->in_room != NOWHERE) {
         char_from_room(d->character);

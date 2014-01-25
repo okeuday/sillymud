@@ -48,7 +48,7 @@ struct char_file_old2 {
   
   /* char data */
   char name[20];
-  char pwd[11];
+  char pwd[PASSWORD_SIZE];
   sh_int apply_saving_throw[5];
   int conditions[3];
   int startroom;  /* which room the player should start in */

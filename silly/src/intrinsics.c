@@ -453,6 +453,8 @@ int vamp_gain_mods(struct char_data *ch, int gain, bool msgs)
   /* 1st: gain in sunlight is -1. */
   /* 2nd: gain elsewhere is normal */
   /* gain during nightimes at 3/4ths or better moons better regen */
+  if (ch->in_room < 0)
+    return 0;
 
   if(time_info.hours > gSunRise && time_info.hours < gSunSet - 1) {
     if(OUTSIDE(ch) && IS_LIGHT(ch->in_room)) {

@@ -1612,7 +1612,7 @@ struct char_data *read_mobile(int nr, int type)
   mob->next = character_list;
   character_list = mob;
 
-#if NEW_RENT
+#if defined(NEW_RENT) || defined(NO_RENT)
   if (mob->points.gold >= 10)
     mob->points.gold /= 10;
   else if (mob->points.gold > 0)
@@ -2488,7 +2488,7 @@ void save_char(struct char_data *ch, sh_int load_room)
   
   st.load_room = load_room;
   
-  strcpy(st.pwd, ch->desc->pwd);
+  memcpy(st.pwd, ch->desc->pwd, PASSWORD_SIZE);
   
   if (!(fl = fopen(PLAYER_FILE, mode)))	{
     perror("save char");
@@ -3519,7 +3519,7 @@ int ReadTextZone( FILE *fl)
 	    (obj = read_object(i, REAL))) {
 	  obj_to_char(obj, mob);
 	  last_cmd = 1;
-#ifndef NEW_RENT
+#if ! defined(NEW_RENT)
 	} else {
 	  last_cmd = 0;
 #endif
