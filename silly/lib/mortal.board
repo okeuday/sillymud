@@ -1,0 +1,142 @@
+ 3 Message Board~
+Okeuday~
+Wed Jan 1~
+
+
+~
+Original Login Message~
+Okeuday~
+Wed Jan 1~
+
+   __
+  /  \
+  \__
+     \  illy MUD     version 1.2a
+  \__/
+
+  Based on Diku MUD (see credits).
+
+
+~
+Original Message Of The Day~
+Okeuday~
+Wed Jan 1~
+
+Read the board for recent changes.
+Type "news", "info", or "newbie" for information.
+
+Because I will be out of town on Christmas, Silly will shut down
+some time after Christmas, but before the new year.
+
+As usual.. there are ABSOLUTELY NO REIMBURSEMENTS, and remember, if 4000
+doesn't work, try 4001
+
+Loki's email address: jdb@cis.ufl.edu   Ripper's: ripper@bu.edu
+        Silly.tar.Z: ftp.cis.ufl.edu (pub/games/mud/)
+------------------------------End Of Line---------------------------------
+
+~
+Original News Message~
+Okeuday~
+Wed Jan 1~
+
+                      The SillyMud Herald  6/21/93
+                        [Doldrums.cis.ufl.edu]
+
+Silly is constantly being worked on code-wise, changes are posted here
+or/and on the board.  It is in an attempt to generate a challenging and
+intelligent mud. Some of the changes do not work out as planned, and
+those are corrected as soon as possible.
+
+[GENERAL NEWS]
+
++ VT100 Display Bar.  Type HELP DISPLAY to find out how to use it.
++ Resize allows you to resize your VT100 bar.
++ Lower levels lose less exp when they die, 
++ Dying frequently w/o gaining much experience could cost you a level
++ Monsters and poly forms have randoms stats based on their level.
+
++ Monsters are a little bit smarter.
++ Some monsters get very cold and lonely in the winter and like to visit
+  town.
++ If you're lower-mid level, you may want to follow Biff sometime, he
+  can lead to some high adventure.
++ Limited items now have egos.. If you're too wimpy, you can't use the
+  powerful items. 
++ Charmed creatures exp goes directly to the master, if the master is in
+  the same room.  Otherwise, it vanishes.
++ Aggressive mobs are now xenophobic.  Polymorphed mages beware!
++ Thieves can't sneak and then wear 'forbidden' armor and remain sneaky.
++ The Abyss is tougher.  
++ Player killing is now legal with restrictions placed on alignment. An evil
+  pc may kill evil or good pcs. A good pc may kill only evil pcs. Neutral pcs
+  are not to be involved in any player killing.
++ Some skills have impact on your alignment. Rescuing will make you good,
+  stealing will make you bad. Career thieves who steal often will soon 
+  become evil and killable by other evils and good aligned pcs.
+  Healing people makes you good.
++ Midgaard will train you to 10th level. New thalos to 20th. High level 
+  masters may be found:
+	Warrior - Rhyodin		Mage   - Mages Tower
+	Thief   - Enfan city		Cleric - Prydain 
++ Killing newbies will be dealt with harshly. A newbie for this is anyone
+  less then 8th level. Anyone caught will lose a level and 1/2 thier exp.
+  Any illegal pc kills (neutral- neutral, good-good, etc) will be dealt with
+  in a similar fashion.
++ New changes:   Mana is now averaged over all of your classes.
+  Triple classed chars can't learn skills or spells better than 80%
+  permanently, double classed 90% permanently. Jack of all trades thing.
+                                        
+[ITEM NEWS]
++  Some items help your skills, lock-picks help the picking skill,
+   sneakers help the sneaking skill, etc.
++  Items can be damaged by combat, spells, etc.
+
+[MONSTER NEWS]
++   Some monsters will rescue others of their own race.
++   Beware the roc.
++   Charmed monsters act more independantly. They will NOT attack anything
+    close to thier alignment. They will also consider fleeing if they are
+    being hit by a mob more than 6 levels higher than them.
++   Skexies no longer pierce.
++   You can no longer kick ghosts.
+
+[LOCATION NEWS]
++   If you notice anything unusual about New Thalos (rooms missing)
+    please write about it on the board.
++   Be sure and type help areas for news on the areas in the game.
+
+[COMMAND NEWS]
++   FILL 	-- Fill barrels and such at fountains.
++   TRACK	-- Taught to you by the ninja master.
++   LOOK ROOM	-- For those of you in brief mode, who want to see what is
+	           in the room.
++   WORLD	-- gives info about the world.
++   ATTRIBUTE	-- gives info about yourself
++   ASSIST	-- Help out a friend who is fighting.
++   WHOZONE     -- Who is in your zone, and where.
++   BREATH      -- in conjunction with certain potions, will make you breath
+                   like a dragon.
++   MOUNT	-- Some animals, such as horses may be ridden.
+    RIDE
+    DISMOUNT
++   SNEAK	-- Repeated will turn off sneak if you were succesful.
+
+[SPELL NEWS]
++   Fly and WaterBreath work.  You will die if your flight runs out
+    in air room and if you can't breath when you are underwater.
++   If you try and charm something and fail it will hate you and try and
+    kill you.
+
+[COMBAT NEWS]
++   Warriors now have multiple attacks at higher levels 
+	7+  3 attacks/ 2 rounds
+       13+  2 attacks/ round.
+       25+  5 attacks/ 2 rounds  (coming soon)
++   Potions take 1 combat round to work..  They fill your stomach, and they
+	have a tendency to break when being quaffed in the midst of battle.
++   Combat will damage weapons and armor, especially if one is using
+    blunt weapons, or having blunt weapons used upon oneself.
+-------------------------------------------------------------------------------
+
+~

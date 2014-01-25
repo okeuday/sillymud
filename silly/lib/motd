@@ -1,13 +1,14 @@
-
-Read the board for recent changes.
-Type "news", "info", or "newbie" for information.
-
-Because I will be out of town on Christmas, Silly will shut down
-some time after Christmas, but before the new year.
-
-As usual.. there are ABSOLUTELY NO REIMBURSEMENTS, and remember, if 4000
-doesn't work, try 4001
-
-Loki's email address: jdb@cis.ufl.edu   Ripper's: ripper@bu.edu
-	    Silly.tar.Z: ftp.cis.ufl.edu (pub/games/mud/)
-------------------------------End Of Line---------------------------------
+################################################################################
+#                                                                              #
+# The original SillyMUD version 1.1b (or 1.2a based on the login message)      #
+# from «a href="http://www.mudbytes.net/file-319" target="_blank"»http://www.mudbytes.net/file-319«/a»                                        #
+#                                                                              #
+# CloudI («a href="http://cloudi.org" target="_blank"»http://cloudi.org«/a») is being used for fault-tolerance and scalability #
+# (which includes socket events and transaction handling)                      #
+#                                                                              #
+# To find out more, go to «a href="https://github.com/okeuday/sillymud" target="_blank"»https://github.com/okeuday/sillymud«/a»                  #
+#                                                                              #
+# If you want to see the original SillyMUD messages, check the mortals board   #
+# at the altar of the Temple of Midgaard                                       #
+#                                                                              #
+################################################################################
