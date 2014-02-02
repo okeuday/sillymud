@@ -93,6 +93,8 @@ static void source_info_from_cloudi(char const ** info,
                                     char const ** source_address,
                                     int * source_port)
 {
+  char const * forwarded_address = 0;
+  char const * forwarded_port = 0;
   *source_address = 0;
   *source_port = 0;
   int found = 0;
@@ -108,14 +110,27 @@ static void source_info_from_cloudi(char const ** info,
       if (strcmp(&(info[i][7]), "address") == 0)
       {
         *source_address = info[i + 1];
-        ++found;
       }
       else if (strcmp(&(info[i][7]), "port") == 0)
       {
         *source_port = atoi(info[i + 1]);
-        ++found;
       }
     }
+    /* cloudi_service_http_cowboy proxied request_info key names */
+    if (strcmp(info[i], "x-forwarded-for") == 0) {
+      forwarded_address = info[i + 1];
+      ++found;
+    }
+    else if (strcmp(info[i], "x-forwarded-port") == 0) {
+      forwarded_port = info[i + 1];
+      ++found;
+    }
+  }
+  if (forwarded_address) {
+    *source_address = forwarded_address;
+  }
+  if (forwarded_port) {
+    *source_port = atoi(forwarded_port);
   }
 }
 
@@ -154,6 +169,7 @@ static void new_descriptor_with_cloudi(cloudi_instance_t * api,
   int source_port;
   source_info_from_cloudi(info, &source_address, &source_port);
   cloudi_info_key_value_destroy(info);
+  fprintf(stderr, "connection open: %s:%d\n", source_address, source_port);
 
   /* New connection */
   struct descriptor_data *point = new_descriptor(source_address, source_port);
@@ -189,6 +205,7 @@ static void close_socket_with_cloudi(cloudi_instance_t * api,
   int source_port;
   source_info_from_cloudi(info, &source_address, &source_port);
   cloudi_info_key_value_destroy(info);
+  fprintf(stderr, "connection close: %s:%d\n", source_address, source_port);
 
   struct descriptor_data *point =
     descriptor_data_from_cloudi(source_address, source_port);
