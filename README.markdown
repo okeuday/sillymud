@@ -1,5 +1,7 @@
 #[SillyMUD 1.1b](http://www.mudbytes.net/file-319) With [CloudI](http://cloudi.org) Integration
 
+[Here is the case study](http://www.toptal.com/erlang/modernizing-legacy-software-an-example-using-erlang-and-cloudi) for the source code in this repository.
+
 ## LICENSE
 
 All SillyMUD source code was released under the DikuMud License
