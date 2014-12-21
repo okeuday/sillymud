@@ -1,7 +1,7 @@
 #-*-Mode:make;coding:utf-8;tab-width:4;c-basic-offset:4-*-
 # ex: set ft=make fenc=utf-8 sts=4 ts=4 sw=4 noet:
 CC=gcc
-CLOUDI_VERSION=1.3.3
+CLOUDI_VERSION=1.4.0
 CLOUDI_PATH=/usr/local/lib/cloudi-$(CLOUDI_VERSION)
 CLOUDI_CFLAGS=-I$(CLOUDI_PATH)/api/c/
 CLOUDI_LFLAGS=-L$(CLOUDI_PATH)/api/c/ -Wl,-rpath,$(CLOUDI_PATH)/api/c/ -lcloudi
@@ -189,5 +189,5 @@ clean:
 
 dmserver: $(OBJS) comm_cloudi.c
 	$(CC) -c -o comm_cloudi.o comm_cloudi.c $(CFLAGS) $(CLOUDI_CFLAGS)
-	$(CC) -o dmserver $(OBJS) comm_cloudi.o -lcrypt $(CLOUDI_LFLAGS)
+	$(CC) -fexceptions -o dmserver $(OBJS) comm_cloudi.o -lcrypt $(CLOUDI_LFLAGS)
 
