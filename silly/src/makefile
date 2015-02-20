@@ -4,7 +4,7 @@ CC=gcc
 CLOUDI_VERSION=1.4.0
 CLOUDI_PATH=/usr/local/lib/cloudi-$(CLOUDI_VERSION)
 CLOUDI_CFLAGS=-I$(CLOUDI_PATH)/api/c/
-CLOUDI_LFLAGS=-L$(CLOUDI_PATH)/api/c/ -Wl,-rpath,$(CLOUDI_PATH)/api/c/ -lcloudi
+CLOUDI_LDFLAGS=-L$(CLOUDI_PATH)/api/c/ -Wl,-rpath,$(CLOUDI_PATH)/api/c/ -lcloudi
 CFLAGS=-g -O0 -I. -D_XOPEN_SOURCE
 MUD_CFLAGS=-DIMPL_SECURITY -DNO_RENT -DLEVEL_LOSS -DNEWEXP -DGROUP_NAMES \
            -Wno-deprecated-declarations \
@@ -189,5 +189,5 @@ clean:
 
 dmserver: $(OBJS) comm_cloudi.c
 	$(CC) -c -o comm_cloudi.o comm_cloudi.c $(CFLAGS) $(CLOUDI_CFLAGS)
-	$(CC) -fexceptions -o dmserver $(OBJS) comm_cloudi.o -lcrypt $(CLOUDI_LFLAGS)
+	$(CC) -fexceptions -o dmserver $(OBJS) comm_cloudi.o -lcrypt $(CLOUDI_LDFLAGS)
 
