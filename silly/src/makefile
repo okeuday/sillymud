@@ -1,7 +1,7 @@
 #-*-Mode:make;coding:utf-8;tab-width:4;c-basic-offset:4-*-
 # ex: set ft=make fenc=utf-8 sts=4 ts=4 sw=4 noet:
 CC=gcc
-CLOUDI_VERSION=1.4.0
+CLOUDI_VERSION=1.5.0
 CLOUDI_PATH=/usr/local/lib/cloudi-$(CLOUDI_VERSION)
 CLOUDI_CFLAGS=-I$(CLOUDI_PATH)/api/c/ -fexceptions
 CLOUDI_LDFLAGS=-L$(CLOUDI_PATH)/api/c/ -Wl,-rpath,$(CLOUDI_PATH)/api/c/ -lcloudi
