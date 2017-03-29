@@ -149,8 +149,7 @@ struct descriptor_data * descriptor_data_from_cloudi(char const * const
   return 0;
 }
 
-static void new_descriptor_with_cloudi(cloudi_instance_t * api,
-                                       int const command,
+static void new_descriptor_with_cloudi(int const command,
                                        char const * const name,
                                        char const * const pattern,
                                        void const * const request_info,
@@ -161,7 +160,9 @@ static void new_descriptor_with_cloudi(cloudi_instance_t * api,
                                        int8_t priority,
                                        char const * const trans_id,
                                        char const * const pid,
-                                       uint32_t const pid_size)
+                                       uint32_t const pid_size,
+                                       void * state,
+                                       cloudi_instance_t * api)
 {
   char const ** info = cloudi_info_key_value_parse(request_info,
                                                    request_info_size);
@@ -185,8 +186,7 @@ static void new_descriptor_with_cloudi(cloudi_instance_t * api,
                 timeout, trans_id, pid, pid_size);
 }
 
-static void close_socket_with_cloudi(cloudi_instance_t * api,
-                                     int const command,
+static void close_socket_with_cloudi(int const command,
                                      char const * const name,
                                      char const * const pattern,
                                      void const * const request_info,
@@ -197,7 +197,9 @@ static void close_socket_with_cloudi(cloudi_instance_t * api,
                                      int8_t priority,
                                      char const * const trans_id,
                                      char const * const pid,
-                                     uint32_t const pid_size)
+                                     uint32_t const pid_size,
+                                     void * state,
+                                     cloudi_instance_t * api)
 {
   char const ** info = cloudi_info_key_value_parse(request_info,
                                                    request_info_size);
@@ -215,8 +217,7 @@ static void close_socket_with_cloudi(cloudi_instance_t * api,
                 timeout, trans_id, pid, pid_size);
 }
 
-static void game_loop_with_cloudi(cloudi_instance_t * api,
-                                  int const command,
+static void game_loop_with_cloudi(int const command,
                                   char const * const name,
                                   char const * const pattern,
                                   void const * const request_info,
@@ -227,7 +228,9 @@ static void game_loop_with_cloudi(cloudi_instance_t * api,
                                   int8_t priority,
                                   char const * const trans_id,
                                   char const * const pid,
-                                  uint32_t const pid_size)
+                                  uint32_t const pid_size,
+                                  void * state,
+                                  cloudi_instance_t * api)
 {
   char const ** info = cloudi_info_key_value_parse(request_info,
                                                    request_info_size);
@@ -399,7 +402,7 @@ void run_the_game_with_cloudi()
   assert(thread_count == 1);
   int const thread_index = 0;
   cloudi_instance_t api;
-  result = cloudi_initialize(&api, thread_index);
+  result = cloudi_initialize(&api, thread_index, 0);
   assert(result == cloudi_success);
   /* Respond to whatever might be happening */
   result = cloudi_subscribe(&api, "connect", &new_descriptor_with_cloudi);
