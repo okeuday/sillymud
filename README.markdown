@@ -7,7 +7,7 @@
 All SillyMUD source code was released under the DikuMud License
 (see `silly/doc/license.doc`)
 
-[CloudI](http://cloudi.org) is released under a BSD license
+[CloudI](http://cloudi.org) is released under a MIT license
 
 The websocket client interface is based on
 [hMUD](https://github.com/blueoctopus/hMUD)
