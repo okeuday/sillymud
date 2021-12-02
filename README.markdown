@@ -1,13 +1,13 @@
-# [SillyMUD 1.1b](http://www.mudbytes.net/file-319) With [CloudI](http://cloudi.org) Integration
+# [SillyMUD 1.1b](http://www.mudbytes.net/file-319) With [CloudI](https://cloudi.org) Integration
 
-[Here is the case study](http://www.toptal.com/erlang/modernizing-legacy-software-an-example-using-erlang-and-cloudi) for the source code in this repository.
+[Here is the case study](https://www.toptal.com/erlang/modernizing-legacy-software-an-example-using-erlang-and-cloudi) for the source code in this repository.
 
 ## LICENSE
 
 All SillyMUD source code was released under the DikuMud License
 (see `silly/doc/license.doc`)
 
-[CloudI](http://cloudi.org) is released under a MIT license
+[CloudI](https://cloudi.org) is released under a MIT license
 
 The websocket client interface is based on
 [hMUD](https://github.com/blueoctopus/hMUD)
@@ -18,7 +18,7 @@ and hMUD is released under a MIT license
 
 Here is a simple way to use the repository directory for running SillyMUD
 
-1. Install [CloudI](http://cloudi.org)
+1. Install [CloudI](https://cloudi.org)
    (you can install locally by using the `--prefix` argument on configure)
 2. Copy the `cloudi.conf` file to your CloudI installation's etc directory
 3. Set the `SILLYMUD` environment variable with the repository root directory
