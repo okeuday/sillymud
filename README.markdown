@@ -22,7 +22,7 @@ Here is a simple way to use the repository directory for running SillyMUD
    (you can install locally by using the `--prefix` argument on configure)
 2. Copy the `cloudi.conf` file to your CloudI installation's etc directory
 3. Set the `SILLYMUD` environment variable with the repository root directory
-   (e.g., `export SILLYMUD=`pwd` ` if you are currently there)
+   (e.g., ``export SILLYMUD=`pwd` `` if you are currently there)
 4. Compile SillyMUD (cd silly/src; make)
 5. Start CloudI
 6. Connect to port 4000 for Telnet or 4001 for WebSockets
