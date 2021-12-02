@@ -4,7 +4,7 @@
   See license.doc for distribution terms.   SillyMUD is based on DIKUMUD
 */
 
-int CAN_SEE(struct char_data *s, struct char_data *o);
+int can_see(struct char_data *s, struct char_data *o);
 
 #define TRUE  1
 
@@ -213,7 +213,7 @@ int CAN_SEE(struct char_data *s, struct char_data *o);
 
 #define CAN_GET_OBJ(ch, obj)   \
    (CAN_WEAR((obj), ITEM_TAKE) && CAN_CARRY_OBJ((ch),(obj)) &&          \
-    CAN_SEE_OBJ((ch),(obj)))
+    can_see_obj((ch),(obj)))
 
 #define IS_OBJ_STAT(obj,stat) (IS_SET((obj)->obj_flags.extra_flags,stat))
 
@@ -222,14 +222,14 @@ int CAN_SEE(struct char_data *s, struct char_data *o);
 /* char name/short_desc(for mobs) or someone?  */
 
 #define PERS(ch, vict)   (                                          \
-	CAN_SEE(vict, ch) ?						                                    \
+	can_see(vict, ch) ?						                                    \
 	  (!IS_NPC(ch) ? (ch)->player.name : (ch)->player.short_descr) :	\
 	  "someone")
 
-#define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
+#define OBJS(obj, vict) (can_see_obj((vict), (obj)) ? \
 	(obj)->short_description  : "something")
 
-#define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
+#define OBJN(obj, vict) (can_see_obj((vict), (obj)) ? \
 	fname((obj)->name) : "something")
 
 #define OUTSIDE(ch) (!IS_SET(real_roomp((ch)->in_room)->room_flags,INDOORS) &&\

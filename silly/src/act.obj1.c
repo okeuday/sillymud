@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "protos.h"
 
@@ -72,7 +73,7 @@ void do_get(struct char_data *ch, char *argument, int cmd)
 {
   char arg1[MAX_STRING_LENGTH];
   char arg2[MAX_STRING_LENGTH];
-  char buffer[MAX_STRING_LENGTH];
+  char buffer[MAX_STRING_LENGTH+30];
   struct obj_data *sub_object;
   struct obj_data *obj_object;
   struct obj_data *next_obj;
@@ -132,7 +133,7 @@ void do_get(struct char_data *ch, char *argument, int cmd)
 	*/
       if (CheckForAnyTrap(ch, obj_object)) 
 	return;
-      if (CAN_SEE_OBJ(ch,obj_object)) {
+      if (can_see_obj(ch,obj_object)) {
 	if ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)) {
 	  if ((IS_CARRYING_W(ch) + obj_object->obj_flags.weight) <= 
 	      CAN_CARRY_W(ch)) {
@@ -240,7 +241,7 @@ void do_get(struct char_data *ch, char *argument, int cmd)
 	  if (CheckForGetTrap(ch, obj_object))
 	    return;
 	  next_obj = obj_object->next_content;
-	  if (CAN_SEE_OBJ(ch,obj_object)) {
+	  if (can_see_obj(ch,obj_object)) {
 	    if ((IS_CARRYING_N(ch) + 1 < 
 		 CAN_CARRY_N(ch))) {
 	      if (has || (IS_CARRYING_W(ch) + obj_object->obj_flags.weight) < 
@@ -426,7 +427,7 @@ void do_drop(struct char_data *ch, char *argument, int cmd)
 	  test = TRUE;
 
 	} else {
-	  if (CAN_SEE_OBJ(ch, tmp_object)) {
+	  if (can_see_obj(ch, tmp_object)) {
 	    if (singular(tmp_object)) 
 	      sprintf(buffer, "You can't drop %s, it must be CURSED!\n\r", tmp_object->short_description);
 	    else 
@@ -635,7 +636,9 @@ int newstrlen(char *p) {
 
 void do_give(struct char_data *ch, char *argument, int cmd)
 {
-  char obj_name[200], vict_name[80], buf[132];
+  char obj_name[200];
+  char vict_name[80];
+  char buf[210];
   char arg[80], newarg[100];
   int amount, num, p, count;
   struct char_data *vict;

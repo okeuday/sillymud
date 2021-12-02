@@ -3,7 +3,7 @@
 # The original SillyMUD version 1.1b (or 1.2a based on the login message)      #
 # from «a href="http://www.mudbytes.net/file-319" target="_blank"»http://www.mudbytes.net/file-319«/a»                                        #
 #                                                                              #
-# CloudI («a href="http://cloudi.org" target="_blank"»http://cloudi.org«/a») is being used for fault-tolerance and scalability #
+# CloudI («a href="https://cloudi.org" target="_blank"»https://cloudi.org«/a») is being used for fault-tolerance and scalability #
 # (which includes socket events and transaction handling)                      #
 #                                                                              #
 # To find out more, go to «a href="https://github.com/okeuday/sillymud" target="_blank"»https://github.com/okeuday/sillymud«/a»                  #

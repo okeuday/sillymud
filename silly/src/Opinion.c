@@ -106,7 +106,7 @@ int AddHated( struct char_data *ch, struct char_data *pud)
 
   if (pud) {
 
-    if (!CAN_SEE(ch, pud))
+    if (!can_see(ch, pud))
       return(FALSE);
 
     CREATE(newpud, struct char_list, 1);
@@ -359,7 +359,7 @@ int AddFeared( struct char_data *ch, struct char_data *pud)
 
   if (pud) {
 
-    if (!CAN_SEE(ch, pud))
+    if (!can_see(ch, pud))
       return(FALSE);
 
     CREATE(newpud, struct char_list, 1);
@@ -431,7 +431,7 @@ struct char_data *FindAHatee( struct char_data *ch)
 
    for (tmp_ch=real_roomp(ch->in_room)->people; tmp_ch; 
         tmp_ch = tmp_ch->next_in_room) {
-       if (Hates(ch, tmp_ch) && (CAN_SEE(ch, tmp_ch))) {
+       if (Hates(ch, tmp_ch) && (can_see(ch, tmp_ch))) {
     	  if (ch->in_room == tmp_ch->in_room) {
 	    if (ch != tmp_ch) {
 	       return(tmp_ch);
@@ -454,7 +454,7 @@ struct char_data *FindAFearee( struct char_data *ch)
 
    for (tmp_ch=real_roomp(ch->in_room)->people; tmp_ch; 
         tmp_ch = tmp_ch->next_in_room) {
-       if (Fears(ch, tmp_ch) && (CAN_SEE(ch, tmp_ch))) {
+       if (Fears(ch, tmp_ch) && (can_see(ch, tmp_ch))) {
     	  if ((ch->in_room == tmp_ch->in_room) &&
 	    (ch != tmp_ch)) {
 	    return(tmp_ch);
@@ -548,7 +548,7 @@ void KillTheOrcs(struct char_data *ch)
   
   for ( tmp_victim = real_roomp(ch->in_room)->people; tmp_victim;
        tmp_victim = tmp_victim->next_in_room) {
-    if(GET_RACE(tmp_victim) == RACE_ORC  && CAN_SEE(ch,tmp_victim) &&
+    if(GET_RACE(tmp_victim) == RACE_ORC  && can_see(ch,tmp_victim) &&
        !ch->specials.fighting) {
       send_to_char("My god, there's a stinking orc!!\n\r",ch);
       if( (GET_HIT(ch) / GET_MAX_HIT(ch)  > 0.25 ) &&

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <sys/time.h>
 
 #include "protos.h"
@@ -710,7 +711,7 @@ int receptionist(struct char_data *ch, int cmd, char *arg, struct char_data *mob
   for (temp_char = real_roomp(ch->in_room)->people; (temp_char) && (!recep);
        temp_char = temp_char->next_in_room)
     if (IS_MOB(temp_char))
-      if (mob_index[temp_char->nr].func == receptionist)
+      if (mob_index[temp_char->nr].func == (funcp_index_item)receptionist)
 	recep = temp_char;
   
   if (!recep) {
@@ -792,7 +793,7 @@ int receptionist(struct char_data *ch, int cmd, char *arg, struct char_data *mob
     return(TRUE);
   }
   
-  if (!CAN_SEE(recep, ch))     {
+  if (!can_see(recep, ch))     {
       act("$n says, 'I just can't deal with people I can't see!'", FALSE, recep, 0, 0, TO_ROOM);
       act("$n bursts into tears", FALSE, recep, 0, 0, TO_ROOM);
       return(TRUE);

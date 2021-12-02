@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <crypt.h>
 #include <unistd.h>
 
 #include "protos.h"
@@ -446,7 +447,7 @@ int special(struct char_data *ch, int cmd, char *arg)
   
   if (ch->in_room == NOWHERE) {
     char_to_room(ch, 3001);
-    return;
+    return(0);
   }
   
   /* special in room? */
@@ -859,7 +860,6 @@ int _parse_name(char *arg, char *name)
 /* deal with newcomers and other non-playing sockets */
 void nanny(struct descriptor_data *d, char *arg)
 {
-
   char buf[100],*help_thing;
   int player_i, count=0, oops=FALSE, index=0, number, choice;
   int i; int junk[6];			/* generic counter */
@@ -874,21 +874,6 @@ void nanny(struct descriptor_data *d, char *arg)
   extern int top_of_mobt;
   extern int RacialMax[][6];
   extern const char *RaceName[];
-  
-  void do_look(struct char_data *ch, char *argument, int cmd);
-  void load_char_objs(struct char_data *ch);
-  int load_char(char *name, struct char_file_u *char_element);
-  /* somehow, keeping these unused variables here is preventing the memory
-   * overwrite of a struct char_data that enters the limits.c check_idling()
-   * function to get logged off, when ran within valgrind
-   * (char_data master was being set to 0x33)
-   */
-  static void * unused0 = 0;
-  static void * unused1 = 0;
-  static void * unused2 = 0;
-  static void * unused3 = 0;
-  static void * unused4 = 0;
-  static void * unused5 = 0;
   
   write_to_descriptor_echo_on(d);
   

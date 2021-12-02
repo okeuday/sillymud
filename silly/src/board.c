@@ -53,13 +53,7 @@ char save_file[NUM_BOARDS][20] = {
     
 /* These are the binary files in which to save/load messages */
 
-void board_write_msg(struct char_data *ch, char *arg, int bnum);
-int board_display_msg(struct char_data *ch, char *arg, int bnum);
-int board_remove_msg(struct char_data *ch, char *arg, int bnum);
-void board_save_board();
-void board_load_board();
-int board_show_board(struct char_data *ch, char *arg, int bnum);
-int fwrite_string(char *buf, FILE *fl);
+static int fwrite_string(char *buf, FILE *fl);
 
 /* board.c version 1.2 - Jun 1991 by Twilight.
 
@@ -85,52 +79,207 @@ c   Added a board and message structure
 
 */
 
-int board(struct char_data *ch, int cmd, char *arg, struct obj_data *obj, int type)
+static void board_load_board()
 {
-  static int has_loaded = 0;
-  char buf[80];
-  int bnum = -1;
-  int obj_num;
-
-  if (type != PULSE_COMMAND)
-    return(FALSE);
-
-  if (!ch->desc)
-    return(0); /* By MS or all NPC's will be trapped at the board */
+  FILE *the_file;
+  int ind;
+  int bnum;
+  char buf[256];
   
-  if (!has_loaded)
-    {
-      board_load_board();
-      has_loaded = 1;
+  memset(boards, 0, sizeof(boards)); /* Zero out the array, make sure no */
+                                     /* Funky pointers are left in the   */
+                                     /* Allocated space                  */
+
+  for ( bnum = 0 ; bnum < NUM_BOARDS ; bnum++ ) {
+    board_lock[bnum].lock = 0;
+    board_lock[bnum].locked_for = 0;
+  }
+
+  for (bnum = 0; bnum < NUM_BOARDS; bnum++) {
+    boards[bnum].number = -1;
+    the_file = fopen(save_file[bnum], "r");
+    if (!the_file) {
+      sprintf(buf,"Can't open message file for board %d.\n\r",bnum);
+      logE(buf);
+      continue;
     }
 
-  if (!cmd)
-    return(FALSE);
+    fscanf( the_file, " %d ", &boards[bnum].number);
+    if (boards[bnum].number < 0 || boards[bnum].number > MAX_MSGS || 
+	feof(the_file)) {
+      logE("Board-message file corrupt, nonexistent, or empty.\n\r");
+      boards[bnum].number = -1;
+      fclose(the_file);
+      continue;
+    }
 
-  /* Identify which board we're dealing with */
-  
-  obj_num = (obj->item_number);
-  if (obj_num == (real_object(3099)))  bnum = 0;
-  else if (obj_num == (real_object(3098)))  bnum = 1;
-  else if (obj_num == (real_object(3097))) bnum = 2;
+    curr_board = &boards[bnum];
 
-  switch (cmd) {
-  case 15:  /* look */
-    return(board_show_board(ch, arg, bnum));
-  case 149: /* write */
-    board_write_msg(ch, arg, bnum);
-    return 1;
-  case 63: /* read */
-    return(board_display_msg(ch, arg, bnum));
-  case 66: /* remove */
-    return(board_remove_msg(ch, arg, bnum));
-  default:
-    return 0;
+    for (ind = 0; ind <= curr_board->number; ind++) {
+      curr_msg = &curr_board->msg[ind];
+      curr_msg->title = (char *)fread_string (the_file);
+      curr_msg->author = (char *)fread_string (the_file);
+      curr_msg->date = (char *)fread_string (the_file);
+      curr_msg->text = (char *)fread_string (the_file);
+    }
+    fclose(the_file);
   }
 }
 
+static int board_show_board(struct char_data *ch, char *arg, int bnum)
+{
+  int i;
+  char buf[MAX_STRING_LENGTH+50], tmp[MAX_INPUT_LENGTH];
+                          /* ^ had a few bus errors, *shrug* */
+  one_argument(arg, tmp);
 
-void board_write_msg(struct char_data *ch, char *arg, int bnum) {
+  if (!*tmp || !isname(tmp, "board bulletin"))
+    return(0);
+
+  if ((GetMaxLevel(ch) < min_read_level[bnum]) && (bnum !=5)) 
+    /* Skip if board 5 (Reimb board) */
+{ 
+    send_to_char("You try and look at the messages on the board but you\n\r",ch);
+    send_to_char("cannot comprehend their meaning.\n\r",ch);
+    act("$n tried to read the board, but looks bewildered.",TRUE,ch, 0, 0, TO_ROOM);
+    return(1);
+  }
+
+  curr_board = &boards[bnum];
+
+  act("$n studies the board.", TRUE, ch, 0, 0, TO_ROOM);
+
+  strcpy(buf,"This is a bulletin board. Usage: READ/REMOVE <messg #>, WRITE <header>\n\r");
+  if (boards[bnum].number == -1)
+    strcat(buf, "The board is empty.\n\r");
+  else {
+    sprintf(buf + strlen(buf), "There are %d messages on the board.\n\r",
+	    curr_board->number);
+    sprintf(buf + strlen(buf), "\n\rBoard Topic:\n\r%s------------\n\r",curr_board->msg[0].text);
+    for ( i = 1 ; i <= curr_board->number ; i++ ) 
+/*      if (((GET_MAX_LEVEL(ch) < min_read_level[bnum]) &&
+           (strcmp(ch->name, curr_board->msg[i].author))) ||
+          (GET_MAX_LEVEL(ch) >= min_read_level[bnum]))  */
+       sprintf(buf + strlen(buf), "%-2d : %-15s (%s) -- %s\n\r", i , 
+               curr_board->msg[i].author, curr_board->msg[i].date,
+               curr_board->msg[i].title);
+  }
+  page_string(ch->desc, buf, 1);
+  return(1);
+}
+
+static char *fix_returns(char *text_string)
+{
+  char *localbuf;
+  int point=0;
+  int point2 = 0;
+
+  if (!text_string) {
+    CREATE(localbuf,char,2);
+    strcpy(localbuf,"\n");
+    return(localbuf);
+  }
+
+  if (!(*text_string)) {
+    CREATE(localbuf,char,strlen("(NULL)")+1);
+    strcpy(localbuf,"(NULL)");
+    return(localbuf);
+  }
+
+  CREATE(localbuf,char,strlen(text_string));
+
+  while(*(text_string+point) != '\0') 
+    if (*(text_string+point) != '\r') {
+      *(localbuf+point2) = *(text_string+point);
+      point2++;
+      point++;
+    }
+    else
+      point++;
+  *(localbuf + point2) = '\0'; /* You never made sure of null termination */
+  return(localbuf);
+}
+
+static void board_save_board(int bnum)
+{
+  FILE *the_file;
+  int ind;
+  char buf[256];
+  char *temp_add;
+
+  /* We're assuming the board number is valid since it was passed by
+     out own code */
+
+  curr_board = &boards[bnum];
+
+  the_file = fopen(save_file[bnum], "w");
+
+  if (!the_file) {
+      logE("Unable to open/create savefile for bulletin board..\n\r");
+      return;
+    }
+
+  fprintf(the_file," %d ", curr_board->number);
+  for (ind = 0; ind <= curr_board->number; ind++) {
+    curr_msg = &curr_board->msg[ind];
+    fwrite_string(curr_msg->title, the_file);
+    fwrite_string(curr_msg->author, the_file);
+    fwrite_string(curr_msg->date, the_file);
+    fwrite_string((temp_add = fix_returns(curr_msg->text)), the_file);
+    free(temp_add);
+  }
+  fclose(the_file);
+  return;
+}
+
+static int board_check_locks(int bnum, struct char_data *ch)
+{
+  char buf[MAX_INPUT_LENGTH];
+  struct char_data *tmp_char;
+  bool found = FALSE;
+  if (!board_lock[bnum].lock) return(0);
+  
+  /* FIRST lets' see if this character is even in the game anymore! -WG-*/
+  for (tmp_char = character_list; tmp_char; tmp_char = tmp_char->next)
+    {
+      if (tmp_char == board_lock[bnum].locked_for)
+        {
+          found = TRUE;
+          break;
+        }
+    }
+  if (!found)
+    {
+      logE("Board: board locked for a user not in game.");
+      board_lock[bnum].lock = 0;
+      board_lock[bnum].locked_for = NULL;
+      return(0);
+    }
+
+  /* Check for link-death of lock holder */
+
+  if (!board_lock[bnum].locked_for->desc) {
+    sprintf(buf,"You push %s aside and approach the board.\n\r",board_lock[bnum].locked_for->player.name);
+    send_to_char(buf, ch);
+  }
+
+  /* Else see if lock holder is still in write-string mode */
+
+  else if (board_lock[bnum].locked_for->desc->str) { /* Lock still holding */
+    sprintf(buf,"You try to approach the board but %s blocks your way.\n\r",board_lock[bnum].locked_for->player.name);
+    send_to_char(buf, ch);
+    return (1);
+  }
+
+  /* Otherwise, the lock has been lifted */
+
+  board_save_board(bnum);
+  board_lock[bnum].lock = 0;
+  board_lock[bnum].locked_for = 0;
+  return(0);
+}
+
+static void board_write_msg(struct char_data *ch, char *arg, int bnum) {
 
   int highmessage;
   char buf[MAX_STRING_LENGTH];
@@ -220,8 +369,59 @@ void board_write_msg(struct char_data *ch, char *arg, int bnum) {
     boards[bnum].number = 0;
 }
 
-int board_remove_msg(struct char_data *ch, char *arg, int bnum) {
+static int board_display_msg(struct char_data *ch, char *arg, int bnum)
+{
+  char buf[512], number[MAX_INPUT_LENGTH], buffer[MAX_STRING_LENGTH];
+  int tmessage;
 
+  one_argument(arg, number);
+
+  if (!*number || !isdigit(*number))
+    return(0);
+
+  if (!(tmessage = atoi(number))) return(0);
+
+  curr_board = &boards[bnum];
+
+  if ((boards[bnum].number != -1) &&
+      (tmessage >= 0 && tmessage <= curr_board->number) &&
+      (GetMaxLevel(ch) < min_read_level[bnum]) &&
+      (strcmp(GET_NAME(ch), curr_board->msg[tmessage].author))) ;
+  else 
+  if ( GetMaxLevel(ch) < min_read_level[bnum] ) {
+    send_to_char("You try and look at the messages on the board but you\n\r",
+                 ch);
+    send_to_char("cannot comprehend their meaning.\n\r\n\r",ch);
+    act("$n tried to read the board, but looks bewildered.",TRUE,ch, 0, 0,
+        TO_ROOM);
+    return(1);
+  }
+
+  if (boards[bnum].number == -1) {
+    send_to_char("The board is empty!\n\r", ch);
+    return(1);
+  }
+  
+  if (tmessage < 0 || tmessage > curr_board->number) {
+    send_to_char("That message exists only in your imagination..\n\r",ch);
+    return(1);
+  }
+
+  curr_msg = &curr_board->msg[tmessage];
+
+  sprintf(buffer, "Message %2d (%s): %-15s -- %s", tmessage, curr_msg->date, curr_msg->author, curr_msg->title );
+  sprintf(buffer + strlen(buffer), "\n\r----------\n\r%s", (curr_msg->text?curr_msg->text:"(null)"));
+  page_string(ch->desc, buffer, 1);
+  return(1);
+
+/*
+  sprintf(buf, "$n reads message %d titled : %s.",tmessage, curr_msg->title);
+  act(buf, TRUE, ch, 0, 0, TO_ROOM);
+*/
+}
+
+static int board_remove_msg(struct char_data *ch, char *arg, int bnum)
+{
   /* This should now be fixed so that low level chars can remove armor and such. */
 
   int ind, tmessage;
@@ -301,259 +501,52 @@ int board_remove_msg(struct char_data *ch, char *arg, int bnum) {
   return(1);
 }
 
-char *fix_returns(char *text_string)
+int board(struct char_data *ch, int cmd, char *arg, struct obj_data *obj, int type)
 {
-  char *localbuf;
-  int point=0;
-  int point2 = 0;
+  static int has_loaded = 0;
+  char buf[80];
+  int bnum = -1;
+  int obj_num;
 
-  if (!text_string) {
-    CREATE(localbuf,char,2);
-    strcpy(localbuf,"\n");
-    return(localbuf);
-  }
+  if (type != PULSE_COMMAND)
+    return(FALSE);
 
-  if (!(*text_string)) {
-    CREATE(localbuf,char,strlen("(NULL)")+1);
-    strcpy(localbuf,"(NULL)");
-    return(localbuf);
-  }
-
-  CREATE(localbuf,char,strlen(text_string));
-
-  while(*(text_string+point) != '\0') 
-    if (*(text_string+point) != '\r') {
-      *(localbuf+point2) = *(text_string+point);
-      point2++;
-      point++;
-    }
-    else
-      point++;
-  *(localbuf + point2) = '\0'; /* You never made sure of null termination */
-  return(localbuf);
-}
+  if (!ch->desc)
+    return(0); /* By MS or all NPC's will be trapped at the board */
   
-void board_save_board(bnum) {
-
-  FILE *the_file;
-  int ind;
-  char buf[256];
-  char *temp_add;
-
-  /* We're assuming the board number is valid since it was passed by
-     out own code */
-
-  curr_board = &boards[bnum];
-
-  the_file = fopen(save_file[bnum], "w");
-
-  if (!the_file) {
-      logE("Unable to open/create savefile for bulletin board..\n\r");
-      return;
+  if (!has_loaded)
+    {
+      board_load_board();
+      has_loaded = 1;
     }
 
-  fprintf(the_file," %d ", curr_board->number);
-  for (ind = 0; ind <= curr_board->number; ind++) {
-    curr_msg = &curr_board->msg[ind];
-    fwrite_string(curr_msg->title, the_file);
-    fwrite_string(curr_msg->author, the_file);
-    fwrite_string(curr_msg->date, the_file);
-    fwrite_string((temp_add = fix_returns(curr_msg->text)), the_file);
-    free(temp_add);
-  }
-  fclose(the_file);
-  return;
-}
+  if (!cmd)
+    return(FALSE);
 
-void board_load_board() {
-
-  FILE *the_file;
-  int ind;
-  int bnum;
-  char buf[256];
+  /* Identify which board we're dealing with */
   
-  memset(boards, 0, sizeof(boards)); /* Zero out the array, make sure no */
-                                     /* Funky pointers are left in the   */
-                                     /* Allocated space                  */
+  obj_num = (obj->item_number);
+  if (obj_num == (real_object(3099)))  bnum = 0;
+  else if (obj_num == (real_object(3098)))  bnum = 1;
+  else if (obj_num == (real_object(3097))) bnum = 2;
 
-  for ( bnum = 0 ; bnum < NUM_BOARDS ; bnum++ ) {
-    board_lock[bnum].lock = 0;
-    board_lock[bnum].locked_for = 0;
-  }
-
-  for (bnum = 0; bnum < NUM_BOARDS; bnum++) {
-    boards[bnum].number = -1;
-    the_file = fopen(save_file[bnum], "r");
-    if (!the_file) {
-      sprintf(buf,"Can't open message file for board %d.\n\r",bnum);
-      logE(buf);
-      continue;
-    }
-
-    fscanf( the_file, " %d ", &boards[bnum].number);
-    if (boards[bnum].number < 0 || boards[bnum].number > MAX_MSGS || 
-	feof(the_file)) {
-      logE("Board-message file corrupt, nonexistent, or empty.\n\r");
-      boards[bnum].number = -1;
-      fclose(the_file);
-      continue;
-    }
-
-    curr_board = &boards[bnum];
-
-    for (ind = 0; ind <= curr_board->number; ind++) {
-      curr_msg = &curr_board->msg[ind];
-      curr_msg->title = (char *)fread_string (the_file);
-      curr_msg->author = (char *)fread_string (the_file);
-      curr_msg->date = (char *)fread_string (the_file);
-      curr_msg->text = (char *)fread_string (the_file);
-    }
-    fclose(the_file);
+  switch (cmd) {
+  case 15:  /* look */
+    return(board_show_board(ch, arg, bnum));
+  case 149: /* write */
+    board_write_msg(ch, arg, bnum);
+    return 1;
+  case 63: /* read */
+    return(board_display_msg(ch, arg, bnum));
+  case 66: /* remove */
+    return(board_remove_msg(ch, arg, bnum));
+  default:
+    return 0;
   }
 }
 
-int board_display_msg(struct char_data *ch, char *arg, int bnum)
-{
-  char buf[512], number[MAX_INPUT_LENGTH], buffer[MAX_STRING_LENGTH];
-  int tmessage;
-
-  one_argument(arg, number);
-
-  if (!*number || !isdigit(*number))
-    return(0);
-
-  if (!(tmessage = atoi(number))) return(0);
-
-  curr_board = &boards[bnum];
-
-  if ((boards[bnum].number != -1) &&
-      (tmessage >= 0 && tmessage <= curr_board->number) &&
-      (GetMaxLevel(ch) < min_read_level[bnum]) &&
-      (strcmp(GET_NAME(ch), curr_board->msg[tmessage].author))) ;
-  else 
-  if ( GetMaxLevel(ch) < min_read_level[bnum] ) {
-    send_to_char("You try and look at the messages on the board but you\n\r",
-                 ch);
-    send_to_char("cannot comprehend their meaning.\n\r\n\r",ch);
-    act("$n tried to read the board, but looks bewildered.",TRUE,ch, 0, 0,
-        TO_ROOM);
-    return(1);
-  }
-
-  if (boards[bnum].number == -1) {
-    send_to_char("The board is empty!\n\r", ch);
-    return(1);
-  }
-  
-  if (tmessage < 0 || tmessage > curr_board->number) {
-    send_to_char("That message exists only in your imagination..\n\r",ch);
-    return(1);
-  }
-
-  curr_msg = &curr_board->msg[tmessage];
-
-  sprintf(buffer, "Message %2d (%s): %-15s -- %s", tmessage, curr_msg->date, curr_msg->author, curr_msg->title );
-  sprintf(buffer + strlen(buffer), "\n\r----------\n\r%s", (curr_msg->text?curr_msg->text:"(null)"));
-  page_string(ch->desc, buffer, 1);
-  return(1);
-
-/*
-  sprintf(buf, "$n reads message %d titled : %s.",tmessage, curr_msg->title);
-  act(buf, TRUE, ch, 0, 0, TO_ROOM);
-*/
-}
-		
-int board_show_board(struct char_data *ch, char *arg, int bnum)
-{
-  int i;
-  char buf[MAX_STRING_LENGTH+50], tmp[MAX_INPUT_LENGTH];
-                          /* ^ had a few bus errors, *shrug* */
-  one_argument(arg, tmp);
-
-  if (!*tmp || !isname(tmp, "board bulletin"))
-    return(0);
-
-  if ((GetMaxLevel(ch) < min_read_level[bnum]) && (bnum !=5)) 
-    /* Skip if board 5 (Reimb board) */
-{ 
-    send_to_char("You try and look at the messages on the board but you\n\r",ch);
-    send_to_char("cannot comprehend their meaning.\n\r",ch);
-    act("$n tried to read the board, but looks bewildered.",TRUE,ch, 0, 0, TO_ROOM);
-    return(1);
-  }
-
-  curr_board = &boards[bnum];
-
-  act("$n studies the board.", TRUE, ch, 0, 0, TO_ROOM);
-
-  strcpy(buf,"This is a bulletin board. Usage: READ/REMOVE <messg #>, WRITE <header>\n\r");
-  if (boards[bnum].number == -1)
-    strcat(buf, "The board is empty.\n\r");
-  else {
-    sprintf(buf + strlen(buf), "There are %d messages on the board.\n\r",
-	    curr_board->number);
-    sprintf(buf + strlen(buf), "\n\rBoard Topic:\n\r%s------------\n\r",curr_board->msg[0].text);
-    for ( i = 1 ; i <= curr_board->number ; i++ ) 
-/*      if (((GET_MAX_LEVEL(ch) < min_read_level[bnum]) &&
-           (strcmp(ch->name, curr_board->msg[i].author))) ||
-          (GET_MAX_LEVEL(ch) >= min_read_level[bnum]))  */
-       sprintf(buf + strlen(buf), "%-2d : %-15s (%s) -- %s\n\r", i , 
-               curr_board->msg[i].author, curr_board->msg[i].date,
-               curr_board->msg[i].title);
-  }
-  page_string(ch->desc, buf, 1);
-  return(1);
-}
-
-int fwrite_string (char *buf, FILE *fl)
+static int fwrite_string (char *buf, FILE *fl)
 {
   return (fprintf(fl, "%s~\n", buf));
 }
 
-int board_check_locks (int bnum, struct char_data *ch) {
-  
-  char buf[MAX_INPUT_LENGTH];
-  struct char_data *tmp_char;
-  bool found = FALSE;
-  if (!board_lock[bnum].lock) return(0);
-  
-  /* FIRST lets' see if this character is even in the game anymore! -WG-*/
-  for (tmp_char = character_list; tmp_char; tmp_char = tmp_char->next)
-    {
-      if (tmp_char == board_lock[bnum].locked_for)
-        {
-          found = TRUE;
-          break;
-        }
-    }
-  if (!found)
-    {
-      logE("Board: board locked for a user not in game.");
-      board_lock[bnum].lock = 0;
-      board_lock[bnum].locked_for = NULL;
-      return(0);
-    }
-
-  /* Check for link-death of lock holder */
-
-  if (!board_lock[bnum].locked_for->desc) {
-    sprintf(buf,"You push %s aside and approach the board.\n\r",board_lock[bnum].locked_for->player.name);
-    send_to_char(buf, ch);
-  }
-
-  /* Else see if lock holder is still in write-string mode */
-
-  else if (board_lock[bnum].locked_for->desc->str) { /* Lock still holding */
-    sprintf(buf,"You try to approach the board but %s blocks your way.\n\r",board_lock[bnum].locked_for->player.name);
-    send_to_char(buf, ch);
-    return (1);
-  }
-
-  /* Otherwise, the lock has been lifted */
-
-  board_save_board(bnum);
-  board_lock[bnum].lock = 0;
-  board_lock[bnum].locked_for = 0;
-  return(0);
-}
-  

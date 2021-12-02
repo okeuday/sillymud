@@ -432,7 +432,7 @@ void affect_update( int pulse )
 	  }
 	} else if (af->type>=FIRST_BREATH_WEAPON &&
 		   af->type <=LAST_BREATH_WEAPON ) {
-	  extern funcp bweapons[];
+	  extern funcp_cast_breath bweapons[];
 	  bweapons[af->type-FIRST_BREATH_WEAPON](-af->modifier/2, i, "",
 						 SPELL_TYPE_SPELL, i, 0);
 	  if (!i->affected) {
@@ -759,10 +759,11 @@ struct syllable syls[] = {
   {"v", "z"},{"w","x"},{"x","n"},{"y","l"},{"z","k"}, {"",""}
 };
 
-say_spell( struct char_data *ch, int si )
+static void say_spell(struct char_data *ch, int si)
 {
-  char buf[MAX_STRING_LENGTH], splwd[MAX_BUF_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
+  char buf[MAX_STRING_LENGTH];
+  char splwd[MAX_BUF_LENGTH];
+  char buf2[MAX_STRING_LENGTH+23];
   
   int j, offs;
   struct char_data *temp_char;

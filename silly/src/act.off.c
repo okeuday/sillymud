@@ -4,6 +4,7 @@
   See license.doc for distribution terms.   SillyMUD is based on DIKUMUD
 */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -276,8 +277,9 @@ void do_backstab(struct char_data *ch, char *argument, int cmd)
 
 void do_order(struct char_data *ch, char *argument, int cmd)
 {
-  char name[100], message[256];
-  char buf[256];
+  char name[100];
+  char message[256];
+  char buf[256+24];
   char tbuf[80];
   bool found = FALSE;
   int org_room;
@@ -454,7 +456,7 @@ void do_flee(struct char_data *ch, char *argument, int cmd)
           found = TRUE;
 
 	  if (RIDDEN(ch)) {
-	    if ((die = MoveOne(RIDDEN(ch), attempt, FALSE))== 1) {
+	    if ((die = MoveOne(RIDDEN(ch), attempt))== 1) {
 	      /* The escape has succeded */
 	      send_to_char("You flee head over heels.\n\r", ch);
               break;
@@ -465,7 +467,7 @@ void do_flee(struct char_data *ch, char *argument, int cmd)
 	      /* return; */
 	    }
 	  } else {
-	    if ((die = MoveOne(ch, attempt, FALSE))== 1) {
+	    if ((die = MoveOne(ch, attempt))== 1) {
 	      /* The escape has succeded */
 	      send_to_char("You flee head over heels.\n\r", ch);
               break;
@@ -624,7 +626,7 @@ void do_flee(struct char_data *ch, char *argument, int cmd)
 
           found = TRUE;
 	  if (RIDDEN(ch)) {
-	    if ((die = MoveOne(RIDDEN(ch), attempt, FALSE))== 1) {
+	    if ((die = MoveOne(RIDDEN(ch), attempt))== 1) {
 	      /* The escape has succeded */
 	      send_to_char("You flee head over heels.\n\r", ch);
               break;
@@ -635,7 +637,7 @@ void do_flee(struct char_data *ch, char *argument, int cmd)
 	      /* return; */
 	    }
 	  } else {
-	    if ((die = MoveOne(ch, attempt, FALSE))== 1) {
+	    if ((die = MoveOne(ch, attempt))== 1) {
 	      /* The escape has succeded */
 	      send_to_char("You flee head over heels.\n\r", ch);
               break;
@@ -671,7 +673,7 @@ void do_flee(struct char_data *ch, char *argument, int cmd)
 	act("$n panics, and attempts to flee.", TRUE, ch, 0, 0, TO_ROOM);
 
 	if (RIDDEN(ch)) {
-	  if ((die = MoveOne(RIDDEN(ch), attempt, FALSE))== 1) {
+	  if ((die = MoveOne(RIDDEN(ch), attempt))== 1) {
 	    /* The escape has succeded */
 	    send_to_char("You flee head over heels.\n\r", ch);
 	    return;
@@ -681,7 +683,7 @@ void do_flee(struct char_data *ch, char *argument, int cmd)
 	    return;
 	  }
 	} else {
-	  if ((die = MoveOne(ch, attempt, FALSE))== 1) {
+	  if ((die = MoveOne(ch, attempt))== 1) {
 	    /* The escape has succeded */
 	    send_to_char("You flee head over heels.\n\r", ch);
 	    return;
@@ -1231,7 +1233,7 @@ void do_wimp(struct char_data *ch, char *argument, int cmd)
 
 extern struct breather breath_monsters[];
 extern struct index_data *mob_index;
-funcp bweapons[] = {
+funcp_cast_breath bweapons[] = {
   cast_geyser,
   cast_fire_breath, cast_gas_breath, cast_frost_breath, cast_acid_breath,
   cast_lightning_breath};
@@ -1241,7 +1243,7 @@ void do_breath(struct char_data *ch, char *argument, int cmd)
   struct char_data *victim;
   char	buf[MAX_STRING_LENGTH], name[MAX_STRING_LENGTH];
   int	count, manacost;
-  funcp weapon;
+  funcp_cast_breath weapon;
   
   if (check_peaceful(ch,"That wouldn't be nice at all.\n\r"))
     return;

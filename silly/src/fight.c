@@ -1039,15 +1039,15 @@ int DoDamage(struct char_data *ch, struct char_data *v, int dam, int type)
 }
 
 
-int DamageMessages( struct char_data *ch, struct char_data *v, int dam,
+void DamageMessages(struct char_data *ch, struct char_data *v, int dam,
 		    int attacktype)
 {
   int nr, max_hit, i, j;
   struct message_type *messages;
   char buf[500];
 
-  if (attacktype == SKILL_KICK) return; /* filter out kicks,
-					  hard coded in do_kick */
+  if (attacktype == SKILL_KICK)
+    return; /* filter out kicks, hard coded in do_kick */
 
   else if ((attacktype >= TYPE_HIT) && (attacktype <= TYPE_BLAST)) {
     dam_message(dam, ch, v, attacktype);
@@ -2674,7 +2674,7 @@ struct char_data *FindVictim( struct char_data *ch)
   
   for (tmp_ch=(real_roomp(ch->in_room))->people;tmp_ch;
        tmp_ch=tmp_ch->next_in_room) {
-    if ((CAN_SEE(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))&&
+    if ((can_see(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))&&
 	(!IS_AFFECTED(tmp_ch, AFF_SNEAK)) && (ch!=tmp_ch)) {
       if (!IS_SET(ch->specials.act, ACT_WIMPY) || !AWAKE(tmp_ch)) {
 	if ((tmp_ch->specials.zone != ch->specials.zone &&
@@ -2742,7 +2742,7 @@ struct char_data *FindVictim( struct char_data *ch)
   
   for (tmp_ch=(real_roomp(ch->in_room))->people;tmp_ch;
        tmp_ch=tmp_ch->next_in_room) {
-    if ((CAN_SEE(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))&&
+    if ((can_see(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))&&
 	(!IS_AFFECTED(tmp_ch, AFF_SNEAK)) && (ch != tmp_ch)) {
       if (!IS_SET(ch->specials.act, ACT_WIMPY) || !AWAKE(tmp_ch)) {
 	if ((tmp_ch->specials.zone != ch->specials.zone &&
@@ -2789,7 +2789,7 @@ struct char_data *FindAnyVictim( struct char_data *ch)
   if (ch->in_room < 0) return(0);
   
   for (tmp_ch=(real_roomp(ch->in_room))->people;tmp_ch;tmp_ch=tmp_ch->next_in_room) {
-    if ((CAN_SEE(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))) {
+    if ((can_see(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))) {
       if (!(IS_AFFECTED(ch, AFF_CHARM)) || (ch->master != tmp_ch)) {
 	if (!SameRace(ch, tmp_ch) || (!IS_NPC(tmp_ch))) {
 	  found = TRUE;  /* a potential victim has been found */ 
@@ -2848,7 +2848,7 @@ struct char_data *FindAnyVictim( struct char_data *ch)
   total = number(1,(int)total);
   
   for (tmp_ch=(real_roomp(ch->in_room))->people;tmp_ch;tmp_ch=tmp_ch->next_in_room) {
-    if ((CAN_SEE(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))) {
+    if ((can_see(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))) {
       if (!SameRace(tmp_ch, ch) || (!IS_NPC(tmp_ch))) {
 	if (IS_NPC(tmp_ch)) {
 	  total -= njump;
@@ -3586,7 +3586,7 @@ struct char_data *FindMetaVictim( struct char_data *ch)
   if (ch->in_room < 0) return(0);
   
   for (tmp_ch=(real_roomp(ch->in_room))->people;tmp_ch;tmp_ch=tmp_ch->next_in_room) {
-    if ((CAN_SEE(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))) {
+    if ((can_see(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))) {
       if (!(IS_AFFECTED(ch, AFF_CHARM)) || (ch->master != tmp_ch)) {
 	if (!SameRace(ch, tmp_ch)) {
 	   found = TRUE;
@@ -3605,7 +3605,7 @@ struct char_data *FindMetaVictim( struct char_data *ch)
   total = number(1,(int)total);
   
   for (tmp_ch=(real_roomp(ch->in_room))->people;tmp_ch;tmp_ch=tmp_ch->next_in_room) {
-    if ((CAN_SEE(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))) {
+    if ((can_see(ch,tmp_ch))&&(!IS_SET(tmp_ch->specials.act,PLR_NOHASSLE))) {
       if (!SameRace(tmp_ch, ch)){
 	total--;
 	if (total == 0)

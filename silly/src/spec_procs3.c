@@ -804,7 +804,7 @@ int type)
   }
 
   if(!dest) 
-    return;
+    return(FALSE);
   
   i=number(0,3);
   

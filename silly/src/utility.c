@@ -75,13 +75,13 @@ int GetItemClassRestrictions(struct obj_data *obj)
 
 }
 
-int CAN_SEE(struct char_data *s, struct char_data *o)
+int can_see(struct char_data *s, struct char_data *o)
 {
 
   if (!o || s->in_room < 0 || o->in_room < 0)
     return(FALSE);
 
-  if (IS_IMMORTAL(s)) 
+  if (IS_IMMORTAL(s)) /* gods can see anything */
     return(TRUE);
 
   if (o->invis_level > GetMaxLevel(s))  /* change this if you want multiple*/
@@ -94,7 +94,7 @@ int CAN_SEE(struct char_data *s, struct char_data *o)
     return(FALSE);
 
 
-  if (IS_AFFECTED(s, AFF_BLIND))
+  if (IS_AFFECTED(s, AFF_BLIND)) /* you are blind */
     return(FALSE);
 
   if (IS_AFFECTED(o, AFF_SANCTUARY) ||
@@ -105,36 +105,25 @@ int CAN_SEE(struct char_data *s, struct char_data *o)
   if (IS_AFFECTED(o, AFF_HIDE))
     return(FALSE);
 
-  if (IS_AFFECTED(o, AFF_INVISIBLE)) {
-    if (IS_IMMORTAL(o))
+  if (IS_AFFECTED(o, AFF_INVISIBLE)) { /* invisible object */
+    if (IS_IMMORTAL(o)) /* object is a god */
       return(FALSE);
-    if (!IS_AFFECTED(s, AFF_DETECT_INVISIBLE)) {
+    if (!IS_AFFECTED(s, AFF_DETECT_INVISIBLE)) { /* you do not detect invis */
       return(FALSE);
     }
   }
 
   if ((IS_DARK(s->in_room) || IS_DARK(o->in_room)) &&
-        (!IS_AFFECTED(s, AFF_INFRAVISION)))
+      (!IS_AFFECTED(s, AFF_INFRAVISION)))  /*  there is enough light to see */
         return(FALSE);
 
   if (IS_AFFECTED2(o, AFF2_ANIMAL_INVIS) && IsAnimal(s))
     return(FALSE);
 
   return(TRUE);
-
-#if 0
-  ((IS_IMMORTAL(sub)) || /* gods can see anything */ \
-   (((!IS_AFFECTED((obj),AFF_INVISIBLE)) || /* visible object */ \
-     ((IS_AFFECTED((sub),AFF_DETECT_INVISIBLE)) && /* you detect I and */ \
-      (!IS_IMMORTAL(obj)))) &&			/* object is not a god */ \
-    (!IS_AFFECTED((sub),AFF_BLIND)) &&      /* you are not blind */ \
-    ( (IS_LIGHT(sub->in_room)) || (IS_AFFECTED((sub),AFF_INFRAVISION))) \
-		/* there is enough light to see or you have infravision */ \
-    ))
-#endif
 }
 
-int CAN_SEE_OBJ( struct char_data *ch, struct obj_data *obj)
+int can_see_obj(struct char_data *ch, struct obj_data *obj)
 {
 
   if (IS_IMMORTAL(ch))
@@ -156,16 +145,6 @@ int CAN_SEE_OBJ( struct char_data *ch, struct obj_data *obj)
     return(0);
 
   return(1);
-
-#if 0
-#define CAN_SEE_OBJ(sub, obj)                                           \
-	(   ( (!IS_NPC(sub)) && (GetMaxLevel(sub)>LOW_IMMORTAL))       ||   \
-        ( (( !IS_SET((obj)->obj_flags.extra_flags, ITEM_INVISIBLE) ||   \
-	     IS_AFFECTED((sub),AFF_DETECT_INVISIBLE) ) &&               \
-	     !IS_AFFECTED((sub),AFF_BLIND)) &&                          \
-             (IS_LIGHT(sub->in_room))))
-
-#endif
 }
 
 int exit_ok(struct room_direction_data	*exit, struct room_data **rpp)
@@ -575,7 +554,7 @@ struct time_info_data age(struct char_data *ch)
 }
 
 
-char in_group ( struct char_data *ch1, struct char_data *ch2)
+char in_group(struct char_data *ch1, struct char_data *ch2)
 {
 
 
@@ -3200,7 +3179,7 @@ int IsGoblinoid(struct char_data *ch)
 
 int IsArticle(char *c)
 {
-  register i;
+  int i;
   
   for(i=0;article_list[i][0] != '\n'; i++)
     if(!str_cmp(article_list[i],c))

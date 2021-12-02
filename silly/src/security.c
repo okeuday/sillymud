@@ -10,7 +10,8 @@
 
 int SecCheck(char *arg, char *site)
 {
- char buf[255], buf2[255];
+ char buf[255+38];
+ char buf2[255];
  FILE *f1;
 
  sprintf(buf, "security/%s", arg);

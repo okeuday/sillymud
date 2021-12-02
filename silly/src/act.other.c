@@ -74,7 +74,9 @@ void do_guard(struct char_data *ch, char *argument, int cmd)
 
 void do_junk(struct char_data *ch, char *argument, int cmd)
 {
-  char arg[100], buf[100], newarg[100];
+  char arg[100];
+  char buf[100+16];
+  char newarg[100];
   struct obj_data *tmp_object;
   int num, p, count, value=0;
   
@@ -502,7 +504,7 @@ void do_steal(struct char_data *ch, char *argument, int cmd)
       for (eq_pos = 0; (eq_pos < MAX_WEAR); eq_pos++)
 	if (victim->equipment[eq_pos] &&
 	    (isname(obj_name, victim->equipment[eq_pos]->name)) &&
-	    CAN_SEE_OBJ(ch,victim->equipment[eq_pos])) {
+	    can_see_obj(ch,victim->equipment[eq_pos])) {
 	  obj = victim->equipment[eq_pos];
 	  break;
 	}
@@ -598,7 +600,7 @@ void do_steal(struct char_data *ch, char *argument, int cmd)
       do_shout(victim, buf, 0);
       do_say(victim, "Don't you ever do that again!", 0);
     } else {
-      if (CAN_SEE(victim, ch))
+      if (can_see(victim, ch))
 	hit(victim, ch, TYPE_UNDEFINED);
       else if (number(0,1))
 	hit(victim, ch, TYPE_UNDEFINED);
@@ -1837,7 +1839,9 @@ void do_gname(struct char_data *ch, char *arg, int cmd)
 
 void do_donate(struct char_data *ch, char *argument, int cmd)
 {
-  char arg[100], buf[100], newarg[100];
+  char arg[100];
+  char buf[100+22];
+  char newarg[100];
   struct obj_data *tmp_object;
   int num, p, count;
   

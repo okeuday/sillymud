@@ -48,13 +48,20 @@ struct room_data *real_roomp(int virtual);
 /* fight.c */
 void perform_violence(int pulse);
 /* handler.c */
+void char_from_room(struct char_data *ch);
 void char_to_room(struct char_data *ch, int room);
 /* interpreter.c */
 void command_interpreter(struct char_data *ch, char *argument);
 void nanny(struct descriptor_data *d, char *arg);
+/* limits.c */
+int mana_limit(struct char_data *ch);
+int hit_limit(struct char_data *ch);
+int move_limit(struct char_data *ch);
 /* modify.c */
 void string_add(struct descriptor_data *d, char *str);
 void show_string(struct descriptor_data *d, char *input);
+/* multiclass.c */
+int GetMaxLevel(struct char_data *ch);
 /* signals.c */
 void signal_setup();
 void signals_block();
@@ -65,6 +72,8 @@ void stop_follower(struct char_data *ch);
 /* utility.c */
 void logE(char *str);
 void log_sev(char *str, int sev);
+void sprintbit(unsigned long vektor, char *names[], char *result);
+void sprinttype(int type, char *names[], char *result);
 void RiverPulseStuff(int pulse);
 void TeleportPulseStuff(int pulse);
 /* weather.c */
@@ -87,6 +96,7 @@ static void process_output(struct descriptor_data * t,
                            size_t * response_size_allocated,
                            size_t * response_size);
 static void process_commands(struct descriptor_data *point);
+static void send_to_char(char *messg, struct char_data *ch);
 static void UpdateScreen(struct char_data *ch, int update);
 
 static void source_info_from_cloudi(char const ** info,
@@ -169,7 +179,7 @@ static void new_descriptor_with_cloudi(int const command,
   char const * source_address;
   int source_port;
   source_info_from_cloudi(info, &source_address, &source_port);
-  cloudi_info_key_value_destroy(info);
+  cloudi_info_key_value_parse_destroy(info);
   fprintf(stderr, "connection open: %s:%d\n", source_address, source_port);
 
   /* New connection */
@@ -206,7 +216,7 @@ static void close_socket_with_cloudi(int const command,
   char const * source_address;
   int source_port;
   source_info_from_cloudi(info, &source_address, &source_port);
-  cloudi_info_key_value_destroy(info);
+  cloudi_info_key_value_parse_destroy(info);
   fprintf(stderr, "connection close: %s:%d\n", source_address, source_port);
 
   struct descriptor_data *point =
@@ -237,7 +247,7 @@ static void game_loop_with_cloudi(int const command,
   char const * source_address;
   int source_port;
   source_info_from_cloudi(info, &source_address, &source_port);
-  cloudi_info_key_value_destroy(info);
+  cloudi_info_key_value_parse_destroy(info);
 
   struct descriptor_data *point =
     descriptor_data_from_cloudi(source_address, source_port);
@@ -346,7 +356,7 @@ static void game_loop_with_cloudi(int const command,
               SEND_TO_Q(" ", point);
             }
             if (IS_SET(ch->specials.prompt, PROMPT_F)) {
-              sprintbit((unsigned long)rm->room_flags,room_bits,promptbuf);
+              sprintbit((unsigned long)rm->room_flags,(char **)room_bits,promptbuf);
               SEND_TO_Q(promptbuf, point);
             }
             sprintf(promptbuf, "> ");
@@ -428,7 +438,7 @@ void run_the_game_with_cloudi()
 
   boot_db();
 
-  logE("Entering game loop.");
+  logE("Entering CloudI game loop.");
 
   game_loop(&api);
 
@@ -830,6 +840,14 @@ static void process_commands(struct descriptor_data *point)
     else
       nanny(point, comm);
   }
+}
+
+/* based on comm.c */
+static void send_to_char(char *messg, struct char_data *ch)
+{
+  if (ch)
+     if (ch->desc && messg)
+        write_to_q(messg, &ch->desc->output);
 }
 
 /* based on comm.c */

@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
@@ -21,8 +22,8 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <sys/resource.h>
+#include <unistd.h>
 
 #include "protos.h"
 
@@ -1261,7 +1262,7 @@ void coma(int s)
     if (FD_ISSET(s, &input_set))	{
       if (load() < 6){
 	logE("Leaving coma with visitor.");
-	sigsetmask(0);
+	signals_clear();
 	return;
       }
       if ((conn = new_connection(s)) >= 0)     {
@@ -1486,7 +1487,7 @@ void act(char *str, int hide_invisible, struct char_data *ch,
   
   for (; to; to = to->next_in_room)	{
     if (to->desc && ((to != ch) || (type == TO_CHAR)) &&  
-	(CAN_SEE(to, ch) || !hide_invisible) && AWAKE(to) &&
+	(can_see(to, ch) || !hide_invisible) && AWAKE(to) &&
 	!((type == TO_NOTVICT)&&(to==(struct char_data *) vict_obj))){
       for (strp = str, point = buf;;)
 	if (*strp == '$') {
@@ -1563,9 +1564,6 @@ int raw_force_all( char *to_force)
     }
 }
 
-
-#if 0
-#endif
 
 void UpdateScreen(struct char_data *ch, int update)
 {

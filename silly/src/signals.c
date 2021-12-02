@@ -145,6 +145,13 @@ void signals_unblock()
   sigprocmask(SIG_UNBLOCK, &signal_mask, 0);
 }
 
+void signals_clear()
+{
+  sigset_t empty_mask;
+  sigemptyset(&empty_mask);
+  sigprocmask(SIG_SETMASK, &empty_mask, NULL);
+}
+
 void checkpointing(int signum)
 {
   extern int tics;

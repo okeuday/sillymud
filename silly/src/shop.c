@@ -74,7 +74,7 @@ int is_ok(struct char_data *keeper, struct char_data *ch, int shop_nr)
 			return(FALSE);
 		};
 
-	if(!(CAN_SEE(keeper,ch)))	{
+	if(!(can_see(keeper,ch)))	{
 		do_say(keeper,
 		"I don't trade with someone I can't see!",17);
 		return(FALSE);
@@ -472,7 +472,9 @@ void shopping_value( char *arg, struct char_data *ch,
 void shopping_list( char *arg, struct char_data *ch,
 		   struct char_data *keeper, int shop_nr)
 {
-  char buf[MAX_STRING_LENGTH], buf2[100],buf3[100];
+  char buf[MAX_STRING_LENGTH];
+  char buf2[100+20];
+  char buf3[100];
   struct obj_data *temp1;
   extern char *drinks[];
   int found_obj;
@@ -503,7 +505,7 @@ void shopping_list( char *arg, struct char_data *ch,
     for(temp1=keeper->carrying;
 	temp1; 
 	temp1 = temp1->next_content)
-      if((CAN_SEE_OBJ(ch,temp1)) && (temp1->obj_flags.cost>0))	{
+      if((can_see_obj(ch,temp1)) && (temp1->obj_flags.cost>0))	{
 	found_obj = TRUE; 
 
 	perc = 100.0 + chr_apply[GET_CHR(ch)].reaction;
@@ -570,29 +572,27 @@ void shopping_kill( char *arg, struct char_data *ch,
 }
 
 
-int shop_keeper(struct char_data *ch, int cmd, char *arg, char *mob, int type)
+int shop_keeper(struct char_data *ch, int cmd, char *arg, void *item, int type)
 {
   char argm[100], buf[MAX_STRING_LENGTH];
   struct char_data *temp_char;
   struct char_data *keeper;
   int shop_nr;
   
-  int citizen(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type);
-
   if(type == EVENT_DWARVES_STRIKE) {
     ch->generic = DWARVES_STRIKE;
-    return;  
+    return(FALSE);
   }
 
   if(type == EVENT_FAMINE) {
     ch->generic = FAMINE;
-    return;
+    return(FALSE);
   }
 
   keeper = 0;
 
   if (!real_roomp(ch->in_room))
-    return;
+    return(FALSE);
   
   for (temp_char = real_roomp(ch->in_room)->people; (!keeper) && (temp_char) ; 
        temp_char = temp_char->next_in_room)
@@ -731,7 +731,7 @@ void boot_the_shops()
 	     &shop_index[number_of_shops].keeper);
       
       shop_index[number_of_shops].keeper =
-	real_mobile(shop_index[number_of_shops].keeper);
+	real_mobile_exists(shop_index[number_of_shops].keeper);
       
       fscanf(shop_f,"%d \n",
 	     &shop_index[number_of_shops].with_who);

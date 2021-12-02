@@ -80,15 +80,25 @@ struct zone_data
 
 
 /* element in monster and object index-tables   */
+typedef int (*funcp_index_item)(struct char_data *ch,
+                                int cmd,
+                                char *arg,
+                                /* item may be:
+                                 *   struct char_data *mob
+                                 *   struct obj_data *obj
+                                 *   char *
+                                 */
+                                void * item,
+                                int type);
 struct index_data
 {
-	int virtual;    /* virtual number of this mob/obj           */
-	long pos;       /* file position of this field              */
-	int number;     /* number of existing units of this mob/obj	*/
-	int (*func)();  /* special procedure for this mob/obj       */
-	char *name;
-        char *short_desc;
-        char *long_desc;
+  int virtual;           /* virtual number of this mob/obj           */
+  long pos;              /* file position of this field              */
+  int number;            /* number of existing units of this mob/obj */
+  funcp_index_item func; /* special procedure for this mob/obj       */
+  char *name;
+  char *short_desc;
+  char *long_desc;
 };
 
 

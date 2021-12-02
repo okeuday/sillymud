@@ -504,7 +504,7 @@ void do_taste(struct char_data *ch, char *argument, int cmd)
 
 /* functions related to wear */
 
-perform_wear(struct char_data *ch, struct obj_data *obj_object, int keyword)
+void perform_wear(struct char_data *ch, struct obj_data *obj_object, int keyword)
 {
   switch(keyword) {
   case 0 :
@@ -976,7 +976,7 @@ void do_wear(struct char_data *ch, char *argument, int cmd)
   char arg1[MAX_INPUT_LENGTH];
   char arg2[MAX_INPUT_LENGTH];
   char buf[256];
-  char buffer[MAX_INPUT_LENGTH];
+  char buffer[MAX_INPUT_LENGTH+34];
   struct obj_data *obj_object, *next_obj;
   int keyword;
   static char *keywords[] = {
@@ -1072,7 +1072,7 @@ void do_wield(struct char_data *ch, char *argument, int cmd)
 {
   char arg1[MAX_INPUT_LENGTH];
   char arg2[MAX_INPUT_LENGTH];
-  char buffer[MAX_INPUT_LENGTH];
+  char buffer[MAX_INPUT_LENGTH+34];
   struct obj_data *obj_object;
   int keyword = 12;
   

@@ -5,50 +5,51 @@ CLOUDI_VERSION=2.0.2
 CLOUDI_PATH=/usr/local/lib/cloudi-$(CLOUDI_VERSION)
 CLOUDI_CFLAGS=-I$(CLOUDI_PATH)/api/c/ -fexceptions
 CLOUDI_LDFLAGS=-L$(CLOUDI_PATH)/api/c/ -Wl,-rpath,$(CLOUDI_PATH)/api/c/ -lcloudi
-CFLAGS=-g -O0 -I. -D_XOPEN_SOURCE
-MUD_CFLAGS=-DIMPL_SECURITY -DNO_RENT -DLEVEL_LOSS -DNEWEXP -DGROUP_NAMES \
-           -Wno-deprecated-declarations \
-           -Wno-pointer-to-int-cast \
-           -Wno-int-to-pointer-cast
-##
-##  For lower exp loss at lower levels -DNEWEXP
-##
-##  For level loss for really low exp -DLEVEL_LOSS
-##
-##  To make some optimizations, you need to add things to the line above.
-##  to use hash tables for rooms  (More cpu, less storage), add
-##  -DHASH    
-##
-##  To get rid of tracking (lower cpu)
-##  -DNOTRACK
-##
-##  To limit items above a specific rent cost
-##  -DLIMITED_ITEMS
-##
-##  To force new players to be authorized
-##  -DPLAYER_AUTH
-##
-##  To add some new debugging stuff (mostly limited to malloc_debug)
-##  -DDEBUG
-##  To add some commands for locking out specific hosts
-##  -DSITELOCK
-##
-## To lock out oak.grove.iup.edu from boot time.
-## -DLOCKGROVE
-##
-##  To save the world (objects and mobs) -DSAVE_WORLD
-##
-##  To modify some commands to make item duplication near impossible:
-##  -DNODUPLICATES
-##
-##  To have each 58+ god restricted to one site, or set of sites
-##  -DIMPL_SECURITY
-##
-##  To provide offers for rent of 0 and only charge for time, not items
-##  -DNEW_RENT
-##
-##  Completely disable rent and allow objects to be saved automatically
-##  -DNO_RENT
+CFLAGS=-g -O0 -I. -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED -Werror
+MUD_CFLAGS=-DIMPL_SECURITY -DNO_RENT -DLEVEL_LOSS -DNEWEXP -DGROUP_NAMES 
+
+# For lower exp loss at lower levels
+# -DNEWEXP
+#
+# For level loss for really low exp
+# -DLEVEL_LOSS
+#
+# To make some optimizations, you need to add things to the line above.
+# to use hash tables for rooms  (More cpu, less storage), add
+# -DHASH    
+#
+# To get rid of tracking (lower cpu)
+# -DNOTRACK
+#
+# To limit items above a specific rent cost
+# -DLIMITED_ITEMS
+#
+# To force new players to be authorized
+# -DPLAYER_AUTH
+#
+# To add some new debugging stuff (mostly limited to malloc_debug)
+# -DDEBUG
+#
+# To add some commands for locking out specific hosts
+# -DSITELOCK
+#
+# To lock out oak.grove.iup.edu from boot time.
+# -DLOCKGROVE
+#
+# To save the world (objects and mobs)
+# -DSAVE_WORLD
+#
+# To modify some commands to make item duplication near impossible:
+# -DNODUPLICATES
+#
+# To have each 58+ god restricted to one site, or set of sites
+# -DIMPL_SECURITY
+#
+# To provide offers for rent of 0 and only charge for time, not items
+# -DNEW_RENT
+#
+# Completely disable rent and allow objects to be saved automatically
+# -DNO_RENT
 
 all: dmserver
 
@@ -128,9 +129,12 @@ act.off.c: protos.h
 act.other.c: protos.h
 act.social.c: protos.h
 act.wizard.c: protos.h
-bart.c: protos.h
 board.c: protos.h
 comm.c: protos.h
+comm_cloudi.c: structs.h \
+               utils.h \
+               vt100c.h \
+               comm.h
 constants.c: structs.h \
              limits.h \
              trap.h \
@@ -139,7 +143,6 @@ convert.c: protos.h
 create.c: protos.h
 db.c: protos.h
 fight.c: protos.h
-fight.old.c: protos.h
 handler.c: protos.h
 hash.c: protos.h
 Heap.c: protos.h
@@ -176,10 +179,6 @@ Trap.c: protos.h
 utility.c: protos.h
 weather.c: protos.h
 
-comm_cloudi.c: structs.h \
-               utils.h \
-               vt100c.h \
-               comm.h
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(MUD_CFLAGS)

@@ -1320,7 +1320,8 @@ void spell_locate_object(byte level, struct char_data *ch,
 			 struct char_data *victim, struct obj_data *obj)
 {
   struct obj_data *i;
-  char name[256], buf2[256];
+  char name[256];
+  char buf2[256];
   char buf[MAX_STRING_LENGTH];
   int j;
 
@@ -1340,7 +1341,7 @@ void spell_locate_object(byte level, struct char_data *ch,
   strcpy(name, obj->name);
 
   j=level>>1;
-  sprintf(buf, "");
+  buf[0] = '\0';
   for (i = object_list; i && (j>0); i = i->next)
     if (isname(name, i->name)) {
       if(i->carried_by) {
@@ -1910,7 +1911,7 @@ void RawSummon( struct char_data *v, struct char_data *c)
       act("$n growls at $N.", 1, tmp, 0, c, TO_NOTVICT);
       i = number(0,6);
       if (i==0) {
-	if (CAN_SEE(tmp, c)) {
+	if (can_see(tmp, c)) {
 	  hit(tmp, c, TYPE_UNDEFINED);
 	}
       }
@@ -2145,7 +2146,8 @@ void sprintbit(unsigned long, char *[], char *);
 void spell_identify(byte level, struct char_data *ch,
   struct char_data *victim, struct obj_data *obj)
 {
-  char buf[256], buf2[256];
+  char buf[256+18];
+  char buf2[256];
   int i;
   bool found;
   

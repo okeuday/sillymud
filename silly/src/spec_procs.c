@@ -53,10 +53,13 @@ struct social_type {
 /*************************************/
 /* predicates for find_path function */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
 int is_target_room_p(int room, void *tgt_room)
 {
   return room == (int)tgt_room;
 }
+#pragma GCC diagnostic pop
 
 int named_object_on_ground(int room, void *c_data)
 {
@@ -401,7 +404,7 @@ int dump(struct char_data *ch, int cmd, char *arg, struct room_data *rp, int typ
       sprintf(buf, "The %s vanish in a puff of smoke.\n\r" ,fname(k->name));
       for(tmp_char = real_roomp(ch->in_room)->people; tmp_char;
 	  tmp_char = tmp_char->next_in_room)
-	if (CAN_SEE_OBJ(tmp_char, k))
+	if (can_see_obj(tmp_char, k))
 	  send_to_char(buf,tmp_char);
       extract_obj(k);
     }
@@ -417,7 +420,7 @@ int dump(struct char_data *ch, int cmd, char *arg, struct room_data *rp, int typ
       sprintf(buf, "The %s vanishes in a puff of smoke.\n\r",fname(k->name));
       for(tmp_char = real_roomp(ch->in_room)->people; tmp_char;
 	  tmp_char = tmp_char->next_in_room)
-	if (CAN_SEE_OBJ(tmp_char, k))
+	if (can_see_obj(tmp_char, k))
 	  send_to_char(buf,tmp_char);
       value+=(MIN(1000,MAX(k->obj_flags.cost/4,1)));
       /*
@@ -607,7 +610,7 @@ int andy_wilcox(struct char_data *ch, int cmd, char *arg, struct char_data *mob,
   for (temp_char = real_roomp(ch->in_room)->people; (!andy) && (temp_char) ; 
        temp_char = temp_char->next_in_room)
     if (IS_MOB(temp_char))
-      if (mob_index[temp_char->nr].func == andy_wilcox)
+      if (mob_index[temp_char->nr].func == (funcp_index_item)andy_wilcox)
 	andy = temp_char;
   
   if (open==0 && time_info.hours == 11) {
@@ -829,7 +832,7 @@ int eric_johnson(struct char_data *ch, int cmd, char *arg, struct char_data *mob
   for (temp_char = real_roomp(ch->in_room)->people; (!eric) && (temp_char) ; 
        temp_char = temp_char->next_in_room)
     if (IS_MOB(temp_char))
-      if (mob_index[temp_char->nr].func == eric_johnson)
+      if (mob_index[temp_char->nr].func == (funcp_index_item)eric_johnson)
 	eric = temp_char;
 
   if (ch==eric) {
@@ -1039,7 +1042,7 @@ int eric_johnson(struct char_data *ch, int cmd, char *arg, struct char_data *mob
 	
 	for (temp_char = character_list; temp_char; temp_char = temp_char->next)
 	  if (IS_MOB(temp_char))
-	    if (mob_index[temp_char->nr].func == andy_wilcox)
+	    if (mob_index[temp_char->nr].func == (funcp_index_item)andy_wilcox)
 	      andy = temp_char;
 	
 	if (eric->in_room != andy->in_room) {
@@ -1395,7 +1398,7 @@ int GreyParamedic(struct char_data *ch, int cmd, char *arg, struct char_data *mo
 	     vict = vict->next_in_room ) {
 	  if (((float)GET_HIT(vict)/(float)hit_limit(vict) <
 	       (float)GET_HIT(most_hurt)/(float)hit_limit(most_hurt))
-	      && (CAN_SEE(ch, vict)))
+	      && (can_see(ch, vict)))
 	    most_hurt = vict;
 	}
 	if (!most_hurt) return(FALSE); /* nobody here */
@@ -1464,7 +1467,7 @@ int AmberParamedic(struct char_data *ch, int cmd, char *arg, struct char_data *m
 	     vict = vict->next_in_room ) {
 	  if (((float)GET_HIT(vict)/(float)hit_limit(vict) <
 	       (float)GET_HIT(most_hurt)/(float)hit_limit(most_hurt))
-	      && (CAN_SEE(ch, vict)))
+	      && (can_see(ch, vict)))
 	    most_hurt = vict;
 	}
 	if (!most_hurt) return(FALSE); /* nobody here */
@@ -2095,7 +2098,7 @@ int puff(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int ty
     case 34:
       if (number(0,50)==0) {
 	for (i = character_list; i; i=i->next) {
-	  if (mob_index[i->nr].func == Inquisitor) {
+	  if (mob_index[i->nr].func == (funcp_index_item)Inquisitor) {
   	     do_shout(ch, "I wasn't expecting the Spanish Inquisition!", 0);
 	     i->generic = INQ_SHOUT;
 	     return(TRUE);
@@ -2357,7 +2360,7 @@ int fido(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int ty
   for (v = rp->people; (v && (!found)); v = next) {
     next = v->next_in_room;
     if ((IS_NPC(v)) && (mob_index[v->nr].virtual == 100) &&
-        CAN_SEE(ch, v)) {  /* is a zombie */
+        can_see(ch, v)) {  /* is a zombie */
       if (v->specials.fighting)
 	stop_fighting(v);
       make_corpse(v);
@@ -2554,7 +2557,7 @@ int temple_labrynth_sentry(struct char_data *ch, int cmd, char *arg, struct char
   /* Find a dude to do very evil things upon ! */
   
   for (tch=real_roomp(ch->in_room)->people; tch; tch = tch->next_in_room) {
-    if( GetMaxLevel(tch)>10 && CAN_SEE(ch, tch)) {
+    if( GetMaxLevel(tch)>10 && can_see(ch, tch)) {
       act("The sentry snaps out of his trance and ...", 1, ch, 0, 0, TO_ROOM);
 	do_say(ch, "You will die for your insolence, pig-dog!", 0);
 	for ( counter = 0 ; counter < 4 ; counter++ )
@@ -2739,7 +2742,7 @@ int AGGRESSIVE(struct char_data *ch, int cmd, char *arg, struct char_data *mob, 
     for (i = real_roomp(ch->in_room)->people; i; i = next) {
       next = i->next_in_room;
       if (GET_RACE(i) != GET_RACE(ch)) {
-	if (!IS_IMMORTAL(i) && CAN_SEE(ch, i)) {
+	if (!IS_IMMORTAL(i) && can_see(ch, i)) {
 	  hit(ch, i, TYPE_UNDEFINED);
 	  break;
 	}
@@ -2774,9 +2777,10 @@ int MidgaardCityguard(struct char_data *ch, int cmd, char *arg, struct char_data
 }
 
 
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
 #define ONE_RING 1105
-int Ringwraith( struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type)
+int Ringwraith(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type)
 {
   static char buf[256];
   struct char_data *victim;
@@ -2906,9 +2910,8 @@ int Ringwraith( struct char_data *ch, int cmd, char *arg, struct char_data *mob,
     wh->ringnumber = 0;
   }
   return TRUE;
-
-
 }
+#pragma GCC diagnostic pop
 
 int WarrenGuard(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type)
 {
@@ -2967,7 +2970,7 @@ int zm_stunned_followers(struct char_data *zmaster)
   return FALSE;
 }
 
-zm_init_combat(struct char_data *zmaster, struct char_data *target)
+static void zm_init_combat(struct char_data *zmaster, struct char_data *target)
 {
   struct follow_type	*fwr;
   for (fwr = zmaster->followers; fwr; fwr = fwr->next)
@@ -3278,7 +3281,7 @@ int bank (struct char_data *ch, int cmd, char *arg, struct room_data *rp, int ty
   money = atoi(arg);
   
   if (IS_NPC(ch))
-    return;
+    return(FALSE);
 
   save_char(ch, ch->in_room);
 
@@ -3465,9 +3468,9 @@ int chalice(struct char_data *ch, int cmd, char *arg)
     case 10:    /* get */
       if (!(chalice = get_obj_in_list_num(chl,
 					  real_roomp(ch->in_room)->contents))
-	  && CAN_SEE_OBJ(ch, chalice))
+	  && can_see_obj(ch, chalice))
 	if (!(chalice = get_obj_in_list_num(achl,
-					    real_roomp(ch->in_room)->contents)) && CAN_SEE_OBJ(ch, chalice))
+					    real_roomp(ch->in_room)->contents)) && can_see_obj(ch, chalice))
 	  return(0);
       
       /* we found a chalice.. now try to get us */			
@@ -3750,7 +3753,7 @@ int paramedics(struct char_data *ch, int cmd, char *arg, struct char_data *mob, 
 	     vict = vict->next_in_room ) {
 	  if (((float)GET_HIT(vict)/(float)hit_limit(vict) <
 	       (float)GET_HIT(most_hurt)/(float)hit_limit(most_hurt))
-	      && (CAN_SEE(ch, vict)))
+	      && (can_see(ch, vict)))
 	    most_hurt = vict;
 	}
 	if (!most_hurt) return(FALSE); /* nobody here */
@@ -4884,7 +4887,7 @@ int Tyrannosaurus_swallower(struct char_data *ch, int cmd, char *arg, struct cha
   if (AWAKE(ch)) {
     if ((targ = FindAnAttacker(ch))!=NULL) {
       act("$n opens $s gaping mouth", TRUE, ch, 0, 0, TO_ROOM);
-      if (!CAN_SEE(ch, targ)) {
+      if (!can_see(ch, targ)) {
 	if (saves_spell(targ, SAVING_PARA)) {
 	  act("$N barely misses being swallowed whole!", 
 	      FALSE, ch, 0, targ, TO_NOTVICT);
@@ -5148,6 +5151,36 @@ struct memory {
   short c;
 };
 
+/* Returns the index to the dude who did it */
+
+static int affect_status(struct memory *mem, struct char_data *ch,
+                         struct char_data *t, int aff_status)
+{
+  int i;
+
+  if(mem->c)
+    for(i = 0;i < mem->c; ++i)
+      if(!(strcmp(GET_NAME(t),mem->names[i]))) {
+	mem->status[i] += aff_status;
+	return(i);
+	break;
+      }
+  
+  if(!mem->c) {
+    mem->names = (char **) malloc(sizeof(char *));
+    mem->status = (int *) malloc(sizeof(int));
+  }
+  else {
+    mem->names = (char **) realloc(mem->names,(sizeof(char *) * mem->c));
+    mem->status = (int *) realloc(mem->status,(sizeof(int) * mem->c));
+  }
+  mem->names[mem->c] = (char *) malloc(strlen(GET_NAME(t)+1));
+  strcpy(mem->names[mem->c],GET_NAME(t));
+  mem->status[mem->c] = aff_status;
+  ++mem->c;
+  return(mem->c-1);
+}
+
 int lattimore(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type)
 {
 #define Lattimore_Initialize  0
@@ -5193,7 +5226,7 @@ int lattimore(struct char_data *ch, int cmd, char *arg, struct char_data *mob, i
     if(!AWAKE(ch)) return(FALSE);
     
     if (ch->specials.fighting) {
-      if(!IS_MOB(ch->specials.fighting) && CAN_SEE(ch,ch->specials.fighting))
+      if(!IS_MOB(ch->specials.fighting) && can_see(ch,ch->specials.fighting))
 	affect_status(mem, ch, ch->specials.fighting, -5);
       if(mem->status[mem->index] < 0) {
 	strcpy(ch->player.long_descr,lattimore_descs[6]);
@@ -5398,7 +5431,7 @@ int lattimore(struct char_data *ch, int cmd, char *arg, struct char_data *mob, i
         }
 	else {
 	  for(t=real_roomp(ch->in_room)->people;t;t=t->next_in_room)
-	    if(!IS_NPC(t) && CAN_SEE(ch,t))
+	    if(!IS_NPC(t) && can_see(ch,t))
 	      if(!(strcmp(mem->names[mem->index],GET_NAME(t)))) {
 		act("$n crawls under the large table.",
 		    FALSE, ch, 0, 0, TO_ROOM);
@@ -5459,7 +5492,7 @@ int lattimore(struct char_data *ch, int cmd, char *arg, struct char_data *mob, i
 	      TRUE, latt, obj, 0, TO_ROOM);
           obj_from_char(obj);
           obj_to_room(obj,ch->in_room);
-	  if(!IS_MOB(ch) && CAN_SEE(latt,ch))
+	  if(!IS_MOB(ch) && can_see(latt,ch))
 	    mem->index = affect_status(mem, latt, ch, -5);
 	  else return(TRUE);
 	}
@@ -5467,7 +5500,7 @@ int lattimore(struct char_data *ch, int cmd, char *arg, struct char_data *mob, i
 	  act("$n takes $p and hungrily wolfs it down.", 
 	      TRUE, latt, obj, 0, TO_ROOM);
 	  extract_obj(obj);
-	  if(!IS_MOB(ch) && CAN_SEE(latt,ch))
+	  if(!IS_MOB(ch) && can_see(latt,ch))
 	    mem->index = affect_status(mem, latt, ch, 4);
 	  else return(TRUE);
 	}
@@ -5479,7 +5512,7 @@ int lattimore(struct char_data *ch, int cmd, char *arg, struct char_data *mob, i
 	      TRUE, latt, obj, 0, TO_ROOM);
 	  obj_from_char(obj);
 	  if (!ch->equipment[HOLD]) equip_char(ch, obj, HOLD);
-	  if(!IS_MOB(ch) && CAN_SEE(latt,ch))
+	  if(!IS_MOB(ch) && can_see(latt,ch))
 	    mem->index = affect_status(mem, latt, ch, 20);
 	  else return(TRUE);
 	}
@@ -5487,7 +5520,7 @@ int lattimore(struct char_data *ch, int cmd, char *arg, struct char_data *mob, i
 	default:
 	/* Any other types of items */
 	act("$n looks at $p curiously.", TRUE, latt, obj, 0, TO_ROOM);
-	if(!IS_MOB(ch) && CAN_SEE(latt,ch))
+	if(!IS_MOB(ch) && can_see(latt,ch))
 	  mem->index = affect_status(mem, latt, ch, 1);
 	else return(TRUE);
 	break;
@@ -5507,37 +5540,6 @@ int lattimore(struct char_data *ch, int cmd, char *arg, struct char_data *mob, i
     return(FALSE);
   }
   else return(FALSE);
-}
-
-/* Returns the index to the dude who did it */
-
-int affect_status(struct memory *mem, struct char_data *ch,
-		  struct char_data *t, int aff_status)
-{
-  int i;
-
-  if(mem->c)
-    for(i = 0;i < mem->c; ++i)
-      if(!(strcmp(GET_NAME(t),mem->names[i]))) {
-	mem->status[i] += aff_status;
-	return(i);
-	break;
-      }
-  
-  if(!mem->c) {
-    mem->names = (char **) malloc(sizeof(long));
-    mem->status = (int *) malloc(sizeof(long));
-  }
-  else {
-    mem->names = (char **) realloc(mem->names,(sizeof(long) * mem->c));
-    mem->status = (int *) realloc(mem->status,(sizeof(long) * mem->c));
-  }
-  mem->names[mem->c] = (char *) malloc(strlen(GET_NAME(t)+2));
-  strcpy(mem->names[mem->c],GET_NAME(t));
-  mem->status[mem->c] = (int) malloc(sizeof(int));
-  mem->status[mem->c] = aff_status;
-  ++mem->c;
-  return(mem->c-1);
 }
 
 int coldcaster(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int type)
@@ -5643,7 +5645,7 @@ int trogcook(struct char_data *ch, int cmd, char *arg, struct char_data *mob, in
   }
   
   for (tch=real_roomp(ch->in_room)->people; tch; tch = tch->next_in_room)
-    if(IS_NPC(tch) && IsAnimal(tch) && CAN_SEE(ch, tch)) {
+    if(IS_NPC(tch) && IsAnimal(tch) && can_see(ch, tch)) {
       if (!check_soundproof(ch))
 	act("$n cackles 'Something else for the pot!'",FALSE,ch,0,0,TO_ROOM);
       hit(ch, tch, TYPE_UNDEFINED);
@@ -5672,7 +5674,7 @@ int shaman(struct char_data *ch, int cmd, char *arg, struct char_data *mob, int 
   if(ch->specials.fighting) {
     if(number(0,3) == 0) {
       for (tch=real_roomp(ch->in_room)->people; tch; tch = tch->next_in_room)
-	if((!IS_NPC(tch)) && (GetMaxLevel(tch) > 20) && CAN_SEE(ch, tch)) {
+	if((!IS_NPC(tch)) && (GetMaxLevel(tch) > 20) && can_see(ch, tch)) {
 	  if(!(god = get_char_room_vis(ch, DEITY_NAME))) {
 	    act("$n screams 'Golgar, I summon thee to aid thy servants!'",
 		FALSE, ch, 0, 0, TO_ROOM);
@@ -5820,7 +5822,7 @@ int keystone(struct char_data *ch, int cmd, char *arg, struct char_data *mob, in
   if(ch->specials.fighting) {
     if(IS_NPC(ch->specials.fighting) &&
        !IS_SET((ch->specials.fighting)->specials.act,ACT_POLYSELF))
-      if((master = (ch->specials.fighting)->master) && CAN_SEE(ch,master)) {
+      if((master = (ch->specials.fighting)->master) && can_see(ch,master)) {
 	stop_fighting(ch);
 	hit(ch, master, TYPE_UNDEFINED);
       }
@@ -5879,7 +5881,7 @@ int ghostsoldier(struct char_data *ch, int cmd, char *arg, struct char_data *mob
   if(ch->specials.fighting) {
     if(IS_NPC(ch->specials.fighting) &&
        !IS_SET((ch->specials.fighting)->specials.act,ACT_POLYSELF))
-      if((master = (ch->specials.fighting)->master) && CAN_SEE(ch,master)) {
+      if((master = (ch->specials.fighting)->master) && can_see(ch,master)) {
 	stop_fighting(ch);
 	hit(ch, master, TYPE_UNDEFINED);
       }
@@ -5998,7 +6000,7 @@ int Valik( struct char_data *ch, int cmd, char *arg, struct char_data *mob, int 
     if(ch->specials.fighting) {
       if(IS_NPC(ch->specials.fighting) &&
 	 !IS_SET((ch->specials.fighting)->specials.act,ACT_POLYSELF))
-	if((master = (ch->specials.fighting)->master) && CAN_SEE(ch,master)) {
+	if((master = (ch->specials.fighting)->master) && can_see(ch,master)) {
 	  stop_fighting(ch);
 	  hit(ch, master, TYPE_UNDEFINED);
 	}
@@ -6274,7 +6276,7 @@ int guardian(struct char_data *ch, int cmd, char *arg, struct char_data *mob, in
     if(ch->specials.fighting) {
       if(IS_NPC(ch->specials.fighting) &&
 	 !IS_SET((ch->specials.fighting)->specials.act,ACT_POLYSELF))
-	if((master = (ch->specials.fighting)->master) && CAN_SEE(ch,master)) {
+	if((master = (ch->specials.fighting)->master) && can_see(ch,master)) {
 	  stop_fighting(ch);
 	  hit(ch, master, TYPE_UNDEFINED);
 	}

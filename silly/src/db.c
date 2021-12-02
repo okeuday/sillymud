@@ -200,8 +200,7 @@ void boot_db()
 
 
 	  if (i == 0) {
-	    fprintf(stderr, "Performing boot-time reload of static mobs\n",
-		    s);
+	    fprintf(stderr, "Performing boot-time reload of static mobs\n");
 	    reset_zone(0);
 
 	  }
@@ -733,7 +732,7 @@ void load_one_room(FILE *fl, struct room_data *rp)
 {
   char chk[50];
   int   bc=0;
-  unsigned long int	tmp;
+  unsigned long int tmp = 0;
 
   struct extra_descr_data *new_descr;
 
@@ -1889,6 +1888,29 @@ void zone_update()
 }
 
 
+static int CheckKillFile(int virtual)
+{
+ FILE *f1;
+ char buf[255];
+ int i;
+
+ if(!(f1 = fopen(killfile, "r"))) {
+    logE("Unable to find killfile.");
+    exit(0);
+  }
+
+ while(fgets(buf, 254, f1) != NULL) {
+    sscanf(buf, "%d", &i);
+    if(i == virtual) {
+       fclose(f1);
+       return(1);
+     }
+  }
+
+ fclose(f1);
+ return(0);
+}
+
 
 
 #define ZCMD zone_table[zone].cmd[cmd_no]
@@ -3033,10 +3055,17 @@ int real_mobile(int virtual)
     }
 }
 
-
-
-
-
+int real_mobile_exists(int virtual)
+{
+  char buf[64];
+  int const i = real_mobile(virtual);
+  if (i == -1) {
+    sprintf(buf, "mobile virtual number %d does not exist!", virtual);
+    logE(buf);
+    abort();
+  }
+  return i;
+}
 
 /* returns the real number of the object with given virtual number */
 int real_object(int virtual)
@@ -3059,6 +3088,18 @@ int real_object(int virtual)
       else
 	bot = mid + 1;
     }
+}
+
+int real_object_exists(int virtual)
+{
+  char buf[64];
+  int const i = real_object(virtual);
+  if (i == -1) {
+    sprintf(buf, "object virtual number %d does not exist!", virtual);
+    logE(buf);
+    abort();
+  }
+  return i;
 }
 
 int ObjRoomCount(int nr, struct room_data *rp)
@@ -3162,7 +3203,8 @@ void reboot_text(struct char_data *ch, char *arg, int cmd)
 
 void InitScripts()
 {
- char buf[255], buf2[255];
+ char buf[255+38];
+ char buf2[255];
  FILE *f1, *f2;
  int i, count;
  struct char_data *mob;
@@ -3206,7 +3248,8 @@ void InitScripts()
        buf[strlen(buf) - 1] = '\0';
 
     if(strlen(buf) < 4)	{	/* no way we can get a valid thing in less */
-      sprintf(buf,"\"%s\" read in, garbage.", buf);
+      memcpy(buf2, buf, 4);
+      sprintf(buf,"\"%s\" read in, garbage.", buf2);
       logE(buf);
     }
 
@@ -3261,29 +3304,6 @@ void InitScripts()
   logE(buf);
 
   fclose(f1);
-}
-
-int CheckKillFile(int virtual)
-{
- FILE *f1;
- char buf[255];
- int i;
-
- if(!(f1 = fopen(killfile, "r"))) {
-    logE("Unable to find killfile.");
-    exit(0);
-  }
-
- while(fgets(buf, 254, f1) != NULL) {
-    sscanf(buf, "%d", &i);
-    if(i == virtual) {
-       fclose(f1);
-       return(1);
-     }
-  }
-
- fclose(f1);
- return(0);
 }
 
 void ReloadRooms()

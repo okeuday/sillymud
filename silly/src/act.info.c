@@ -113,7 +113,7 @@ struct obj_data *get_object_in_equip_vis(struct char_data *ch,
   
   for ((*j) = 0; (*j) < MAX_WEAR ; (*j)++)
     if (equipment[(*j)])
-      if (CAN_SEE_OBJ(ch,equipment[(*j)])) {
+      if (can_see_obj(ch,equipment[(*j)])) {
 	if (isname(arg, equipment[(*j)]->name)) {
 	  return(equipment[(*j)]);
 	}
@@ -299,7 +299,7 @@ void list_obj_in_room(struct obj_data *list, struct char_data *ch)
   cond_top = 0; 
   
   for (i=list; i; i = i->next_content) {
-    if (CAN_SEE_OBJ(ch, i)) {
+    if (can_see_obj(ch, i)) {
       if (cond_top< 50) {
 	found = FALSE;
 	for (k=0;(k<cond_top&& !found);k++) {
@@ -366,7 +366,7 @@ void list_obj_in_heap(struct obj_data *list, struct char_data *ch)
   cond_top = 0; 
   
   for (i=list; i; i = i->next_content) {
-    if (CAN_SEE_OBJ(ch, i)) {
+    if (can_see_obj(ch, i)) {
       if (cond_top< 50) {
 	found = FALSE;
         for (k=0;(k<cond_top&& !found);k++) {
@@ -413,7 +413,7 @@ void list_obj_to_char(struct obj_data *list,struct char_data *ch, int mode,
   
   found = FALSE;
   for ( i = list ; i ; i = i->next_content ) { 
-    if (CAN_SEE_OBJ(ch,i)) {
+    if (can_see_obj(ch,i)) {
       sprintf(buf,"[%2d] ",Num_In_Bag++);
       send_to_char(buf,ch);
       show_obj_to_char(i, ch, mode);
@@ -435,7 +435,7 @@ void show_char_to_char(struct char_data *i, struct char_data *ch, int mode)
   
   if (mode == 0) {
     
-    if (IS_AFFECTED(i, AFF_HIDE) || !CAN_SEE(ch,i)) {
+    if (IS_AFFECTED(i, AFF_HIDE) || !can_see(ch,i)) {
       if (IS_AFFECTED(ch, AFF_SENSE_LIFE))
 	send_to_char("You sense a hidden life form in the room.\n\r", ch);
       return;
@@ -629,7 +629,7 @@ void show_char_to_char(struct char_data *i, struct char_data *ch, int mode)
     found = FALSE;
     for (j=0; j< MAX_WEAR; j++) {
       if (i->equipment[j]) {
-	if (CAN_SEE_OBJ(ch,i->equipment[j])) {
+	if (can_see_obj(ch,i->equipment[j])) {
 	  found = TRUE;
 	}
       }
@@ -638,7 +638,7 @@ void show_char_to_char(struct char_data *i, struct char_data *ch, int mode)
       act("\n\r$n is using:", FALSE, i, 0, ch, TO_VICT);
       for (j=0; j< MAX_WEAR; j++) {
 	if (i->equipment[j]) {
-	  if (CAN_SEE_OBJ(ch,i->equipment[j])) {
+	  if (can_see_obj(ch,i->equipment[j])) {
 	    send_to_char(where[j],ch);
 	    show_obj_to_char(i->equipment[j],ch,1);
 	  }
@@ -652,7 +652,7 @@ void show_char_to_char(struct char_data *i, struct char_data *ch, int mode)
 	("\n\rYou attempt to peek at the inventory:\n\r", ch);
       for(tmp_obj = i->carrying; tmp_obj; 
 	  tmp_obj = tmp_obj->next_content) {
-	if (CAN_SEE_OBJ(ch, tmp_obj) && 
+	if (can_see_obj(ch, tmp_obj) && 
 	    (number(0,MAX_MORT) < GetMaxLevel(ch))) {
 	  show_obj_to_char(tmp_obj, ch, 1);
 	  found = TRUE;
@@ -689,7 +689,7 @@ void show_mult_char_to_char(struct char_data *i, struct char_data *ch, int mode,
   struct obj_data *tmp_obj;
   
   if (mode == 0) {
-    if (IS_AFFECTED(i, AFF_HIDE) || !CAN_SEE(ch,i)) {
+    if (IS_AFFECTED(i, AFF_HIDE) || !can_see(ch,i)) {
       if (IS_AFFECTED(ch, AFF_SENSE_LIFE))
 	if (num==1)
 	  send_to_char("You sense a hidden life form in the room.\n\r", ch);
@@ -858,7 +858,7 @@ void show_mult_char_to_char(struct char_data *i, struct char_data *ch, int mode,
     found = FALSE;
     for (j=0; j< MAX_WEAR; j++) {
       if (i->equipment[j]) {
-	if (CAN_SEE_OBJ(ch,i->equipment[j])) {
+	if (can_see_obj(ch,i->equipment[j])) {
 	  found = TRUE;
 	}
       }
@@ -867,7 +867,7 @@ void show_mult_char_to_char(struct char_data *i, struct char_data *ch, int mode,
       act("\n\r$n is using:", FALSE, i, 0, ch, TO_VICT);
       for (j=0; j< MAX_WEAR; j++) {
 	if (i->equipment[j]) {
-	  if (CAN_SEE_OBJ(ch,i->equipment[j])) {
+	  if (can_see_obj(ch,i->equipment[j])) {
 	    send_to_char(where[j],ch);
 	    show_obj_to_char(i->equipment[j],ch,1);
 	  }
@@ -878,7 +878,7 @@ void show_mult_char_to_char(struct char_data *i, struct char_data *ch, int mode,
       found = FALSE;
       send_to_char("\n\rYou attempt to peek at the inventory:\n\r", ch);
       for(tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
-	if (CAN_SEE_OBJ(ch,tmp_obj)&&(number(0,MAX_MORT) < GetMaxLevel(ch))) {
+	if (can_see_obj(ch,tmp_obj)&&(number(0,MAX_MORT) < GetMaxLevel(ch))) {
 	  show_obj_to_char(tmp_obj, ch, 1);
 	  found = TRUE;
 	}
@@ -905,7 +905,7 @@ void list_char_in_room(struct char_data *list, struct char_data *ch)
   
   for (i=list; i; i = i->next_in_room) {
     if ( (ch!=i) && (!RIDDEN(i)) && (IS_AFFECTED(ch, AFF_SENSE_LIFE) ||
-		     (CAN_SEE(ch,i) && !IS_AFFECTED(i, AFF_HIDE))) ) {
+		     (can_see(ch,i) && !IS_AFFECTED(i, AFF_HIDE))) ) {
       if ((cond_top< 50) && !MOUNTED(i)) {
 	found = FALSE;
 	if (IS_NPC(i)) {
@@ -952,7 +952,7 @@ void list_char_to_char(struct char_data *list, struct char_data *ch,
   
   for (i = list; i ; i = i->next_in_room) {
     if ( (ch!=i) && (IS_AFFECTED(ch, AFF_SENSE_LIFE) ||
-		     (CAN_SEE(ch,i) && !IS_AFFECTED(i, AFF_HIDE))) )
+		     (can_see(ch,i) && !IS_AFFECTED(i, AFF_HIDE))) )
       show_char_to_char(i,ch,0); 
   } 
 }
@@ -1164,7 +1164,7 @@ void do_look(struct char_data *ch, char *argument, int cmd)
 	if (!found) {
 	  for (j = 0; j< MAX_WEAR && !found; j++) {
 	    if (ch->equipment[j]) {
-	      if (CAN_SEE_OBJ(ch,ch->equipment[j])) {
+	      if (can_see_obj(ch,ch->equipment[j])) {
 		tmp_desc = find_ex_description(arg2, 
 					       ch->equipment[j]->ex_description);
 		if (tmp_desc) {
@@ -1180,7 +1180,7 @@ void do_look(struct char_data *ch, char *argument, int cmd)
 	  for(tmp_object = ch->carrying; 
 	      tmp_object && !found; 
 	      tmp_object = tmp_object->next_content) {
-	    if (CAN_SEE_OBJ(ch, tmp_object)) {
+	    if (can_see_obj(ch, tmp_object)) {
 	      tmp_desc = find_ex_description(arg2, 
 					     tmp_object->ex_description);
 	      if (tmp_desc) {
@@ -1196,7 +1196,7 @@ void do_look(struct char_data *ch, char *argument, int cmd)
 	  for(tmp_object = real_roomp(ch->in_room)->contents; 
 	      tmp_object && !found; 
 	      tmp_object = tmp_object->next_content) {
-	    if (CAN_SEE_OBJ(ch, tmp_object)) {
+	    if (can_see_obj(ch, tmp_object)) {
 	      tmp_desc = find_ex_description(arg2, 
 					     tmp_object->ex_description);
 	      if (tmp_desc) {
@@ -1804,7 +1804,7 @@ void do_who(struct char_data *ch, char *argument, int cmd)
     send_to_char("Players\n\r-------\n\r", ch);
     count=0;
     for (d = descriptor_list; d; d = d->next) {
-      if (!d->connected && CAN_SEE(ch, d->character) &&
+      if (!d->connected && can_see(ch, d->character) &&
 	  ( real_roomp((person = (d->original ? d->original:d->character)
 			)->in_room)) &&
 	  ( real_roomp((person = (d->original ? d->original:d->character)
@@ -2034,7 +2034,7 @@ void do_equipment(struct char_data *ch, char *argument, int cmd) {
       Worn_Index++;
       sprintf(String,"[%d] %s",Worn_Index,where[j]);
       send_to_char(String,ch);
-      if (CAN_SEE_OBJ(ch,ch->equipment[j])) {
+      if (can_see_obj(ch,ch->equipment[j])) {
 	show_obj_to_char(ch->equipment[j],ch,1);
 	found = TRUE;
       } else {
@@ -2211,7 +2211,7 @@ void do_where(struct char_data *ch, char *argument, int cmd)
   init_string_block(&sb);
   
   for (i = character_list; i; i = i->next)
-    if (isname(name, i->player.name) && CAN_SEE(ch, i) )   	{
+    if (isname(name, i->player.name) && can_see(ch, i) )   	{
       if ((i->in_room != NOWHERE) &&
 	  ((GetMaxLevel(ch)>=LOW_IMMORTAL) || (real_roomp(i->in_room)->zone ==
 					     real_roomp(ch->in_room)->zone))) {
@@ -2234,7 +2234,7 @@ void do_where(struct char_data *ch, char *argument, int cmd)
   
   if (GetMaxLevel(ch) >= LOW_IMMORTAL ) {
     for (k = object_list; k; k = k->next)
-      if (isname(name, k->name) && CAN_SEE_OBJ(ch, k)) {
+      if (isname(name, k->name) && can_see_obj(ch, k)) {
 	if (number==0 || (--count)==0) {
 	  if (number==0) {
 	    sprintf(buf, "[%2d] ", ++count);
@@ -3277,13 +3277,13 @@ int MobLevBonus(struct char_data *ch)
   int t=0;
   extern struct index_data *mob_index;
 
-  if (mob_index[ch->nr].func == magic_user)
+  if (mob_index[ch->nr].func == (funcp_index_item)magic_user)
     t+=5;
-  if (mob_index[ch->nr].func == BreathWeapon)
+  if (mob_index[ch->nr].func == (funcp_index_item)BreathWeapon)
     t+=7;
-  if (mob_index[ch->nr].func == fighter)
+  if (mob_index[ch->nr].func == (funcp_index_item)fighter)
     t+=3;
-  if (mob_index[ch->nr].func == snake)
+  if (mob_index[ch->nr].func == (funcp_index_item)snake)
     t+=3;
 
   t+=(ch->mult_att-1)*3;
@@ -3335,7 +3335,7 @@ void list_groups(struct char_data *ch)
 
   /* list the master and the group name */
       if (!person->master && IS_AFFECTED(person, AFF_GROUP)) {
-	if (person->specials.gname && CAN_SEE(ch, person)) {
+	if (person->specials.gname && can_see(ch, person)) {
 	  sprintf(buf, "%s %s\n\r", fname (GET_NAME(person)), 
 		  person->specials.gname);
 	  send_to_char(buf, ch);
@@ -3344,7 +3344,7 @@ void list_groups(struct char_data *ch)
 	  for(f=person->followers; f; f=f->next) {
 	    if (IS_AFFECTED(f->follower, AFF_GROUP) && IS_PC(f->follower)) {
 	      count++;
-	      if (CAN_SEE(ch, f->follower)) {
+	      if (can_see(ch, f->follower)) {
 		sprintf(buf, "          %s\n\r", fname(GET_NAME(f->follower)));
 	      } else {
 		sprintf(buf, "          Someone\n\r");

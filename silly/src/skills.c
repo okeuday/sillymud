@@ -552,17 +552,19 @@ void donothing()
   return;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
 int find_path(int in_room, int (*predicate)(), void *c_data, 
 	      int depth, int in_zone)
 {
-   struct room_q *tmp_q, *q_head, *q_tail;
-#if 1
+  struct room_q *tmp_q, *q_head, *q_tail;
   struct hash_header	x_room;
-/*  static struct hash_header	x_room; */
-#else
-  struct nodes x_room[MAX_ROOMS];
-#endif
-   int i, tmp_room, count=0, thru_doors;
+  int i;
+  int tmp_room;
+  int ancestor;
+  int count=0;
+  int thru_doors;
   struct room_data	*herep, *therep;
   struct room_data      *startp;
   struct room_direction_data	*exitp;
@@ -570,13 +572,6 @@ int find_path(int in_room, int (*predicate)(), void *c_data,
 	/* If start = destination we are done */
    if ((predicate)(in_room, c_data))
      return(-69);		/* <grin> couldn't return a direction */
-
-#if 0
-   if (top_of_world > MAX_ROOMS) {
-     log("TRACK Is disabled, too many rooms.\n\rContact Loki soon.\n\r");
-    return -1;
-   }
-#endif
 
    if (depth<0) {
      thru_doors = TRUE;
@@ -624,9 +619,10 @@ int find_path(int in_room, int (*predicate)(), void *c_data,
 	      q_tail = tmp_q;
 	      
 	      /* ancestor for first layer is the direction */
-	      hash_enter(&x_room, tmp_room,
-			 ((int)hash_find(&x_room,q_head->room_nr) == -1) ?
-			 (void*)(i+1) : hash_find(&x_room,q_head->room_nr));
+              ancestor = (int)hash_find(&x_room,q_head->room_nr);
+              if (ancestor == -1)
+                ancestor = i + 1;
+	      hash_enter(&x_room, tmp_room, (void*)ancestor);
 	    }
 	  } else {
 	    /* have reached our goal so free queue */
@@ -636,19 +632,17 @@ int find_path(int in_room, int (*predicate)(), void *c_data,
 	      free(q_head);
 	    }
 	    /* return direction if first layer */
-	    if ((int)hash_find(&x_room,tmp_room)==-1) {
+            ancestor = (int)hash_find(&x_room,tmp_room);
+	    if (ancestor == -1) {
               if (x_room.buckets) { /* junk left over from a previous track */
 		destroy_hash_table(&x_room, donothing);
               }
 	      return(i);
 	    } else {  /* else return the ancestor */
-	      int i;
-	      
-              i = (int)hash_find(&x_room,tmp_room);
               if (x_room.buckets) { /* junk left over from a previous track */
 		destroy_hash_table(&x_room, donothing);
               }
-	      return( -1+i);
+	      return(ancestor - 1);
 	    }
 	  }
 	}
@@ -665,9 +659,7 @@ int find_path(int in_room, int (*predicate)(), void *c_data,
       destroy_hash_table(&x_room, donothing);
    } 
    return(-1);
-
 }
-
 
 int choose_exit_global(int in_room, int tgt_room, int depth)
 {
@@ -678,6 +670,7 @@ int choose_exit_in_zone(int in_room, int tgt_room, int depth)
 {
   return find_path(in_room, is_target_room_p, (void*)tgt_room, depth, 1);
 }
+#pragma GCC diagnostic pop
 
 int go_direction(struct char_data *ch, int dir)     
 {
@@ -1270,8 +1263,9 @@ void slip_in_climb(struct char_data *ch, int dir, int room)
 
 void do_palm( struct char_data *ch, char *arg, int cmd)
 {
-  char arg1[MAX_STRING_LENGTH], arg2[MAX_STRING_LENGTH], 
-  buffer[MAX_STRING_LENGTH];
+  char arg1[MAX_STRING_LENGTH];
+  char arg2[MAX_STRING_LENGTH];
+  char buffer[MAX_STRING_LENGTH+30];
   struct obj_data *sub_object;
   struct obj_data *obj_object;
   bool has=FALSE;

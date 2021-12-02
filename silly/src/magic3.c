@@ -1862,7 +1862,7 @@ void spell_silence(byte level, struct char_data *ch,
       if ((!victim->specials.fighting)) {
 	set_fighting(victim, ch);
 	if (mob_index[victim->nr].func) {
-	  (*mob_index[victim->nr].func)(victim, 0,"");
+	  (*mob_index[victim->nr].func)(victim, 0, "", "", 0);
 	}
       }
     }
@@ -2059,7 +2059,8 @@ void spell_sunray(byte level, struct char_data *ch,
 void spell_know_monster(byte level, struct char_data *ch,
   struct char_data *victim, struct obj_data *obj)
 {
-  char buf[256], buf2[256];
+  char buf[256+32];
+  char buf2[256];
   int exp, lev, hits;
 
   extern char *pc_class_types[];

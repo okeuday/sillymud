@@ -1627,7 +1627,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name)
   for (i = real_roomp(ch->in_room)->people, j = 1; 
        i && (j <= number); i = i->next_in_room)
     if (isname(tmp, GET_NAME(i)))
-      if (CAN_SEE(ch, i))	{
+      if (can_see(ch, i))	{
 	if (j == number) 
 	  return(i);
 	j++;
@@ -1656,7 +1656,7 @@ struct char_data *get_char_vis_world(struct char_data *ch, char *name,
   j = count ? *count : 1;
   for (i = character_list; i && (j <= number); i = i->next)
     if (isname(tmp, GET_NAME(i)))
-      if (CAN_SEE(ch, i))	{
+      if (can_see(ch, i))	{
 	if (j == number)
 	  return(i);
 	j++;
@@ -1696,7 +1696,7 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name,
   
   for (i = list, j = 1; i && (j <= number); i = i->next_content)
     if (isname(tmp, i->name))
-      if (CAN_SEE_OBJ(ch, i)) {
+      if (can_see_obj(ch, i)) {
 	if (j == number)
 	  return(i);
 	j++;
@@ -1724,7 +1724,7 @@ struct obj_data *get_obj_vis_world(struct char_data *ch, char *name,
   /* ok.. no luck yet. scan the entire obj list   */
   for (i = object_list; i && (j <= number); i = i->next)
     if (isname(tmp, i->name))
-      if (CAN_SEE_OBJ(ch, i)) {
+      if (can_see_obj(ch, i)) {
 	if (j == number)
 	  return(i);
 	j++;
@@ -1763,13 +1763,13 @@ struct obj_data *get_obj_vis_accessible(struct char_data *ch, char *name)
   
   /* scan items carried */
   for (i = ch->carrying, j=1; i && j<=number; i = i->next_content)
-    if (isname(tmp, i->name) && CAN_SEE_OBJ(ch, i))
+    if (isname(tmp, i->name) && can_see_obj(ch, i))
       if (j == number)
 	return(i);
       else
 	j++;
   for (i = real_roomp(ch->in_room)->contents; i && j<=number; i = i->next_content)
-    if (isname(tmp, i->name) && CAN_SEE_OBJ(ch, i))
+    if (isname(tmp, i->name) && can_see_obj(ch, i))
       if (j==number)
 	return(i);
       else

@@ -10,6 +10,8 @@
 #include <strings.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <crypt.h>
+#include <time.h>
 
 #include "protos.h"
 
@@ -1040,7 +1042,7 @@ void do_stat(struct char_data *ch, char *argument, int cmd)
   extern char *spells[];
   struct affected_type *aff;
   char arg1[MAX_STRING_LENGTH];
-  char buf[MAX_STRING_LENGTH];
+  char buf[MAX_STRING_LENGTH+86];
   char buf2[MAX_STRING_LENGTH];
   struct room_data *rm=0;
   struct char_data *k=0;
@@ -2040,7 +2042,9 @@ void do_force(struct char_data *ch, char *argument, int cmd)
 {
   struct descriptor_data *i;
   struct char_data *vict;
-  char name[100], to_force[100],buf[100]; 
+  char name[100];
+  char to_force[100];
+  char buf[100+24]; 
   
   if (IS_NPC(ch) && (cmd != 0))
     return;

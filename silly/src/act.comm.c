@@ -22,7 +22,8 @@ extern const char *ogre_speak[];
 
 void do_say(struct char_data *ch, char *argument, int cmd)
 {
-  char buf[MAX_INPUT_LENGTH+40], buf2[MAX_INPUT_LENGTH+40];
+  char buf[MAX_INPUT_LENGTH+50];
+  char message[MAX_INPUT_LENGTH+40];
   
   if (apply_soundproof(ch))
     return;
@@ -39,14 +40,14 @@ void do_say(struct char_data *ch, char *argument, int cmd)
     }
 
     if(GET_RACE(ch) == RACE_OGRE) {
-      ogre_garble(argument, buf2, ch);
-      sprintf(buf, "$n says '%s'", buf2);
+      ogre_garble(argument, message, ch);
+      sprintf(buf, "$n says '%s'", message);
     } else if( GET_RACE(ch) == RACE_DRAAGDIM ) {
-      rat_garble(argument, buf2, ch);
-      sprintf(buf, "$n says '%s'", buf2);
+      rat_garble(argument, message, ch);
+      sprintf(buf, "$n says '%s'", message);
     } else if(GET_RACE(ch) == RACE_HALFORC) {
-      half_orc_garble(argument, buf2, ch);
-      sprintf(buf, "$n says '%s'", buf2);
+      half_orc_garble(argument, message, ch);
+      sprintf(buf, "$n says '%s'", message);
     } else {
       sprintf(buf,"$n says '%s'", argument);
     }
@@ -59,7 +60,8 @@ void do_say(struct char_data *ch, char *argument, int cmd)
 
 void do_shout(struct char_data *ch, char *argument, int cmd)
 {
-  char buf1[MAX_INPUT_LENGTH+40], buf2[MAX_INPUT_LENGTH+40];
+  char buf[MAX_INPUT_LENGTH+52];
+  char message[MAX_INPUT_LENGTH+40];
   struct descriptor_data *i;
   extern int Silence;
   
@@ -92,21 +94,21 @@ void do_shout(struct char_data *ch, char *argument, int cmd)
     send_to_char("Shout? Yes! Fine! Shout we must, but WHAT??\n\r", ch);
   else	{
     if (IS_NPC(ch) || IS_SET(ch->specials.act, PLR_ECHO)) {
-      sprintf(buf1,"You shout '%s'\n\r", argument);
-      send_to_char(buf1, ch);
+      sprintf(buf,"You shout '%s'\n\r", argument);
+      send_to_char(buf, ch);
     }
 
     if(GET_RACE(ch) == RACE_DRAAGDIM) {
-      rat_garble(argument, buf2, ch);
-      sprintf(buf1, "$n shouts '%s'", buf2);
+      rat_garble(argument, message, ch);
+      sprintf(buf, "$n shouts '%s'", message);
     } else if(GET_RACE(ch) == RACE_HALFORC) {
-      half_orc_garble(argument, buf2, ch);
-      sprintf(buf1, "$n shouts '%s'", buf2);
+      half_orc_garble(argument, message, ch);
+      sprintf(buf, "$n shouts '%s'", message);
     } else if(GET_RACE(ch) == RACE_OGRE) {
-      ogre_garble(argument, buf2, ch);
-      sprintf(buf1, "$n shouts '%s'", buf2);
+      ogre_garble(argument, message, ch);
+      sprintf(buf, "$n shouts '%s'", message);
     } else {
-      sprintf(buf1, "$n shouts '%s'", argument);
+      sprintf(buf, "$n shouts '%s'", argument);
     }
 
     act("$n lifts up $s head and shouts loudly", TRUE, ch, 0, 0, TO_ROOM);
@@ -119,7 +121,7 @@ void do_shout(struct char_data *ch, char *argument, int cmd)
 	   (!IS_SET(i->character->specials.act, PLR_NOSHOUT) &&
 	    !IS_SET(i->character->specials.act, PLR_DEAF))) &&
 	  !check_soundproof(i->character)) {
-	  act(buf1, 0, ch, 0, i->character, TO_VICT);
+	  act(buf, 0, ch, 0, i->character, TO_VICT);
       }
   }
 }
@@ -153,8 +155,10 @@ void do_commune(struct char_data *ch, char *argument, int cmd)
 void do_tell(struct char_data *ch, char *argument, int cmd)
 {
   struct char_data *vict;
-  char name[100], message[MAX_INPUT_LENGTH+20],
-  buf[MAX_INPUT_LENGTH+60], buf2[MAX_INPUT_LENGTH+60];
+  char name[100];
+  char message[MAX_INPUT_LENGTH+20];
+  char buf[MAX_INPUT_LENGTH+76];
+  char buf2[MAX_INPUT_LENGTH+60];
 
   if (apply_soundproof(ch))
     return;
@@ -211,8 +215,9 @@ void do_tell(struct char_data *ch, char *argument, int cmd)
 void do_whisper(struct char_data *ch, char *argument, int cmd)
 {
   struct char_data *vict;
-  char name[100], message[MAX_INPUT_LENGTH],
-  buf[MAX_INPUT_LENGTH];
+  char name[100];
+  char message[MAX_INPUT_LENGTH];
+  char buf[MAX_INPUT_LENGTH+22];
 
 	if (apply_soundproof(ch))
 	  return;
@@ -246,8 +251,9 @@ void do_whisper(struct char_data *ch, char *argument, int cmd)
 void do_ask(struct char_data *ch, char *argument, int cmd)
 {
   struct char_data *vict;
-  char name[100], message[MAX_INPUT_LENGTH],
-  buf[MAX_INPUT_LENGTH];
+  char name[100];
+  char message[MAX_INPUT_LENGTH];
+  char buf[MAX_INPUT_LENGTH+16];
 
 	if (apply_soundproof(ch))
 	  return;

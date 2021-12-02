@@ -47,7 +47,7 @@ void mobile_guardian(struct char_data *ch)
 	  act("$n growls angrily!", 
 	      FALSE, ch, 0, 0, TO_ROOM);
 	}
-	if (CAN_SEE(ch, targ))
+	if (can_see(ch, targ))
 	  hit(ch, targ,0);	  
       }
     }
@@ -450,7 +450,7 @@ int AssistFriend( struct char_data *ch)
   targ = 0;
   
   if (check_peaceful(ch, ""))
-    return;
+    return(0);
 #if 0
   assert(ch->in_room >= 0); 
 #else
@@ -472,7 +472,7 @@ int AssistFriend( struct char_data *ch)
   for (tmp_ch=(real_roomp(ch->in_room))->people;tmp_ch;
        tmp_ch=next) {
     next = tmp_ch->next_in_room;
-    if (CAN_SEE(ch,tmp_ch)) {
+    if (can_see(ch,tmp_ch)) {
       if (!IS_SET(ch->specials.act, ACT_WIMPY)) {
 	if (MobFriend(ch, tmp_ch)) {
 	  if (tmp_ch->specials.fighting)
@@ -506,7 +506,7 @@ int AssistFriend( struct char_data *ch)
   return(1);
 }
   
-FindABetterWeapon(struct char_data *mob)
+int FindABetterWeapon(struct char_data *mob)
 {
   struct obj_data *o, *best;
   /*
@@ -583,6 +583,7 @@ FindABetterWeapon(struct char_data *mob)
       do_remove(mob, mob->equipment[WIELD]->name, 0);
     }
   }
+  return(FALSE);
 }
       
 int GetDamage(struct obj_data *w, struct char_data *ch) 

@@ -1095,28 +1095,21 @@ void assign_mobiles()
 /* assign special procedures to objects */
 void assign_objects()
 {
-        obj_index[real_object(15)].func = SlotMachine;
-	obj_index[real_object(29)].func = warpstone;
-        obj_index[real_object(30)].func = scraps;
-	obj_index[real_object(23)].func = jive_box;
-	obj_index[real_object(31)].func = portal;
-	obj_index[real_object(3092)].func = board;
-	obj_index[real_object(3093)].func = board;
-	obj_index[real_object(3094)].func = board;
-	obj_index[real_object(3095)].func = board;
-	obj_index[real_object(3096)].func = board;
-	obj_index[real_object(3097)].func = board;
-	obj_index[real_object(3098)].func = board;
-	obj_index[real_object(3099)].func = board;
-	obj_index[real_object(25102)].func = board;
-	obj_index[real_object(21122)].func = nodrop;
-	obj_index[real_object(21130)].func = soap;
-	obj_index[real_object(22698)].func = YouthPotion;
+  obj_index[real_object_exists(15)].func = (funcp_index_item)SlotMachine;
+  obj_index[real_object_exists(29)].func = (funcp_index_item)warpstone;
+  obj_index[real_object_exists(30)].func = (funcp_index_item)scraps;
+  obj_index[real_object_exists(23)].func = (funcp_index_item)jive_box;
+  obj_index[real_object_exists(31)].func = (funcp_index_item)portal;
+  obj_index[real_object_exists(3097)].func = (funcp_index_item)board;
+  obj_index[real_object_exists(3098)].func = (funcp_index_item)board;
+  obj_index[real_object_exists(3099)].func = (funcp_index_item)board;
+  obj_index[real_object_exists(25102)].func = (funcp_index_item)board;
+  obj_index[real_object_exists(21122)].func = (funcp_index_item)nodrop;
+  obj_index[real_object_exists(21130)].func = (funcp_index_item)soap;
+  obj_index[real_object_exists(22698)].func = (funcp_index_item)YouthPotion;
 #if EGO
-	obj_index[real_object(40000)].func = BitterBlade;
+  obj_index[real_object_exists(40000)].func = (funcp_index_item)BitterBlade;
 #endif
-
-
 }
 
 

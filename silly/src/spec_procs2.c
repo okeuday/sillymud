@@ -480,7 +480,10 @@ void invert(char *arg1, char *arg2)
  
 int jive_box(struct char_data *ch, int cmd, char *arg, struct obj_data *obj, int type)
 {
- char buf[255], buf2[255], buf3[255], tmp[255];
+ char buf[255+256];
+ char buf2[255];
+ char buf3[255];
+ char tmp[255];
 
  if (type != PULSE_COMMAND)
     return(FALSE);
@@ -491,10 +494,10 @@ int jive_box(struct char_data *ch, int cmd, char *arg, struct obj_data *obj, int
                  do_say(ch, buf, cmd);
                  return(TRUE);
                  break;
-       case 19:  half_chop(arg, tmp, buf);
-                 invert(buf, buf2);
-                 sprintf(buf3, "%s %s", tmp, buf);
-                 do_tell(ch, buf3, cmd);
+       case 19:  half_chop(arg, tmp, buf3);
+                 invert(buf3, buf2);
+                 sprintf(buf, "%s %s", tmp, buf3);
+                 do_tell(ch, buf, cmd);
                  return(TRUE);
                  break;
        case 18:  invert(arg, buf);
@@ -534,12 +537,12 @@ int magic_user(struct char_data *ch, int cmd, char *arg, struct char_data *mob, 
 	    }
 	  }
        }
-       return;
+       return(FALSE);
      }
   }
 
   if (!ch->specials.fighting)
-    return;
+    return(FALSE);
 
   if (!IS_PC(ch)) {  
     if ((GET_POS(ch) > POSITION_STUNNED) &&
@@ -1666,7 +1669,7 @@ int BitterBlade(struct char_data *ch, int cmd, char *arg,struct obj_data *tobj, 
    
    for (obj = real_roomp(ch->in_room)->contents; 
 	obj ; obj = obj->next_content) {
-     if (obj_index[obj->item_number].func == BitterBlade) {
+     if (obj_index[obj->item_number].func == (funcp_index_item)BitterBlade) {
        /* I am on the floor */
        for (joe = real_roomp(ch->in_room)->people; joe ; 
 	    joe = joe->next_in_room) {
@@ -1703,7 +1706,7 @@ int BitterBlade(struct char_data *ch, int cmd, char *arg,struct obj_data *tobj, 
 	holder = holder->next_in_room) {
      for (obj = holder->carrying; obj ; obj = obj->next_content) {
        if ((obj_index[obj->item_number].func) && 
-	   (obj_index[obj->item_number].func != board)){
+	   (obj_index[obj->item_number].func != (funcp_index_item)board)){
 	 /*held*/
 	 if (holder->equipment[WIELD]) {
 	   if ((!EgoBladeSave(holder)) && (!EgoBladeSave(holder))) {
@@ -1735,7 +1738,7 @@ int BitterBlade(struct char_data *ch, int cmd, char *arg,struct obj_data *tobj, 
      }
      if (holder->equipment[WIELD]) {
        if ((obj_index[holder->equipment[WIELD]->item_number].func) 
-	   && (obj_index[holder->equipment[WIELD]->item_number].func != board)){
+	   && (obj_index[holder->equipment[WIELD]->item_number].func != (funcp_index_item)board)){
 	 /*YES! I am being held!*/
 	 obj = holder->equipment[WIELD];
 	 if (affected_by_spell(holder,SPELL_CHARM_PERSON)) {
@@ -1805,7 +1808,7 @@ int BitterBlade(struct char_data *ch, int cmd, char *arg,struct obj_data *tobj, 
 	 for (joe = real_roomp(holder->in_room)->people; joe ;
 	      joe = joe->next_in_room) {
 	   if ((GET_ALIGNMENT(joe) >= 500) && 
-	       (IS_MOB(joe)) && (CAN_SEE(holder,joe)) && (holder != joe)) {
+	       (IS_MOB(joe)) && (can_see(holder,joe)) && (holder != joe)) {
 	     if (lowjoe) {
 	       if (GET_ALIGNMENT(joe) > GET_ALIGNMENT(lowjoe)){
 		 lowjoe = joe;
@@ -1869,7 +1872,7 @@ int MakeQuest(struct char_data *ch, struct char_data *gm, int Class, char *arg, 
      }
      if (!(vict = get_char_room_vis(ch, vict_name)))	{
        send_to_char("No one by that name around here.\n\r", ch);
-       return;
+       return(FALSE);
      }
      if (vict == gm) {
        if (obj_index[obj->item_number].virtual == QuestList[Class][GET_LEVEL(ch, Class)].item) {
@@ -2305,7 +2308,7 @@ int GenericCityguardHateUndead(struct char_data *ch, int cmd, char *arg, struct 
     return FALSE;
   
   for (tch=real_roomp(ch->in_room)->people; tch; tch = tch->next_in_room) {
-    if ((IS_NPC(tch)) && (IsUndead(tch)) && CAN_SEE(ch, tch)) {
+    if ((IS_NPC(tch)) && (IsUndead(tch)) && can_see(ch, tch)) {
       max_evil = -1000;
       evil = tch;
       if (!check_soundproof(ch))
@@ -2662,7 +2665,7 @@ int DruidTree(struct char_data *ch)
 
 }
 
-DruidMob(struct char_data *ch)
+static void DruidMob(struct char_data *ch)
 {
 
   act("$n utters the words 'lagomorph'", FALSE, ch, 0, 0, TO_ROOM);
@@ -3136,7 +3139,7 @@ int monk_challenge_room(struct char_data *ch, int cmd, char *arg, struct room_da
                do_return(i,"",0);
              }
              if (IS_IMMORTAL(i))
-               return;
+               return(FALSE);
 	     
              if (HasClass(i, CLASS_MONK)) {
                GET_EXP(i) = MAX(titles[MONK_LEVEL_IND]
@@ -3289,7 +3292,7 @@ int portal(struct char_data *ch, int cmd, char *arg, struct obj_data *obj, int t
     if (port->obj_flags.value[1] <= 0 ||
 	port->obj_flags.value[1] > 32000) {
       send_to_char("The portal leads nowhere\n\r", ch);
-      return;
+      return(FALSE);
     }
     
     act("$n enters $p, and vanishes!", FALSE, ch, port, 0, TO_ROOM);
@@ -3738,7 +3741,7 @@ int astral_portal(struct char_data *ch, int cmd, char *arg, struct char_data *mo
   } else if(type == PULSE_TICK) {               /* hey, let's wander! */
     
     if (GET_POS(ch) != POSITION_STANDING)
-      return;
+      return(FALSE);
     
     if(ch->in_room < ASTRAL_START || ch->in_room > ASTRAL_END) {
       do_say(ch, "Woah!  How the fuck did I get here??", 0);
